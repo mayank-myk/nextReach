@@ -7,6 +7,10 @@ from app.repository.campaign_repository import CampaignRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.requests.campaign_request import CampaignRequest
 from app.requests.rate_campaign import RateCampaign
+from app.response.campaign.billing_info import BillingInfo
+from app.response.campaign.campaign_billing import CampaignBilling
+from app.response.campaign.campaign_metrics import CampaignMetrics
+from app.response.campaign.content_post import ContentPost
 from app.response.campaign_basic_details import CampaignBasicDetails
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
@@ -46,11 +50,76 @@ class CampaignService:
             return GenericResponse(success=False, error_code=None,
                                    error_message="Something went wrong while fetching your campaigns, please report the issue")
 
-    def get_user_campaign_detail(self, campaign_id: str) -> CampaignDetail:
+    def get_user_campaign_detail(self, campaign_id: str) -> CampaignDetail | GenericResponse:
         try:
-            return self.campaign_repository.get_campaign_by_id(campaign_id)
+            existing_campaign = self.campaign_repository.get_campaign_by_id(campaign_id)
+
+            content_post = ContentPost(
+                date=existing_campaign.content_post_date,
+                insta_post_link=existing_campaign.insta_post_link,
+                youtube_post_link=existing_campaign.youtube_post_link,
+                fb_post_link=existing_campaign.fb_post_link,
+                billing_info=BillingInfo(
+                    billing_amount=existing_campaign.content_billing_amount,
+                    billing_payment_at=existing_campaign.content_billing_payment_at,
+                    billing_payment_status=existing_campaign.content_billing_payment_status
+                )
+            )
+            first_billing = CampaignBilling(
+                campaign_metrics=CampaignMetrics(
+                    views=existing_campaign.first_billing_views,
+                    likes=existing_campaign.first_billing_likes,
+                    comments=existing_campaign.first_billing_comments,
+                    shares=existing_campaign.first_billing_shares
+
+                ),
+                billing_info=BillingInfo(
+                    billing_amount=existing_campaign.first_billing_amount,
+                    billing_payment_at=existing_campaign.first_billing_payment_at,
+                    billing_payment_status=existing_campaign.first_billing_payment_status
+                )
+            )
+            second_billing = CampaignBilling(
+                campaign_metrics=CampaignMetrics(
+                    views=existing_campaign.second_billing_views,
+                    likes=existing_campaign.second_billing_likes,
+                    comments=existing_campaign.second_billing_comments,
+                    shares=existing_campaign.second_billing_shares
+
+                ),
+                billing_info=BillingInfo(
+                    billing_amount=existing_campaign.second_billing_amount,
+                    billing_payment_at=existing_campaign.second_billing_payment_at,
+                    billing_payment_status=existing_campaign.second_billing_payment_status
+                )
+            )
+
+            return CampaignDetail(
+                id=existing_campaign.id,
+                last_updated_at=existing_campaign.last_updated_at,
+                campaign_managed_by=existing_campaign.last_updated_at,
+                influencer_id=existing_campaign.influencer_id,
+                stage=existing_campaign.stage,
+                content_charge=existing_campaign.content_charge,
+                views_charge=existing_campaign.views_charge,
+                type_of_content=existing_campaign.type_of_content,
+                campaign_notes=existing_campaign.campaign_notes,
+                rating=existing_campaign.rating,
+                review=existing_campaign.review,
+                influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                content_shoot_date=existing_campaign.content_shoot_date,
+                content_post=content_post,
+                first_billing=first_billing,
+                second_billing=second_billing,
+                post_insights=existing_campaign.post_insights,
+                pending_deliverables=existing_campaign.pending_deliverables
+            )
         except Exception as e:
-            raise Exception
+            _log.error(
+                f"Error occurred while fetching campaigns details for campaign_id: {campaign_id}. Error: {str(e)}")
+            return GenericResponse(success=False, error_code=None,
+                                   error_message="Something went wrong while rating the campaign, campaign_id {}".format(
+                                       campaign_id))
 
     def rate_campaign(self, request: RateCampaign) -> GenericResponse:
         try:
@@ -80,7 +149,8 @@ class CampaignService:
             timestamp_id = id_utils.get_campaign_id()
             db_campaign = self.campaign_repository.create_campaign(timestamp_id, request)
             return GenericResponse(success=True, error_code=None,
-                                   error_message="Campaign created successfully, with campaign_id {}".format(db_campaign.id))
+                                   error_message="Campaign created successfully, with campaign_id {}".format(
+                                       db_campaign.id))
         except Exception as e:
             return GenericResponse(success=False, error_code=None,
                                    error_message="Campaign creation failed")
