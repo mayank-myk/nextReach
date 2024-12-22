@@ -11,6 +11,7 @@ from app.response.campaign.billing_info import BillingInfo
 from app.response.campaign.campaign_billing import CampaignBilling
 from app.response.campaign.campaign_metrics import CampaignMetrics
 from app.response.campaign.content_post import ContentPost
+from app.response.campaign.influencer_basic_detail import InfluencerBasicDetail
 from app.response.campaign_basic_details import CampaignBasicDetails
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
@@ -35,10 +36,12 @@ class CampaignService:
                     influencer_id=campaign.influencer_id)
                 campaign_basic_detail = CampaignBasicDetails(id=campaign.id,
                                                              created_at=campaign.created_at,
-                                                             influencer_id=campaign.influencer_id,
-                                                             influencer_image=influencer_basic_detail.profile_picture,
-                                                             niche=influencer_basic_detail.niche,
-                                                             city=influencer_basic_detail.city,
+                                                             influencer_basic_detail=InfluencerBasicDetail(
+                                                                 influencer_id=campaign.influencer_id,
+                                                                 influencer_image=influencer_basic_detail.profile_picture,
+                                                                 niche=influencer_basic_detail.niche,
+                                                                 city=influencer_basic_detail.city
+                                                             ),
                                                              stage=campaign.stage,
                                                              status=campaign_stage_to_status(campaign.stage))
                 campaign_basic_details.append(campaign_basic_detail)
@@ -53,6 +56,17 @@ class CampaignService:
     def get_user_campaign_detail(self, campaign_id: str) -> CampaignDetail | GenericResponse:
         try:
             existing_campaign = self.campaign_repository.get_campaign_by_id(campaign_id)
+            influencer = existing_campaign.influencer
+
+            influencer_basic_detail = InfluencerBasicDetail(
+                id=influencer.id,
+                name=influencer.name,
+                profile_picture=influencer.profile_picture,
+                niche=influencer.niche,
+                city=influencer.city,
+                views_charge=influencer.views_charge,
+                content_charge=influencer.content_charge
+            )
 
             content_post = ContentPost(
                 date=existing_campaign.content_post_date,
@@ -98,7 +112,7 @@ class CampaignService:
                 id=existing_campaign.id,
                 last_updated_at=existing_campaign.last_updated_at,
                 campaign_managed_by=existing_campaign.last_updated_at,
-                influencer_id=existing_campaign.influencer_id,
+                influencer_basic_detail=influencer_basic_detail,
                 stage=existing_campaign.stage,
                 content_charge=existing_campaign.content_charge,
                 views_charge=existing_campaign.views_charge,
