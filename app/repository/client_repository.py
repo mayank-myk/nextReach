@@ -58,29 +58,56 @@ class ClientRepository:
             if not existing_client:
                 return None
 
-            existing_client = Client(
-                id=existing_client.id,
-                name=request.name,
-                created_by=existing_client.created_by,
-                last_updated_by=request.created_by,
-                phone_number=existing_client.phone_number,
-                business_name=request.business_name,
-                email=request.email,
-                city=request.city,
-                niche=request.niche,
-                category=request.category,
-                total_profile_visited=existing_client.total_profile_visited,
-                balance_profile_visits=request.balance_profile_visits,
-                insta_username=request.insta_username,
-                insta_profile_link=request.insta_profile_link,
-                insta_followers=request.insta_followers,
-                yt_username=request.yt_username,
-                yt_profile_link=request.yt_profile_link,
-                yt_followers=request.yt_followers,
-                fb_username=request.fb_username,
-                fb_profile_link=request.fb_profile_link,
-                fb_followers=request.fb_followers,
-            )
+            if hasattr(request, 'name'):
+                setattr(existing_client, 'name', request.name)
+
+            if hasattr(request, 'created_by'):
+                setattr(existing_client, 'last_updated_by', request.created_by)
+
+            if hasattr(request, 'business_name'):
+                setattr(existing_client, 'business_name', request.business_name)
+
+            if hasattr(request, 'email'):
+                setattr(existing_client, 'email', request.email)
+
+            if hasattr(request, 'city'):
+                setattr(existing_client, 'city', request.city)
+
+            if hasattr(request, 'niche'):
+                setattr(existing_client, 'niche', request.niche)
+
+            if hasattr(request, 'category'):
+                setattr(existing_client, 'category', request.category)
+
+            if hasattr(request, 'balance_profile_visits'):
+                setattr(existing_client, 'balance_profile_visits', request.balance_profile_visits)
+
+            if hasattr(request, 'insta_username'):
+                setattr(existing_client, 'insta_username', request.insta_username)
+
+            if hasattr(request, 'insta_profile_link'):
+                setattr(existing_client, 'insta_profile_link', request.insta_profile_link)
+
+            if hasattr(request, 'insta_followers'):
+                setattr(existing_client, 'insta_followers', request.insta_followers)
+
+            if hasattr(request, 'yt_username'):
+                setattr(existing_client, 'yt_username', request.yt_username)
+
+            if hasattr(request, 'yt_profile_link'):
+                setattr(existing_client, 'yt_profile_link', request.yt_profile_link)
+
+            if hasattr(request, 'yt_followers'):
+                setattr(existing_client, 'yt_followers', request.yt_followers)
+
+            if hasattr(request, 'fb_username'):
+                setattr(existing_client, 'fb_username', request.fb_username)
+
+            if hasattr(request, 'fb_profile_link'):
+                setattr(existing_client, 'fb_profile_link', request.fb_profile_link)
+
+            if hasattr(request, 'fb_followers'):
+                setattr(existing_client, 'fb_followers', request.fb_followers)
 
             self.db.commit()
             self.db.refresh(existing_client)
@@ -96,29 +123,34 @@ class ClientRepository:
             if not existing_client:
                 return None
 
-            existing_client = Client(
-                id=existing_client.id,
-                name=request.name,
-                created_by=existing_client.created_by,
-                last_updated_by=client_id,
-                phone_number=existing_client.phone_number,
-                business_name=request.business_name,
-                email=request.email,
-                city=request.city,
-                niche=request.niche,
-                category=request.category,
-                total_profile_visited=existing_client.total_profile_visited,
-                balance_profile_visits=existing_client.total_profile_visited,
-                insta_username=request.insta_username,
-                insta_profile_link=existing_client.insta_profile_link,
-                insta_followers=existing_client.insta_followers,
-                yt_username=request.yt_username,
-                yt_profile_link=existing_client.yt_profile_link,
-                yt_followers=existing_client.yt_followers,
-                fb_username=request.fb_username,
-                fb_profile_link=existing_client.fb_profile_link,
-                fb_followers=existing_client.fb_followers,
-            )
+            setattr(existing_client, 'last_updated_by', client_id)
+
+            if hasattr(request, 'name'):
+                setattr(existing_client, 'name', request.name)
+
+            if hasattr(request, 'business_name'):
+                setattr(existing_client, 'business_name', request.business_name)
+
+            if hasattr(request, 'email'):
+                setattr(existing_client, 'email', request.email)
+
+            if hasattr(request, 'city'):
+                setattr(existing_client, 'city', request.city)
+
+            if hasattr(request, 'niche'):
+                setattr(existing_client, 'niche', request.niche)
+
+            if hasattr(request, 'category'):
+                setattr(existing_client, 'category', request.category)
+
+            if hasattr(request, 'insta_username'):
+                setattr(existing_client, 'insta_username', request.insta_username)
+
+            if hasattr(request, 'yt_username'):
+                setattr(existing_client, 'yt_username', request.yt_username)
+
+            if hasattr(request, 'fb_username'):
+                setattr(existing_client, 'fb_username', request.fb_username)
 
             self.db.commit()
             self.db.refresh(existing_client)
@@ -127,44 +159,24 @@ class ClientRepository:
             _log.error("Unable to update client record with client_id {}".format(client_id))
             raise FetchOneUserMetadataException(ex, client_id)
 
-    def update_profile_visit_count(self, client_id: str) -> Client:
+    def update_profile_visit_count(self, client_id: str) -> bool:
         try:
             existing_client = self.db.query(Client).filter(Client.id == client_id).first()
 
             if not existing_client:
-                _log.info("No record found for client with client_id {}".format(client_id))
-                return None
+                _log.error("While updating profile visit count, No record found for client with client_id {}".format(
+                    client_id))
+                return False
 
-            existing_client = Client(
-                id=existing_client.id,
-                name=request.name,
-                created_by=existing_client.created_by,
-                last_updated_by=client_id,
-                phone_number=existing_client.phone_number,
-                business_name=request.business_name,
-                email=request.email,
-                city=request.city,
-                niche=request.niche,
-                category=request.category,
-                total_profile_visited=existing_client.total_profile_visited,
-                balance_profile_visits=existing_client.total_profile_visited,
-                insta_username=request.insta_username,
-                insta_profile_link=existing_client.insta_profile_link,
-                insta_followers=existing_client.insta_followers,
-                yt_username=request.yt_username,
-                yt_profile_link=existing_client.yt_profile_link,
-                yt_followers=existing_client.yt_followers,
-                fb_username=request.fb_username,
-                fb_profile_link=existing_client.fb_profile_link,
-                fb_followers=existing_client.fb_followers,
-            )
+            setattr(existing_client, 'total_profile_visited', existing_client.total_profile_visited + 1)
+            setattr(existing_client, 'balance_profile_visits', existing_client.balance_profile_visits - 1)
 
             self.db.commit()
             self.db.refresh(existing_client)
-            return existing_client
+            return True
         except Exception as ex:
             _log.error("Unable to update client record with client_id {}".format(client_id))
-            raise FetchOneUserMetadataException(ex, request.user_id)
+            raise FetchOneUserMetadataException(ex, client_id)
 
     def get_client_by_id(self, client_id: str) -> Optional[Client]:
         return self.db.query(Client).filter(Client.id == client_id).first()

@@ -2,9 +2,9 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.models.business_category import BusinessCategory
-from app.models.city import City
-from app.models.niche import Niche
+from app.enums.business_category import BusinessCategory
+from app.enums.city import City
+from app.enums.niche import Niche
 
 
 class UserProfile(BaseModel):
@@ -15,7 +15,7 @@ class UserProfile(BaseModel):
     email: Optional[str] = None
     city: Optional[City]
     niche: Optional[Niche]
-    category: BusinessCategory
+    category: Optional[BusinessCategory]
     total_profile_visited: int
     balance_profile_visits: int
     insta_username: Optional[str] = None

@@ -3,21 +3,21 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
-from app.models.campaign_stage import CampaignStage
-from app.models.content_type import ContentType
+from app.enums.campaign_stage import CampaignStage
+from app.enums.content_type import ContentType
 from app.response.campaign.campaign_billing import CampaignBilling
 from app.response.campaign.content_post import ContentPost
-from app.response.campaign.influencer_basic_detail import InfluencerBasicDetail
+from app.response.influencer_basic_detail import InfluencerBasicDetail
 
 
 class CampaignDetail(BaseModel):
     id: str
     last_updated_at: datetime.datetime
-    campaign_managed_by: str
+    campaign_managed_by: Optional[str] = None
     influencer_basic_detail: InfluencerBasicDetail
     stage: CampaignStage
-    content_charge: int
-    views_charge: int
+    content_charge: Optional[int] = None
+    views_charge: Optional[int] = None
     type_of_content: Optional[ContentType] = None
     rating: Optional[int] = None
     review: Optional[str] = None

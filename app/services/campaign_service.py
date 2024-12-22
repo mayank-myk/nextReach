@@ -11,10 +11,10 @@ from app.response.campaign.billing_info import BillingInfo
 from app.response.campaign.campaign_billing import CampaignBilling
 from app.response.campaign.campaign_metrics import CampaignMetrics
 from app.response.campaign.content_post import ContentPost
-from app.response.campaign.influencer_basic_detail import InfluencerBasicDetail
-from app.response.campaign_basic_details import CampaignBasicDetails
+from app.response.campaign_basic_detail import CampaignBasicDetail
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
+from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.utils import id_utils
 from app.utils.converters import campaign_stage_to_status
 from app.utils.logger import configure_logger
@@ -27,23 +27,23 @@ class CampaignService:
         self.campaign_repository = CampaignRepository(session)
         self.influencer_repository = InfluencerRepository(session)
 
-    def get_user_campaign_all(self, user_id: str) -> List[CampaignBasicDetails] | GenericResponse:
+    def get_user_campaign_all(self, user_id: str) -> List[CampaignBasicDetail] | GenericResponse:
         try:
             all_campaigns = self.campaign_repository.get_all_campaign_for_a_user(user_id)
             campaign_basic_details = []
             for campaign in all_campaigns:
                 influencer_basic_detail = self.influencer_repository.get_influencer_by_id(
                     influencer_id=campaign.influencer_id)
-                campaign_basic_detail = CampaignBasicDetails(id=campaign.id,
-                                                             created_at=campaign.created_at,
-                                                             influencer_basic_detail=InfluencerBasicDetail(
-                                                                 influencer_id=campaign.influencer_id,
-                                                                 influencer_image=influencer_basic_detail.profile_picture,
-                                                                 niche=influencer_basic_detail.niche,
-                                                                 city=influencer_basic_detail.city
-                                                             ),
-                                                             stage=campaign.stage,
-                                                             status=campaign_stage_to_status(campaign.stage))
+                campaign_basic_detail = CampaignBasicDetail(id=campaign.id,
+                                                            created_at=campaign.created_at,
+                                                            influencer_basic_detail=InfluencerBasicDetail(
+                                                                influencer_id=campaign.influencer_id,
+                                                                influencer_image=influencer_basic_detail.profile_picture,
+                                                                niche=influencer_basic_detail.niche,
+                                                                city=influencer_basic_detail.city
+                                                            ),
+                                                            stage=campaign.stage,
+                                                            status=campaign_stage_to_status(campaign.stage))
                 campaign_basic_details.append(campaign_basic_detail)
 
             return campaign_basic_details

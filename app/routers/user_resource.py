@@ -2,7 +2,7 @@ from typing import List
 
 from app.database.session import DatabaseSessionManager
 from app.requests.rate_campaign import RateCampaign
-from app.response.campaign_basic_details import CampaignBasicDetails
+from app.response.campaign_basic_detail import CampaignBasicDetail
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
@@ -75,7 +75,7 @@ def request_collab(request: CollabRequest, db=Depends(db_manager.get_db)) -> Gen
 
 
 @router.get("/campaign/all/{user_id}")
-def get_user_campaign_all(user_id: str, db=Depends(db_manager.get_db)) -> List[CampaignBasicDetails] | GenericResponse:
+def get_user_campaign_all(user_id: str, db=Depends(db_manager.get_db)) -> List[CampaignBasicDetail] | GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.get_user_campaign_all(user_id=user_id)
 

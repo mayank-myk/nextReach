@@ -1,3 +1,5 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 from app.enums.city import City
@@ -10,5 +12,6 @@ class InfluencerBasicDetail(BaseModel):
     profile_picture: str
     niche: Niche
     city: City
-    views_charge: int
-    content_charge: int
+    profile_visited: bool
+    views_charge: Optional[int] = None
+    content_charge: Optional[int] = None

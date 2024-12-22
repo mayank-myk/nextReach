@@ -1,24 +1,24 @@
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.models.city import City
-from app.models.gender import Gender
-from app.models.niche import Niche
-from app.models.platform import Platform
+from app.enums.city import City
+from app.enums.gender import Gender
+from app.enums.niche import Niche
+from app.enums.platform import Platform
 
 
 class SearchFilter(BaseModel):
-    platform: Platform
-    content_price: List[int]
-    reach_price: List[int]
-    niche: List[Niche]
-    gender: List[Gender]
-    age: List[int]
-    city: List[City]
-    followers: List[int]
-    avg_views: List[int]
-    rating: int
-    engagement: int
-    consistency: int
-    score: int
+    platform: Optional[Platform] = None  # Optional field (Platform type)
+    content_price: Optional[List[int]] = None  # Optional list of integers
+    reach_price: Optional[List[int]] = None  # Optional list of integers
+    niche: Optional[List[Niche]] = None  # Optional list of Niche items
+    gender: Optional[List[Gender]] = None  # Optional list of Gender items
+    age: Optional[List[int]] = None  # Optional list of integers
+    city: Optional[List[City]] = None  # Optional list of City items
+    followers: Optional[List[int]] = None  # Optional list of integers
+    avg_views: Optional[List[int]] = None  # Optional list of integers
+    rating: Optional[int] = None  # Optional integer field
+    engagement: Optional[int] = None  # Optional integer field
+    consistency: Optional[int] = None  # Optional integer field
+    score: Optional[int] = None  # Optional integer field

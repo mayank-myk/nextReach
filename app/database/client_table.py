@@ -1,10 +1,12 @@
 import datetime
+
 from sqlalchemy import Column, String, DateTime, Integer, Enum, CheckConstraint
 from sqlalchemy.orm import relationship
+
 from app.database.session import Base
-from app.models.business_category import BusinessCategory
-from app.models.city import City
-from app.models.niche import Niche
+from app.enums.business_category import BusinessCategory
+from app.enums.city import City
+from app.enums.niche import Niche
 
 
 class Client(Base):
@@ -21,7 +23,7 @@ class Client(Base):
 
     # Client information
     name = Column(String(255), nullable=False)
-    phone_number = Column(String(10), nullable=False, unique=True)  # Phone is unique and fixed length
+    phone_number = Column(String(10), nullable=False)  # Phone is unique and fixed length
     business_name = Column(String(255), nullable=True)  # Business name should be present
     email = Column(String(255), nullable=True)  # Email can be checked using validation logic
     city = Column(Enum(City), nullable=True)  # Enum for predefined cities
