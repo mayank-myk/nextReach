@@ -3,8 +3,8 @@ from typing import List, Optional
 from sqlalchemy.orm import Session
 
 from app.database.waitlist_table import WaitList
+from app.enums.status import Status
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.models.status import Status
 from app.requests.waitlist_request import WaitListRequest
 from app.utils.logger import configure_logger
 

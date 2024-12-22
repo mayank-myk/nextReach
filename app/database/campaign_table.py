@@ -28,15 +28,15 @@ class Campaign(Base):
 
     # Campaign stage and content info
     stage = Column(Enum(CampaignStage), nullable=False)
-    content_charge = Column(Integer, CheckConstraint('content_charge >= 0'), nullable=False)
-    views_charge = Column(Integer, CheckConstraint('views_charge >= 0'), nullable=False)
+    content_charge = Column(Integer, CheckConstraint('content_charge >= 0'), nullable=True)
+    views_charge = Column(Integer, CheckConstraint('views_charge >= 0'), nullable=True)
     type_of_content = Column(Enum(ContentType), nullable=True)
     campaign_notes = Column(String(255), nullable=True)
 
     # Ratings and reviews
     rating = Column(Integer, CheckConstraint('rating >= 0 AND rating <= 5'),
                     nullable=True)  # Assuming rating is from 0 to 5
-    review = Column(String(255), nullable=True)  # Review can be large text
+    review = Column(String(1000), nullable=True)  # Review can be large text
 
     # Influencer finalization information
     influencer_finalization_date = Column(DateTime, nullable=True)

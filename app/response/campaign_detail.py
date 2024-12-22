@@ -18,7 +18,7 @@ class CampaignDetail(BaseModel):
     stage: CampaignStage
     content_charge: int
     views_charge: int
-    type_of_content: Optional[ContentType]= None
+    type_of_content: Optional[ContentType] = None
     rating: Optional[int] = None
     review: Optional[str] = None
     influencer_finalization_date: Optional[datetime.datetime] = None

@@ -1,26 +1,28 @@
 from typing import Optional
+
 from pydantic import BaseModel, Field
-from app.models.business_category import BusinessCategory
-from app.models.city import City
-from app.models.niche import Niche
+
+from app.enums.business_category import BusinessCategory
+from app.enums.city import City
+from app.enums.niche import Niche
 
 
 class ClientRequest(BaseModel):
-    created_by: str = Field(min_length=5)
-    name: str = Field(min_length=3, max_length=255)
-    phone_number: str = Field(min_length=10, max_length=10)
-    business_name: Optional[Field(max_length=255)]
-    email: Optional[Field(max_length=255)]
-    city: Optional[City]
-    niche: Optional[Niche]
-    category: Optional[BusinessCategory]
-    balance_profile_visits: Optional[Field(ge=0)]
-    insta_username: Optional[Field(max_length=255)]
-    insta_profile_link: Optional[Field(max_length=255)]
-    insta_followers: Optional[Field(ge=0)]
-    yt_username: Optional[Field(max_length=255)]
-    yt_profile_link: Optional[Field(max_length=255)]
-    yt_followers: Optional[Field(ge=0)]
-    fb_username: Optional[Field(max_length=255)]
-    fb_profile_link: Optional[Field(max_length=255)]
-    fb_followers: Optional[Field(ge=0)]
+    created_by: str = Field(..., min_length=5)  # Enforcing str type with a length constraint
+    name: str = Field(..., min_length=3, max_length=255)  # Enforcing str type with length constraints
+    phone_number: str = Field(..., min_length=10, max_length=10)  # Enforcing exact length for phone number
+    business_name: Optional[str] = Field(None, max_length=255)  # Optional, but must be str if provided
+    email: Optional[str] = Field(None, max_length=255)  # Optional, but must be str if provided
+    city: Optional[City] = None  # Optional, must be of type City if provided
+    niche: Optional[Niche] = None  # Optional, must be of type Niche if provided
+    category: Optional[BusinessCategory] = None  # Optional, must be of type BusinessCategory if provided
+    balance_profile_visits: Optional[int] = Field(None, ge=0)  # Optional, but must be an int >= 0 if provided
+    insta_username: Optional[str] = Field(None, max_length=255)  # Optional, must be str if provided
+    insta_profile_link: Optional[str] = Field(None, max_length=255)  # Optional, must be str if provided
+    insta_followers: Optional[int] = Field(None, ge=0)  # Optional, but must be int >= 0 if provided
+    yt_username: Optional[str] = Field(None, max_length=255)  # Optional, must be str if provided
+    yt_profile_link: Optional[str] = Field(None, max_length=255)  # Optional, must be str if provided
+    yt_followers: Optional[int] = Field(None, ge=0)  # Optional, but must be int >= 0 if provided
+    fb_username: Optional[str] = Field(None, max_length=255)  # Optional, must be str if provided
+    fb_profile_link: Optional[str] = Field(None, max_length=255)  # Optional, must be str if provided
+    fb_followers: Optional[int] = Field(None, ge=0)  # Optional, but must be int >= 0 if provided

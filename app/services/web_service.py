@@ -2,11 +2,11 @@ from datetime import datetime
 from typing import Optional, List
 
 from app.database.waitlist_table import WaitList
-from app.models.city import City
-from app.models.gender import Gender
-from app.models.niche import Niche
-from app.models.platform import Platform
-from app.models.status import Status
+from app.enums.city import City
+from app.enums.gender import Gender
+from app.enums.niche import Niche
+from app.enums.platform import Platform
+from app.enums.status import Status
 from app.repository.client_repository import ClientRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository

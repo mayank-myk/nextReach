@@ -1,7 +1,7 @@
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.models.city import City
-from app.models.niche import Niche
+from app.enums.city import City
+from app.enums.niche import Niche
 
 
 class InfluencerBasicDetail(BaseModel):

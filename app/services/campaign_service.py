@@ -2,7 +2,7 @@ from __future__ import print_function
 
 from typing import List
 
-from app.models.status import Status
+from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.requests.campaign_request import CampaignRequest

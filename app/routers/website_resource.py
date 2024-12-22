@@ -3,10 +3,10 @@ from typing import Optional, List
 from fastapi import APIRouter, Query, Depends
 
 from app.database.session import DatabaseSessionManager
-from app.models.city import City
-from app.models.gender import Gender
-from app.models.niche import Niche
-from app.models.platform import Platform
+from app.enums.city import City
+from app.enums.gender import Gender
+from app.enums.niche import Niche
+from app.enums.platform import Platform
 from app.requests.influencer_insights import InfluencerInsights
 from app.requests.waitlist_request import WaitListRequest
 from app.response.generic_response import GenericResponse

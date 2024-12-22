@@ -6,6 +6,7 @@ from app.database.client_table import Client
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.requests.client_request import ClientRequest
 from app.requests.profile_update import ProfileUpdate
+from app.utils.config import get_config
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -30,7 +31,7 @@ class ClientRepository:
                 niche=request.niche,
                 category=request.category,
                 total_profile_visited=0,
-                balance_profile_visits=20,
+                balance_profile_visits=get_config("DEFAULT_PROFILE_VISIT"),
                 insta_username=request.insta_username,
                 insta_profile_link=request.insta_profile_link,
                 insta_followers=request.insta_followers,

@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from fastapi.params import Query
 
 from app.database.session import DatabaseSessionManager
-from app.models.status import Status
+from app.enums.status import Status
 from app.requests.admin_user_request import AdminUserRequest
 from app.requests.client_request import ClientRequest
 from app.requests.expense_request import ExpenseRequest

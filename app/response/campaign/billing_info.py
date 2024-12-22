@@ -3,7 +3,7 @@ from typing import Optional
 
 from pydantic import BaseModel
 
-from app.models.status import Status
+from app.enums.status import Status
 
 
 class BillingInfo(BaseModel):
