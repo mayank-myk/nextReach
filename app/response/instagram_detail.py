@@ -1,0 +1,30 @@
+import datetime
+
+from pydantic import BaseModel, Field
+
+
+class InstagramDetail(BaseModel):
+    username: str = Field(min_length=5, max_length=100)
+    followers: int = Field(ge=0)
+    city_1: int = Field(ge=0)
+    city_pc_1: int = Field(ge=0)
+    city_2: int = Field(ge=0)
+    city_pc_2: int = Field(ge=0)
+    city_3: int = Field(ge=0)
+    city_pc_3: int = Field(ge=0)
+    age_13_to_17: int = Field(ge=0)
+    age_18_to_24: int = Field(ge=0)
+    age_25_to_34: int = Field(ge=0)
+    age_35_to_44: int = Field(ge=0)
+    age_45_to_54: int = Field(ge=0)
+    age_55: int = Field(ge=0)
+    men_follower_pc: int = Field(ge=0)
+    women_follower_pc: int = Field(ge=0)
+    avg_views: int = Field(ge=0)
+    max_views: int = Field(ge=0)
+    min_views: int = Field(ge=0)
+    spread: int = Field(ge=0)
+    avg_likes: int = Field(ge=0)
+    avg_comments: int = Field(ge=0)
+    avg_shares: int = Field(ge=0)
+    engagement_rate: int = Field(ge=0)
