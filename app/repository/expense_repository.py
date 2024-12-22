@@ -1,3 +1,5 @@
+from typing import Optional, List
+
 from sqlalchemy.orm import Session
 
 from app.database.expense_table import Expense
@@ -31,15 +33,14 @@ class ExpenseRepository:
             self.db.refresh(new_revenue)
             return new_revenue
         except Exception as ex:
-            _log.error("Unable to create expense for campaign_id {}".format(request.campaign_id))
-            raise FetchOneUserMetadataException(ex, request.campaign_id)
+            _log.error("Unable to create expense for account_id: {}".format(request.account_id))
+            raise FetchOneUserMetadataException(ex, request.account_id)
 
-    def update_expense(self, expense_id: str, request: ExpenseRequest) -> Expense:
+    def update_expense(self, expense_id: str, request: ExpenseRequest) -> Optional[Expense]:
         try:
-            existing_expense = await self.db.get(Expense, expense_id)
+            existing_expense = self.db.get(Expense, expense_id)
 
             if not existing_expense:
-                _log.info("No record found for expense with with expense_id {}".format(expense_id))
                 return None
 
             setattr(existing_expense, 'last_updated_by', request.created_by)
@@ -57,12 +58,18 @@ class ExpenseRepository:
             _log.error("Unable to update expense for expense_id {}".format(expense_id))
             raise FetchOneUserMetadataException(ex, expense_id)
 
-    def get_expense_by_id(self, expense_id: str) -> Expense:
+    def get_all_expense(self, limit: int, offset: int) -> Optional[List[Expense]]:
         try:
-            existing_expense = await self.db.get(Expense, expense_id)
+            return self.db.query(Expense).offset(offset).limit(limit).all()
+
+        except Exception as ex:
+            raise FetchOneUserMetadataException(ex, str(offset))
+
+    def get_expense_by_id(self, expense_id: str) -> Optional[Expense]:
+        try:
+            existing_expense = self.db.get(Expense, expense_id)
 
             if not existing_expense:
-                _log.info("No record found for expense with with expense_id {}".format(expense_id))
                 return None
 
             return existing_expense

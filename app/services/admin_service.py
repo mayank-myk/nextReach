@@ -1,8 +1,12 @@
+from typing import List
+
+from app.database.expense_table import Expense
+from app.database.revenue_table import Revenue
+from app.repository.admin_user_repository import AdminUserRepository
 from app.repository.client_repository import ClientRepository
 from app.repository.expense_repository import ExpenseRepository
 from app.repository.revenue_repository import RevenueRepository
 from app.requests.admin_user_request import AdminUserRequest
-from app.repository.admin_user_repository import AdminUserRepository
 from app.requests.client_request import ClientRequest
 from app.requests.expense_request import ExpenseRequest
 from app.requests.login_request import LoginRequest
@@ -30,6 +34,7 @@ class AdminService:
             else:
                 return LoginResponse(success=False, error_message="Incorrect password", admin_type=None)
         else:
+            _log.info("No record found for admin login with user_id {}".format(request.user_id))
             return LoginResponse(success=False, error_message="User Id does not exists", admin_type=None)
 
     def generate_bill(self, campaign_id: str) -> GenericResponse:
@@ -49,6 +54,7 @@ class AdminService:
         if new_admin_user:
             return GenericResponse(success=True, error_code=None, error_message=None)
         else:
+            _log.info("No record found for admin with user_id {}".format(user.user_id))
             return GenericResponse(success=False, error_code=None, error_message="No admin found for given user_id")
 
     def delete_user(self, user_id: str) -> GenericResponse:
@@ -57,6 +63,7 @@ class AdminService:
         if admin_user:
             return GenericResponse(success=True, error_code=None, error_message=None)
         else:
+            _log.info("No record found for admin with user_id {}".format(user_id))
             return GenericResponse(success=False, error_code=None, error_message="No admin found for given user_id")
 
     def create_revenue(self, request: RevenueRequest) -> GenericResponse:
@@ -73,8 +80,19 @@ class AdminService:
         if new_revenue:
             return GenericResponse(success=True, error_code=None, error_message=None)
         else:
+            _log.info("No record found for revenue with with revenue_id {}".format(revenue_id))
             return GenericResponse(success=False, error_code=None,
                                    error_message="No revenue found for given revenue_id")
+
+    def get_all_revenue(self, page_size: int, page_number: int) -> List[Revenue] | GenericResponse:
+        expenses = self.revenue_repository.get_all_revenue(limit=page_size, offset=page_size * page_number)
+
+        if expenses and len(expenses) > 0:
+            return GenericResponse(success=True, error_code=None, error_message=None)
+        else:
+            _log.info("No record found for revenue page_size {}, page_number {}".format(page_size, page_number))
+            return GenericResponse(success=False, error_code=None,
+                                   error_message="No record found for revenue at all")
 
     def create_expense(self, request: ExpenseRequest) -> GenericResponse:
         new_expense = self.expense_repository.create_expense(request=request)
@@ -90,8 +108,19 @@ class AdminService:
         if new_expense:
             return GenericResponse(success=True, error_code=None, error_message=None)
         else:
+            _log.info("No record found for expense with with expense_id {}".format(expense_id))
             return GenericResponse(success=False, error_code=None,
                                    error_message="No expense found for given expense_id")
+
+    def get_all_expense(self, page_size: int, page_number: int) -> List[Expense] | GenericResponse:
+        expenses = self.expense_repository.get_all_expense(limit=page_size, offset=page_size * page_number)
+
+        if expenses and len(expenses) > 0:
+            return GenericResponse(success=True, error_code=None, error_message=None)
+        else:
+            _log.info("No record found for expense page_size {}, page_number {}".format(page_size, page_number))
+            return GenericResponse(success=False, error_code=None,
+                                   error_message="No record found for expense at all")
 
     def create_client(self, request: ClientRequest) -> GenericResponse:
         timestamp_id = id_utils.get_user_id()
@@ -108,5 +137,6 @@ class AdminService:
         if new_client:
             return GenericResponse(success=True, error_code=None, error_message=None)
         else:
+            _log.info("No record found for client with client_id {}".format(client_id))
             return GenericResponse(success=False, error_code=None,
                                    error_message="No client found for given client_id")

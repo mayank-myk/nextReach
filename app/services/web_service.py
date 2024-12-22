@@ -1,4 +1,7 @@
+from datetime import datetime
 from typing import Optional, List
+
+from app.database.waitlist_table import WaitList
 from app.models.city import City
 from app.models.gender import Gender
 from app.models.niche import Niche
@@ -8,13 +11,12 @@ from app.repository.client_repository import ClientRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository
 from app.repository.wait_list_repository import WaitListRepository
+from app.requests.influencer_insights import InfluencerInsights
 from app.requests.waitlist_request import WaitListRequest
 from app.response.generic_response import GenericResponse
-from app.requests.influencer_insights import InfluencerInsights
 from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing
 from app.utils.logger import configure_logger
-from datetime import datetime
 
 _log = configure_logger()
 
@@ -90,14 +92,16 @@ class WebService:
         if wait_list:
             return GenericResponse(success=True, error_code=None, error_message=None)
         else:
+            _log.info("No record found for wait_list with wait_list_id {}".format(wait_list_id))
             return GenericResponse(success=False, error_code=None,
                                    error_message="No wait_list found for given wait_list_id")
 
-    def get_all_leads(self, page_size: int, page_number: int) -> GenericResponse:
+    def get_all_leads(self, page_size: int, page_number: int) -> List[WaitList] | GenericResponse:
         wait_list = self.wait_list_user_repository.get_wait_list(limit=page_size, offset=page_size * page_number)
 
-        if wait_list:
-            return GenericResponse(success=True, error_code=None, error_message=None)
+        if wait_list and len(wait_list) > 0:
+            return wait_list
         else:
+            _log.info("No record found for wait_list page_size {}, page_number {}".format(page_size, page_number))
             return GenericResponse(success=False, error_code=None,
                                    error_message="No wait_list found for at all")

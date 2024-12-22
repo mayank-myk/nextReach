@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.database.client_table import Client
@@ -45,15 +47,14 @@ class ClientRepository:
             self.db.refresh(new_client)
             return new_client
         except Exception as ex:
-            _log.error("Unable to create new_client record with phone_number {}".format(request.phone_number))
-            raise FetchOneUserMetadataException(ex, request.user_id)
+            _log.error("Unable to create new_client record with client_id {}".format(client_id))
+            raise FetchOneUserMetadataException(ex, client_id)
 
-    def update_client_from_admin(self, client_id: str, request: ClientRequest) -> Client:
+    def update_client_from_admin(self, client_id: str, request: ClientRequest) -> Optional[Client]:
         try:
             existing_client = self.db.query(Client).filter(Client.id == client_id).first()
 
             if not existing_client:
-                _log.info("No record found for client with client_id {}".format(client_id))
                 return None
 
             existing_client = Client(
@@ -85,14 +86,13 @@ class ClientRepository:
             return existing_client
         except Exception as ex:
             _log.error("Unable to update client record with client_id {}".format(client_id))
-            raise FetchOneUserMetadataException(ex, request.user_id)
+            raise FetchOneUserMetadataException(ex, client_id)
 
-    def update_client_from_user(self, client_id: str, request: ProfileUpdate) -> Client:
+    def update_client_from_user(self, client_id: str, request: ProfileUpdate) -> Optional[Client]:
         try:
             existing_client = self.db.query(Client).filter(Client.id == client_id).first()
 
             if not existing_client:
-                _log.info("No record found for client with client_id {}".format(client_id))
                 return None
 
             existing_client = Client(
@@ -124,7 +124,7 @@ class ClientRepository:
             return existing_client
         except Exception as ex:
             _log.error("Unable to update client record with client_id {}".format(client_id))
-            raise FetchOneUserMetadataException(ex, request.user_id)
+            raise FetchOneUserMetadataException(ex, client_id)
 
     def update_profile_visit_count(self, client_id: str) -> Client:
         try:
@@ -165,5 +165,8 @@ class ClientRepository:
             _log.error("Unable to update client record with client_id {}".format(client_id))
             raise FetchOneUserMetadataException(ex, request.user_id)
 
-    def get_client_by_id(self, client_id: str) -> Client:
+    def get_client_by_id(self, client_id: str) -> Optional[Client]:
         return self.db.query(Client).filter(Client.id == client_id).first()
+
+    def get_client_by_phone_number(self, phone_number: str) -> Optional[Client]:
+        return self.db.query(Client).filter(Client.phone_number == phone_number).first()

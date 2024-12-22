@@ -66,6 +66,14 @@ def update_revenue(revenue_id: str, request: RevenueRequest, db=Depends(db_manag
     return admin_service.update_revenue(revenue_id=revenue_id, request=request)
 
 
+@router.get("/get/revenue/all")
+def get_all_revenue(page_number: int = Query(0, description="Page number to fetch", ge=0),
+                    page_size: int = Query(100, description="Number of leads per page", ge=1, le=1000),
+                    db=Depends(db_manager.get_db)) -> GenericResponse:
+    admin_service = AdminService(db)
+    return admin_service.get_all_expense(page_size=page_size, page_number=page_number)
+
+
 @router.post("/create/expense")
 def create_expense(request: ExpenseRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
@@ -76,6 +84,14 @@ def create_expense(request: ExpenseRequest, db=Depends(db_manager.get_db)) -> Ge
 def update_expense(expense_id: str, request: ExpenseRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.update_expense(expense_id=expense_id, request=request)
+
+
+@router.get("/get/expense/all")
+def get_all_expense(page_number: int = Query(0, description="Page number to fetch", ge=0),
+                    page_size: int = Query(100, description="Number of leads per page", ge=1, le=1000),
+                    db=Depends(db_manager.get_db)) -> GenericResponse:
+    admin_service = AdminService(db)
+    return admin_service.get_all_expense(page_size=page_size, page_number=page_number)
 
 
 @router.post("/create/client")
@@ -90,13 +106,13 @@ def update_client(client_id: str, request: ClientRequest, db=Depends(db_manager.
     return admin_service.update_client(client_id=client_id, request=request)
 
 
-@router.post("/update/signup/{wait_list_id}")
+@router.post("/update/lead/status/{wait_list_id}")
 def create_lead(wait_list_id: str, status: Status, db=Depends(db_manager.get_db)) -> GenericResponse:
     web_service = WebService(db)
     return web_service.update_lead(wait_list_id=wait_list_id, status=status)
 
 
-@router.get("/get/signup")
+@router.get("/get/lead/all")
 def get_all_leads(page_number: int = Query(0, description="Page number to fetch", ge=0),
                   page_size: int = Query(100, description="Number of leads per page", ge=1, le=1000),
                   db=Depends(db_manager.get_db)) -> GenericResponse:

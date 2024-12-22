@@ -2,8 +2,11 @@ from enum import Enum
 
 
 class CampaignStage(Enum):
-    INFLUENCER_FINALIZATION = 1
-    SHOOT = 2
-    POST = 3
-    FIRST_BILLING = 4
-    SECOND_BILLING = 5
+    CREATED = 1
+    INFLUENCER_FINALIZATION = 2
+    SHOOT = 3
+    POST = 4
+    FIRST_BILLING = 5
+    SECOND_BILLING = 6
+    COMPLETED = 7
+    CANCELLED = 8

@@ -1,17 +1,18 @@
 from typing import Optional, List
 
+from fastapi import APIRouter, Query, Depends
+
 from app.database.session import DatabaseSessionManager
 from app.models.city import City
 from app.models.gender import Gender
-from app.requests.waitlist_request import WaitListRequest
-from app.response.generic_response import GenericResponse
 from app.models.niche import Niche
 from app.models.platform import Platform
 from app.requests.influencer_insights import InfluencerInsights
+from app.requests.waitlist_request import WaitListRequest
+from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
 from app.services.web_service import WebService
 from app.utils.logger import configure_logger
-from fastapi import APIRouter, Query, Depends
 
 _log = configure_logger()
 
@@ -60,7 +61,7 @@ def get_influencer_insight(request: InfluencerInsights, db=Depends(db_manager.ge
     return web_service.get_influencer_insight(request=request)
 
 
-@router.post("/create/signup")
+@router.post("/create/lead")
 def create_lead(request: WaitListRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     web_service = WebService(db)
     return web_service.create_lead(request=request)

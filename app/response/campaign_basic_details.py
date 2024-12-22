@@ -1,4 +1,5 @@
 import datetime
+
 from pydantic import BaseModel, Field
 
 from app.models.campaign_stage import CampaignStage
@@ -14,5 +15,5 @@ class CampaignBasicDetails(BaseModel):
     influencer_image: str
     niche: Niche
     city: City
-    status: Status
     stage: CampaignStage
+    status: Status

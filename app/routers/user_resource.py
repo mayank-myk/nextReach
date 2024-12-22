@@ -5,6 +5,7 @@ from app.requests.rate_campaign import RateCampaign
 from app.response.campaign_basic_details import CampaignBasicDetails
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
+from app.response.login_response import LoginResponse
 from app.response.user_profile import UserProfile
 from app.requests.collab_request import CollabRequest
 from app.requests.profile_update import ProfileUpdate
@@ -44,7 +45,7 @@ def request_otp(phone_number: str, db=Depends(db_manager.get_db)) -> GenericResp
 
 
 @router.post("/validate/otp")
-def validate_otp(request: UserLogin, db=Depends(db_manager.get_db)) -> GenericResponse:
+def validate_otp(request: UserLogin, db=Depends(db_manager.get_db)) -> LoginResponse:
     user_service = UserService(db)
     return user_service.validate_otp(phone_number=request.phone_number, otp=request.otp)
 

@@ -5,9 +5,10 @@ from app.database.client_table import Client
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.client_repository import ClientRepository
 from app.repository.user_login_repository import UserLoginRepository
-from app.response.generic_response import GenericResponse
 from app.requests.profile_update import ProfileUpdate
+from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
+from app.response.login_response import LoginResponse
 from app.utils import id_utils
 from app.utils.logger import configure_logger
 
@@ -20,20 +21,35 @@ class UserService:
         self.client_repository = ClientRepository(session)
         self.campaign_repository = CampaignRepository(session)
 
-    def get_user_profile(self, user_id: str) -> Client:
+    def get_user_profile(self, user_id: str) -> Client | GenericResponse:
         try:
-            return self.client_repository.get_client_by_id(client_id=user_id)
+            user_profile = self.client_repository.get_client_by_id(client_id=user_id)
+            if user_profile:
+                return user_profile
+            else:
+                _log.info("No record found for user_profile with user_id {}".format(user_id))
+                return GenericResponse(success=False, error_code=None,
+                                       error_message="No user profile found for given user_id")
         except Exception as e:
-            raise Exception(e)
+            _log.error(f"Error occurred while fetching profile for user_id: {user_id}. Error: {str(e)}")
+            return GenericResponse(success=False, error_code=None,
+                                   error_message="Something went wrong while fetching user profile")
 
     def update_user_profile(self, user_id: str, profile: ProfileUpdate) -> GenericResponse:
         try:
-            self.client_repository.update_client_from_user(client_id=user_id, request=profile)
-            return GenericResponse(success=True, error_code=None,
-                                   error_message="User profile updated successfully")
+            user_profile = self.client_repository.update_client_from_user(client_id=user_id, request=profile)
+            if user_profile:
+                return GenericResponse(success=True, error_code=None,
+                                       error_message="User profile updated successfully")
+            else:
+                _log.info("No record found for user_profile with user_id {}".format(user_id))
+                return GenericResponse(success=False, error_code=None,
+                                       error_message="No user profile found for given user_id")
+
         except Exception as e:
+            _log.error(f"Error occurred while updating profile for user_id: {user_id}. Error: {str(e)}")
             return GenericResponse(success=False, error_code=None,
-                                   error_message="User profile update failed")
+                                   error_message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
         login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
@@ -50,22 +66,23 @@ class UserService:
         else:
             return GenericResponse(success=False, error_code=None, error_message="Unable to send OTP")
 
-    def validate_otp(self, phone_number: str, otp: str) -> GenericResponse:
+    def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
         login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
+        client_record = self.client_repository.get_client_by_phone_number(phone_number=phone_number)
         if login_record:
             if login_record.otp == otp:
-                return GenericResponse(success=True, error_code=None,
-                                       error_message="OTP has been verified successfully")
+                return LoginResponse(user_id=client_record.id, success=True, error_code=None,
+                                     error_message="OTP has been verified successfully")
             elif (datetime.now() - login_record.created_at).total_seconds() > 3600:
-                return GenericResponse(success=True, error_code=None,
-                                       error_message="OTP has expired, use the latest one or request resend OTP")
+                return LoginResponse(success=False, error_code=None,
+                                     error_message="OTP has expired, use the latest one or request resend OTP")
             else:
-                return GenericResponse(success=False, error_code=None,
-                                       error_message="Latest OTP which was sent to your registered mobile number does not matches with entered one")
+                return LoginResponse(success=False, error_code=None,
+                                     error_message="Latest OTP which was sent to your registered mobile number does not matches with entered one")
         else:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No OTP record found for this phone number")
+            return LoginResponse(success=False, error_code=None,
+                                 error_message="No OTP record found for this phone number")
 
     def get_watchlist(self, user_id: str) -> List[InfluencerDetail]:
 

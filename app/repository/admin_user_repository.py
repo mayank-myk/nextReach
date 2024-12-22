@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy.orm import Session
 
 from app.database.admin_user_table import AdminUser
@@ -30,12 +32,11 @@ class AdminUserRepository:
             _log.error("Unable to create admin record with user_id {}".format(request.user_id))
             raise FetchOneUserMetadataException(ex, request.user_id)
 
-    def update_admin(self, request: AdminUser) -> AdminUser:
+    def update_admin(self, request: AdminUserRequest) -> Optional[AdminUser]:
         try:
             existing_admin = self.db.query(AdminUser).filter(AdminUser.user_id == request.user_id).first()
 
             if not existing_admin:
-                _log.info("No record found for admin with with user_id {}".format(AdminUser.user_id))
                 return None
 
             setattr(existing_admin, 'password', request.password)
@@ -48,12 +49,11 @@ class AdminUserRepository:
             _log.error("Unable to update admin record with user_id {}".format(request.user_id))
             raise FetchOneUserMetadataException(ex, request.user_id)
 
-    def delete_admin(self, user_id: str) -> AdminUser:
+    def delete_admin(self, user_id: str) -> Optional[AdminUser]:
         try:
             existing_admin = self.db.query(AdminUser).filter(AdminUser.user_id == user_id).first()
 
             if not existing_admin:
-                _log.info("No record found for admin with with user_id {}".format(user_id))
                 return None
 
             self.db.delete(existing_admin)
@@ -63,12 +63,11 @@ class AdminUserRepository:
             _log.error("Unable to delete admin record with user_id {}".format(user_id))
             raise FetchOneUserMetadataException(ex, user_id)
 
-    def get_admin_by_user_id(self, user_id: str) -> AdminUser:
+    def get_admin_by_user_id(self, user_id: str) -> Optional[AdminUser]:
 
         try:
             existing_admin = self.db.query(AdminUser).filter(AdminUser.user_id == user_id).first()
             if not existing_admin:
-                _log.info("No record found for admin with with user_id {}".format(user_id))
                 return None
             return existing_admin
 
