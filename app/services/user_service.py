@@ -1,7 +1,6 @@
 from datetime import datetime
 from typing import List
 
-from app.database.client_table import Client
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.client_repository import ClientRepository
 from app.repository.user_login_repository import UserLoginRepository
@@ -9,6 +8,7 @@ from app.requests.profile_update import ProfileUpdate
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
 from app.response.login_response import LoginResponse
+from app.response.user_profile import UserProfile
 from app.utils import id_utils
 from app.utils.logger import configure_logger
 
@@ -21,11 +21,23 @@ class UserService:
         self.client_repository = ClientRepository(session)
         self.campaign_repository = CampaignRepository(session)
 
-    def get_user_profile(self, user_id: str) -> Client | GenericResponse:
+    def get_user_profile(self, user_id: str) -> UserProfile | GenericResponse:
         try:
             user_profile = self.client_repository.get_client_by_id(client_id=user_id)
             if user_profile:
-                return user_profile
+                return UserProfile(
+                    id=user_profile.id,
+                    name=user_profile.name,
+                    business_name=user_profile.business_name,
+                    email=user_profile.email,
+                    city=user_profile.city,
+                    niche=user_profile.niche,
+                    category=user_profile.category,
+                    total_profile_visited=user_profile.total_profile_visited,
+                    balance_profile_visits=user_profile.balance_profile_visits,
+                    insta_username=user_profile.insta_username,
+                    yt_username=user_profile.yt_username,
+                    fb_username=user_profile.fb_username)
             else:
                 _log.info("No record found for user_profile with user_id {}".format(user_id))
                 return GenericResponse(success=False, error_code=None,
