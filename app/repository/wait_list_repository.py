@@ -1,10 +1,10 @@
-from typing import List
+from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
 from app.database.waitlist_table import WaitList
+from app.enums.status import Status
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.models.status import Status
 from app.requests.waitlist_request import WaitListRequest
 from app.utils.logger import configure_logger
 
@@ -34,15 +34,14 @@ class WaitListRepository:
             self.db.refresh(db_wait_list)
             return db_wait_list
         except Exception as ex:
-            _log.error("Unable to create wait_list record for phone_number {}".format(request.phone_number))
+            _log.error(f"Unable to create wait_list record for phone_number {request.phone_number}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, request.phone_number)
 
-    def update_wait_list_status(self, wait_list_id: str, status: Status) -> WaitList:
+    def update_wait_list_status(self, wait_list_id: int, status: Status) -> Optional[WaitList]:
         try:
             db_wait_list = self.db.query(WaitList).filter(WaitList.id == wait_list_id).first()
 
             if not db_wait_list:
-                _log.info("No record found for wait_list with wait_list_id {}".format(wait_list_id))
                 return None
 
             setattr(db_wait_list, 'onboarding_status', status)
@@ -51,17 +50,13 @@ class WaitListRepository:
             self.db.refresh(db_wait_list)
             return db_wait_list
         except Exception as ex:
-            _log.error("Unable to update wait_list record for wait_list_id {}".format(wait_list_id))
-            raise FetchOneUserMetadataException(ex, wait_list_id)
+            _log.error(f"Unable to update wait_list record for wait_list_id {wait_list_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(wait_list_id))
 
-    def get_wait_list(self, limit: int, offset: int) -> List[WaitList]:
+    def get_wait_list(self, limit: int, offset: int) -> Optional[List[WaitList]]:
         try:
-            existing_wait_list = self.db.query(WaitList).offset(offset).limit(limit).all()
-            # existing_wait_list = self.db.query(WaitList).all()
-            if not existing_wait_list:
-                _log.info("No record found for existing_wait_list")
-                return None
-            return existing_wait_list
+            return self.db.query(WaitList).offset(offset).limit(limit).all()
 
         except Exception as ex:
-            raise FetchOneUserMetadataException(ex, 0)
+            _log.error(f"Unable to get wait_list record for page_number {offset}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(offset))

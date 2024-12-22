@@ -1,24 +1,32 @@
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.models.city import City
-from app.models.gender import Gender
-from app.models.niche import Niche
-from app.models.platform import Platform
+from app.enums.average_view import AverageView
+from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.engagement_rate import EngagementRate
+from app.enums.follower_count import FollowerCount
+from app.enums.gender import Gender
+from app.enums.influencer_age import InfluencerAge
+from app.enums.language import Language
+from app.enums.niche import Niche
+from app.enums.platform import Platform
+from app.enums.rating import Rating
+from app.enums.reach_price import ReachPrice
 
 
 class SearchFilter(BaseModel):
-    platform: Platform
-    content_price: List[int]
-    reach_price: List[int]
-    niche: List[Niche]
-    gender: List[Gender]
-    age: List[int]
-    city: List[City]
-    followers: List[int]
-    avg_views: List[int]
-    rating: int
-    engagement: int
-    consistency: int
-    score: int
+    niche: Optional[List[Niche]] = None
+    city: Optional[List[City]] = None
+    reach_price: Optional[List[ReachPrice]] = None
+    follower_count: Optional[List[FollowerCount]] = None
+    avg_views: Optional[List[AverageView]] = None
+    engagement: Optional[EngagementRate] = None
+    platform: Optional[Platform] = None
+    content_price: Optional[List[int]] = None
+    gender: Optional[List[Gender]] = None
+    collab_type: Optional[CollabType] = None
+    age: Optional[List[InfluencerAge]] = None
+    rating: Optional[Rating] = None
+    languages: Optional[List[Language]] = None

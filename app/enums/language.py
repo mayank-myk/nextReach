@@ -1,0 +1,21 @@
+from enum import Enum
+
+
+class Language(Enum):
+    HINDI = "HINDI"
+    ENGLISH = "ENGLISH"
+    BENGALI = "BENGALI"
+    TAMIL = "TAMIL"
+    TELUGU = "TELUGU"
+    MARATHI = "MARATHI"
+    GUJARATI = "GUJARATI"
+    MALAYALAM = "MALAYALAM"
+    KANNADA = "KANNADA"
+    ODIA = "ODIA"
+    PUNJABI = "PUNJABI"
+    ASSAMESE = "ASSAMESE"
+    URDU = "URDU"
+    SINDHI = "SINDHI"
+    SANSKRIT = "SANSKRIT"
+    KASHMIRI = "KASHMIRI"
+    MAITHILI = "MAITHILI"

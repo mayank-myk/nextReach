@@ -1,0 +1,8 @@
+from enum import Enum
+
+
+class ContentType(Enum):
+    PROMOTIONAL = "PROMOTIONAL"
+    CONCEPT = "CONCEPT"
+    EXPERIENTIAL = "EXPERIENTIAL"
+    EDUCATIONAL = "EDUCATIONAL"

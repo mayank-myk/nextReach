@@ -1,90 +1,71 @@
-import io
-import json
-import uuid
-from typing import Optional
+import os
+from threading import Lock
 
-import boto3
+from azure.storage.blob import BlobServiceClient
 
-from simpl_utils.clients.s3 import S3
-from simpl_utils.config import aws_default_bucket
-from app.utils.logger import configure_logger
 from app.utils.config import get_config
+from app.utils.logger import configure_logger
 
 logger = configure_logger()
 
+# Initialize Azure Blob Storage Client
+container_name = get_config("AZURE_CONTAINER_NAME")
 
-class S3Manager:
+
+class AzureBlobClient:
+    _instance = None
+    _lock = Lock()
 
     def __init__(self):
-        self.s3 = S3()
+        self._refresh_client()
 
-    @property
-    def unique_payload_filename(self):
-        """Return a unique filename for the payload"""
-        random_string = uuid.uuid4().hex
-        webhooks_folder = ''
-        return f'{webhooks_folder}{random_string}.json'
+    def _refresh_client(self):
+        connection_string = get_config("AZURE_STORAGE_CONNECTION_STRING")
+        if not connection_string:
+            raise ValueError("AZURE_STORAGE_CONNECTION_STRING is not set in env variables")
+        self._client = BlobServiceClient.from_connection_string(connection_string)
 
-    def publish_to_s3(self, payload):
-        """Handle the webhook from clevertap and schedule the event
-
-        Parse the payload from clevertap and create events for each user,
-        and schedule a job to publish the event.
-        """
-
-        # Upload the file to s3
-        s3_object_key = self.unique_payload_filename
-
-        uploaded, err = self.s3.put_object(
-            key=s3_object_key,
-            bucket=aws_default_bucket,
-            file_obj=io.BytesIO(json.dumps(payload).encode('utf-8')),
-        )
-
-        if err is not None:
-            configure_logger.error("Error while uploading payload {}".format(err))
-            raise Exception("Error while uploading payload {}".format(err))
-        return s3_object_key
-
-    def get_object_from_s3(self, s3_object_key):
+    @classmethod
+    def get_client(cls) -> BlobServiceClient:
+        if not cls._instance:
+            with cls._lock:
+                if not cls._instance:
+                    cls._instance = AzureBlobClient()
 
         try:
-            response = self.s3.get_object(bucket=aws_default_bucket, key=s3_object_key)
-            if not response:
-                configure_logger.error('Error while fetching payload')
-                return None
+            # Simple validation by checking account properties
+            cls._instance._client.get_account_information()
+            return cls._instance._client
+        except Exception as e:
+            print(f"BlobServiceClient connection invalid, refreshing: {e}")
+            with cls._lock:
+                cls._instance._refresh_client()
+            return cls._instance._client
 
-            payload = json.loads(response['Body'].read().decode('utf-8'))
-            return payload
-        except json.JSONDecodeError:
-            configure_logger.error('Error while decoding payload')
-            return None
-        except Exception as e:  # noqa
-            configure_logger.error('Error while read payload: {}'.format(str(e)))
-            return None
 
-    def upload_file_to_s3(self, file_path) -> Optional[str]:
-
-        try:
-            s3_object_key = self.unique_payload_filename
-
-            s3_client = boto3.client(
-                service_name='s3',
-                region_name=get_config('AWS_DEFAULT_REGION'),
-                aws_access_key_id=get_config('AWS_ACCESS_KEY_ID'),
-                aws_secret_access_key=get_config('AWS_SECRET_ACCESS_KEY')
-            )
-
-            response = s3_client.upload_file(file_path, get_config('AWS_BUCKET'), s3_object_key)
-
-            bucket_location = boto3.client('s3').get_bucket_location(Bucket=get_config('AWS_BUCKET'))
-            object_url = "https://s3-{0}.amazonaws.com/{1}/{2}".format(
-                bucket_location['LocationConstraint'],
-                get_config('AWS_BUCKET'),
-                s3_object_key)
-
-            return object_url
-
-        except Exception as e:  # noqa
-            configure_logger.error(f'Error while uploading file to s3 payload: {file_path}')
-            return None
+def upload_influencer_image(influencer_id: int, image_file) -> str:
+    """
+    Uploads or updates an influencer's image in Azure Blob Storage.
+    Args:
+        influencer_id (int): Unique ID of the influencer.
+        image_file (UploadFile): The image file uploaded by the user.
+    Returns:
+        str: URL of the uploaded image in Azure Blob Storage.
+    """
+    try:
+        # Generate a consistent filename based on influencer_id
+        # file_extension = os.path.splitext(image_file.filename)[1]
+        blob_filename = f"influencer_{influencer_id}_image"
+        # Get a blob client
+        blob_service_client = AzureBlobClient.get_client()
+        blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_filename)
+        # Check if the blob already exists and overwrite it
+        if blob_client.exists():
+            blob_client.delete_blob()
+        # Upload the new image
+        blob_client.upload_blob(image_file.file, overwrite=True)
+        # Construct and return the image URL
+        image_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_filename}"
+        return image_url
+    except Exception as e:
+        raise Exception(f"Failed to upload image: {e}")

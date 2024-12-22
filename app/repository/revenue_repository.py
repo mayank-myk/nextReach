@@ -1,4 +1,7 @@
+from typing import Optional, List
+
 from sqlalchemy.orm import Session
+
 from app.database.revenue_table import Revenue
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.requests.revenue_request import RevenueRequest
@@ -32,15 +35,14 @@ class RevenueRepository:
             self.db.refresh(new_revenue)
             return new_revenue
         except Exception as ex:
-            _log.error("Unable to create revenue for campaign_id {}".format(request.campaign_id))
-            raise FetchOneUserMetadataException(ex, request.campaign_id)
+            _log.error(f"Unable to create revenue for campaign_id {request.campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(request.campaign_id))
 
-    def update_revenue(self, revenue_id: str, request: RevenueRequest) -> Revenue:
+    def update_revenue(self, revenue_id: int, request: RevenueRequest) -> Optional[Revenue]:
         try:
-            existing_revenue = await self.db.get(Revenue, revenue_id)
+            existing_revenue = self.db.get(Revenue, revenue_id)
 
             if not existing_revenue:
-                _log.info("No record found for revenue with with revenue_id {}".format(revenue_id))
                 return None
 
             setattr(existing_revenue, 'last_updated_by', request.created_by)
@@ -56,20 +58,25 @@ class RevenueRepository:
             self.db.refresh(existing_revenue)
             return existing_revenue
         except Exception as ex:
-            _log.error("Unable to update revenue for revenue_id {}".format(revenue_id))
-            raise FetchOneUserMetadataException(ex, revenue_id)
+            _log.error(f"Unable to update revenue for revenue_id {revenue_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(revenue_id))
 
-    def get_revenue_by_id(self, revenue_id: str) -> Revenue:
+    def get_revenue_by_id(self, revenue_id: int) -> Optional[Revenue]:
 
         try:
-            existing_revenue = await self.db.get(Revenue, revenue_id)
+            existing_revenue = self.db.get(Revenue, revenue_id)
 
             if not existing_revenue:
-                _log.info("No record found for revenue with with revenue_id {}".format(revenue_id))
                 return None
 
             return existing_revenue
 
         except Exception as ex:
-            _log.error("Unable to fetch revenue for revenue_id {}".format(revenue_id))
-            raise FetchOneUserMetadataException(ex, revenue_id)
+            _log.error(f"Unable to fetch revenue for revenue_id {revenue_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(revenue_id))
+
+    def get_all_revenue(self, limit: int, offset: int) -> Optional[List[Revenue]]:
+        try:
+            return self.db.query(Revenue).offset(offset).limit(limit).all()
+        except Exception as ex:
+            raise FetchOneUserMetadataException(ex, str(offset))

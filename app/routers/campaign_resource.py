@@ -22,6 +22,6 @@ def create_campaign(request: CampaignRequest, db=Depends(db_manager.get_db)) -> 
 
 
 @router.post("/update/{campaign_id}")
-def update_campaign(campaign_id: str, request: CampaignRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_campaign(campaign_id: int, request: CampaignRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.update_campaign(campaign_id=campaign_id, request=request)

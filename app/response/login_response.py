@@ -1,9 +1,13 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
-from app.models.admin_type import AdminType
+from app.enums.admin_type import AdminType
 
 
 class LoginResponse(BaseModel):
+    user_id: Optional[int] = None
     success: bool
-    error_message: str
-    admin_type: AdminType
+    button_text: Optional[str] = "OKAY"
+    message: Optional[str] = None
+    admin_type: Optional[AdminType] = None

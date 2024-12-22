@@ -1,15 +1,18 @@
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.response.influencer_detail import InfluencerDetail
+from app.enums.sort_applied import SortApplied
+from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.search_filter import SearchFilter
 
 
 class InfluencerListing(BaseModel):
-    user_id: str = Field(min_length=13, max_length=13)
+    user_id: int
     coin_balance: int
-    influencer_details: List[InfluencerDetail]
+    influencer_list: List[InfluencerBasicDetail]
     filters_applied: SearchFilter
+    sorting_applied: Optional[SortApplied]
     page_number: int
-    quantity: int
+    page_size: int
+    total_match_number: int

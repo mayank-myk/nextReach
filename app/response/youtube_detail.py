@@ -1,23 +1,22 @@
-import datetime
+from typing import Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
 
 class YouTubeDetail(BaseModel):
-    id: str = Field(min_length=13, max_length=13, frozen=True)
-    username: str = Field(min_length=5, max_length=100)
-    followers: int = Field(ge=0)
-    city_1: int = Field(ge=0)
-    city_pc_1: int = Field(ge=0)
-    city_2: int = Field(ge=0)
-    city_pc_2: int = Field(ge=0)
-    city_3: int = Field(ge=0)
-    city_pc_3: int = Field(ge=0)
-    avg_views: int = Field(ge=0)
-    max_views: int = Field(ge=0)
-    min_views: int = Field(ge=0)
-    spread: int = Field(ge=0)
-    avg_likes: int = Field(ge=0)
-    avg_comments: int = Field(ge=0)
-    avg_shares: int = Field(ge=0)
-    engagement_rate: int = Field(ge=0)
+    username: str
+    followers: Optional[int]
+    city_1: Optional[int]
+    city_pc_1: Optional[int]
+    city_2: Optional[int]
+    city_pc_2: Optional[int]
+    city_3: Optional[int]
+    city_pc_3: Optional[int]
+    avg_views: Optional[int]
+    max_views: Optional[int]
+    min_views: Optional[int]
+    spread: Optional[int]
+    avg_likes: Optional[int]
+    avg_comments: Optional[int]
+    avg_shares: Optional[int]
+    engagement_rate: Optional[int]

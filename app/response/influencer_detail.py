@@ -1,35 +1,33 @@
 import datetime
-from typing import List
+from typing import List, Optional
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 
-from app.models.city import City
-from app.models.collab_type import CollabType
-from app.models.gender import Gender
-from app.models.language import Language
-from app.models.niche import Niche
-from app.models.platform import Platform
-from app.response.facebook_detail import FacebookDetail
-from app.response.instagram_detail import InstagramDetail
-from app.response.youtube_detail import YouTubeDetail
+from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.gender import Gender
+from app.enums.language import Language
+from app.enums.niche import Niche
+from app.enums.platform import Platform
+from app.response.influencer_collab_charge import InfluencerCollabCharge
+from app.response.influencer_metric_detail import InfluencerMetricDetail
 
 
 class InfluencerDetail(BaseModel):
-    id: str = Field(min_length=13, max_length=13)
+    id: int
     last_updated_at: datetime.datetime
-    profile_visited: bool
+    collaboration_request_raised: bool
     primary_platform: Platform
-    name: str = Field(min_length=5)
+    name: str
     gender: Gender
     profile_picture: str
-    languages: List[Language]
-    next_reach_score: int = Field(ge=0)
+    languages: List[Language] = None
+    next_reach_score: int
     niche: Niche
     city: City
     collab_type: CollabType
-    deliverables: List[str]
-    content_charge: int = Field(ge=0)
-    views_charge: int = Field(ge=0)
-    instagram_detail: InstagramDetail
-    youtube_detail: YouTubeDetail
-    facebook_detail: FacebookDetail
+    deliverables: Optional[List[str]] = None
+    content_charge: int
+    views_charge: int
+    collab_charge: InfluencerCollabCharge
+    platform_details: InfluencerMetricDetail

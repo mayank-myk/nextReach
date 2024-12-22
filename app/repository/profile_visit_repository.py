@@ -1,5 +1,8 @@
+from datetime import datetime
+
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
+
 from app.database.profile_visit_table import ProfileVisit
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.utils.logger import configure_logger
@@ -12,11 +15,11 @@ class ProfileVisitRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def log_profile_visit(self, client_id: str, influencer_id: str) -> ProfileVisit:
-        """Creates a new profile visit log for a client viewing an influencer's profile."""
+    def log_profile_visit(self, user_id: int, influencer_id: int) -> ProfileVisit:
+        """Creates a new profile visit log for a user viewing an influencer's profile."""
         try:
             profile_visit = ProfileVisit(
-                client_id=client_id,
+                user_id=user_id,
                 influencer_id=influencer_id
             )
             self.db.add(profile_visit)
@@ -25,40 +28,62 @@ class ProfileVisitRepository:
             return profile_visit
         except SQLAlchemyError as ex:
             self.db.rollback()
-            _log.error(f"Error logging profile visit for client {client_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException("Error logging profile visit")
+            _log.error(f"Error logging profile visit for user {user_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
         except Exception as ex:
             _log.error(
-                f"Exception while logging profile visit for client {client_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, client_id)
+                f"Exception while logging profile visit for user {user_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
 
-    def check_if_influencer_already_visited(self, client_id: str, influencer_id: str) -> int:
-        """Counts total visits by a client to a specific influencer."""
+    def check_if_influencer_already_visited(self, user_id: int, influencer_id: int) -> int:
+        """Counts total visits by a user to a specific influencer."""
         try:
             count = self.db.query(ProfileVisit).filter(
-                ProfileVisit.client_id == client_id,
+                ProfileVisit.user_id == user_id,
                 ProfileVisit.influencer_id == influencer_id
             ).count()
             return count
         except SQLAlchemyError as ex:
-            _log.error(f"Error getting total visits for client {client_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException("Error getting total visits")
+            _log.error(f"Error getting total visits for user {user_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
         except Exception as ex:
             _log.error(
-                f"Exception while getting total profile visits for client {client_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, client_id)
+                f"Exception while getting total profile visits for user {user_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
 
-    def get_total_visits_by_client(self, client_id: str) -> int:
-        """Counts total visits by a client to a specific influencer."""
+    def log_already_visited_profile(self, user_id: int, influencer_id: int) -> ProfileVisit:
+        """Creates a new profile visit log for a user viewing an influencer's profile."""
         try:
-            count = self.db.query(ProfileVisit).filter(
-                ProfileVisit.client_id == client_id
-            ).count()
-            return count
+            exisiting_profile_visit = self.db.query(ProfileVisit).filter(
+                ProfileVisit.user_id == user_id, ProfileVisit.influencer_id == influencer_id).order_by(
+                ProfileVisit.created_at.desc()).first()
+
+            setattr(exisiting_profile_visit, 'last_visited_at', datetime.now())
+
+            self.db.commit()
+            self.db.refresh(exisiting_profile_visit)
+            return exisiting_profile_visit
         except SQLAlchemyError as ex:
-            _log.error(f"Error getting total visits for client {client_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException("Error getting total visits")
+            self.db.rollback()
+            _log.error(
+                f"Error updating last_visited_at profile visit for user {user_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
         except Exception as ex:
             _log.error(
-                f"Exception while getting total profile visits for client {client_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, client_id)
+                f"Exception updating last_visited_at profile visit for for user {user_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
+
+    # def get_total_visits_by_user(self, user_id: int) -> int:
+    #     """Counts total visits by a user to a specific influencer."""
+    #     try:
+    #         count = self.db.query(ProfileVisit).filter(
+    #             ProfileVisit.user_id == user_id
+    #         ).count()
+    #         return count
+    #     except SQLAlchemyError as ex:
+    #         _log.error(f"Error getting total visits for user {user_id} to influencer {influencer_id}: {str(ex)}")
+    #         raise FetchOneUserMetadataException("Error getting total visits")
+    #     except Exception as ex:
+    #         _log.error(
+    #             f"Exception while getting total profile visits for user {user_id} to influencer {influencer_id}: {str(ex)}")
+    #         raise FetchOneUserMetadataException(ex, user_id)

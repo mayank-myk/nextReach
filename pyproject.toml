@@ -1,29 +1,29 @@
 [tool.poetry]
-name = "binge-platform"
+name = "next-reach"
 version = "1.0.0"
-description = "booking platform"
-authors = ["Data engineering"]
+description = "Influencer marketing platform"
+authors = ["mayank"]
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.8"
-fastapi = "^0.95.2"
-structlog = "^23.1.0"
-gunicorn = "^20.1.0"
+python = "^3.11"
+fastapi = "^0.115.6"
+structlog = "^24.4.0"
+gunicorn = "^23.0.0"
 orjson = "^3.8.12"
-uvicorn = "^0.22.0"
+uvicorn = "^0.34.0"
 pybrake = "^1.10.1"
 gremlinpython = "^3.6.3"
 psycopg2-binary = "^2.9.6"
 requests = "^2.31.0"
-yoyo-migrations = "^8.2.0"
+yoyo-migrations = "^9.0.0"
 python-dotenv = "^1.0.1"
-sib-api-v3-sdk = "^7.6.0"
-fastapi-utilities = "^0.2.0"
+fastapi-utilities = "^0.3.0"
 jinja2 = "^3.1.4"
 pdfkit = "^1.0.0"
-boto3 = "^1.35.20"
-
+sqlalchemy = "^2.0.19"
+azure-storage-blob="^12.24.0"
+python-multipart="^0.0.20"
 
 [tool.poetry.group.dev.dependencies]
 pre-commit = "^3.3.1"

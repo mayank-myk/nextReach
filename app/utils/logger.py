@@ -4,6 +4,13 @@ import structlog
 
 
 def configure_logger():
+    # Set up root logger to output logs to the console
+    if not logging.getLogger().hasHandlers():
+        logging.basicConfig(
+            level=logging.INFO,  # Set the log level to INFO
+            format="%(message)s",  # Simple output format for logs
+        )
+
     structlog.configure(
         processors=[
             structlog.processors.TimeStamper(fmt="iso"),

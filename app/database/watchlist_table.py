@@ -9,7 +9,7 @@ class WatchList(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    influencer_id = Column(String(13), ForeignKey('influencer.id'), nullable=False)
-    client_id = Column(String(13), ForeignKey('client.id'), nullable=False)
-    influencer = relationship("Influencer", back_populates="collab")
-    client = relationship("Client", back_populates="collab")
+    influencer_id = Column(Integer, ForeignKey('influencer.id'), nullable=False)
+    user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False)
+    influencer = relationship("Influencer", back_populates="watchlist")
+    user = relationship("User", back_populates="watchlist")

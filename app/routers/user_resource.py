@@ -2,9 +2,10 @@ from typing import List
 
 from app.database.session import DatabaseSessionManager
 from app.requests.rate_campaign import RateCampaign
-from app.response.campaign_basic_details import CampaignBasicDetails
+from app.response.campaign_basic_detail import CampaignBasicDetail
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
+from app.response.login_response import LoginResponse
 from app.response.user_profile import UserProfile
 from app.requests.collab_request import CollabRequest
 from app.requests.profile_update import ProfileUpdate
@@ -26,13 +27,13 @@ db_manager = DatabaseSessionManager()
 
 
 @router.get("/profile/get/{user_id}")
-def get_user_profile(user_id: str, db=Depends(db_manager.get_db)) -> UserProfile:
+def get_user_profile(user_id: int, db=Depends(db_manager.get_db)) -> UserProfile | GenericResponse:
     user_service = UserService(db)
     return user_service.get_user_profile(user_id=user_id)
 
 
 @router.post("/profile/update/{user_id}")
-def update_user_profile(user_id: str, profile: ProfileUpdate, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_user_profile(user_id: int, profile: ProfileUpdate, db=Depends(db_manager.get_db)) -> GenericResponse:
     user_service = UserService(db)
     return user_service.update_user_profile(user_id=user_id, profile=profile)
 
@@ -44,13 +45,13 @@ def request_otp(phone_number: str, db=Depends(db_manager.get_db)) -> GenericResp
 
 
 @router.post("/validate/otp")
-def validate_otp(request: UserLogin, db=Depends(db_manager.get_db)) -> GenericResponse:
+def validate_otp(request: UserLogin, db=Depends(db_manager.get_db)) -> LoginResponse:
     user_service = UserService(db)
     return user_service.validate_otp(phone_number=request.phone_number, otp=request.otp)
 
 
 @router.get("/watchlist/all/{user_id}")
-def get_watchlist(user_id: str, db=Depends(db_manager.get_db)) -> List[InfluencerDetail]:
+def get_watchlist(user_id: int, db=Depends(db_manager.get_db)) -> List[InfluencerDetail]:
     user_service = UserService(db)
     return user_service.get_watchlist(user_id=user_id)
 
@@ -74,13 +75,13 @@ def request_collab(request: CollabRequest, db=Depends(db_manager.get_db)) -> Gen
 
 
 @router.get("/campaign/all/{user_id}")
-def get_user_campaign_all(user_id: str, db=Depends(db_manager.get_db)) -> List[CampaignBasicDetails]:
+def get_user_campaign_all(user_id: int, db=Depends(db_manager.get_db)) -> List[CampaignBasicDetail] | GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.get_user_campaign_all(user_id=user_id)
 
 
 @router.get("/campaign/detail/{campaign_id}")
-def get_user_campaign_detail(campaign_id: str, db=Depends(db_manager.get_db)) -> CampaignDetail:
+def get_user_campaign_detail(campaign_id: int, db=Depends(db_manager.get_db)) -> CampaignDetail | GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.get_user_campaign_detail(campaign_id=campaign_id)
 

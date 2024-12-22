@@ -1,5 +1,7 @@
 from typing import Optional
+
 from sqlalchemy.orm import Session
+
 from app.database.user_login_table import UserLogin
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.utils.logger import configure_logger
@@ -38,5 +40,5 @@ class UserLoginRepository:
             self.db.refresh(db_otp)
             return db_otp
         except Exception as ex:
-            _log.error("Unable to create otp record for phone_number {}".format(phone_number))
+            _log.error(f"Unable to create otp record for phone_number {phone_number}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, phone_number)

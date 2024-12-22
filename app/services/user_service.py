@@ -1,13 +1,15 @@
 from datetime import datetime
 from typing import List
 
-from app.database.client_table import Client
+from app.clients.interakt_client import send_otp_via_whatsapp
 from app.repository.campaign_repository import CampaignRepository
-from app.repository.client_repository import ClientRepository
 from app.repository.user_login_repository import UserLoginRepository
-from app.response.generic_response import GenericResponse
+from app.repository.user_repository import UserRepository
 from app.requests.profile_update import ProfileUpdate
+from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
+from app.response.login_response import LoginResponse
+from app.response.user_profile import UserProfile
 from app.utils import id_utils
 from app.utils.logger import configure_logger
 
@@ -17,76 +19,110 @@ _log = configure_logger()
 class UserService:
     def __init__(self, session):
         self.user_login_repository = UserLoginRepository(session)
-        self.client_repository = ClientRepository(session)
+        self.user_repository = UserRepository(session)
         self.campaign_repository = CampaignRepository(session)
 
-    def get_user_profile(self, user_id: str) -> Client:
+    def get_user_profile(self, user_id: int) -> UserProfile | GenericResponse:
         try:
-            return self.client_repository.get_client_by_id(client_id=user_id)
+            user_profile = self.user_repository.get_user_by_id(user_id=user_id)
+            if user_profile:
+                return UserProfile(
+                    id=user_profile.id,
+                    phone_number=user_profile.phone_number,
+                    name=user_profile.name,
+                    business_name=user_profile.business_name,
+                    email=user_profile.email,
+                    city=user_profile.city,
+                    niche=user_profile.niche,
+                    category=user_profile.category,
+                    total_profile_visited=user_profile.total_profile_visited,
+                    balance_profile_visits=user_profile.balance_profile_visits,
+                    insta_username=user_profile.insta_username,
+                    yt_username=user_profile.yt_username,
+                    fb_username=user_profile.fb_username)
+            else:
+                _log.info("No record found for user_profile with user_id {}".format(user_id))
+                return GenericResponse(success=False, button_text=None,
+                                       message="No user profile found for given user_id")
         except Exception as e:
-            raise Exception(e)
+            _log.error(f"Error occurred while fetching profile for user_id: {user_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message="Something went wrong while fetching user profile")
 
-    def update_user_profile(self, user_id: str, profile: ProfileUpdate) -> GenericResponse:
+    def update_user_profile(self, user_id: int, profile: ProfileUpdate) -> GenericResponse:
         try:
-            self.client_repository.update_client_from_user(client_id=user_id, request=profile)
-            return GenericResponse(success=True, error_code=None,
-                                   error_message="User profile updated successfully")
+            user_profile = self.user_repository.update_user_from_user(user_id=user_id, request=profile)
+            if user_profile:
+                return GenericResponse(success=True, button_text=None,
+                                       message="User profile updated successfully")
+            else:
+                _log.info("No record found for user_profile with user_id {}".format(user_id))
+                return GenericResponse(success=False, button_text=None,
+                                       message="No user profile found for given user_id")
+
         except Exception as e:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="User profile update failed")
+            _log.error(f"Error occurred while updating profile for user_id: {user_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
-        login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
-        if login_record:
-            if (datetime.now() - login_record.created_at).total_seconds() < 3600:
-                return GenericResponse(success=True, error_code=None,
-                                       error_message="OTP has already been send to this number, and it is valid for 1hour")
+        try:
+            # login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
+            # if login_record:
+            #     if (datetime.now() - login_record.created_at).total_seconds() < 600:
+            #         return GenericResponse(success=True,
+            #                                message="OTP has already been send to this number, it's valid for 10minutes")
+            otp = id_utils.generate_otp()
+            otp_sent_successfully = send_otp_via_whatsapp(phone_number=phone_number, otp=otp)
+            if not otp_sent_successfully:
+                return GenericResponse(success=False, button_text="RETRY", message="Unable to send OTP")
 
-        otp = id_utils.generate_otp()
-        login_record = self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
+            login_record = self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
 
-        if login_record:
-            return GenericResponse(success=True, error_code=None, error_message="OTP has been sent successfully")
-        else:
-            return GenericResponse(success=False, error_code=None, error_message="Unable to send OTP")
+            return GenericResponse(success=True, message="OTP has been sent successfully")
+        except Exception as ex:
+            _log.error(f"Unable to create otp record for phone_number {phone_number}. Error: {str(ex)}")
+            return GenericResponse(success=False, button_text="RETRY", message="Something went wrong")
 
-    def validate_otp(self, phone_number: str, otp: str) -> GenericResponse:
+    def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
         login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
         if login_record:
             if login_record.otp == otp:
-                return GenericResponse(success=True, error_code=None,
-                                       error_message="OTP has been verified successfully")
-            elif (datetime.now() - login_record.created_at).total_seconds() > 3600:
-                return GenericResponse(success=True, error_code=None,
-                                       error_message="OTP has expired, use the latest one or request resend OTP")
+                user_record = self.user_repository.get_or_create_user_by_phone_number(phone_number=phone_number)
+                return LoginResponse(user_id=user_record.id, success=True,
+                                     message="OTP has been verified successfully", button_text="OKAY")
+            elif (datetime.now() - login_record.created_at).total_seconds() > 600:
+                return LoginResponse(success=False, message="OTP has expired, use the latest one or request resend OTP",
+                                     button_text="RETRY")
             else:
-                return GenericResponse(success=False, error_code=None,
-                                       error_message="Latest OTP which was sent to your registered mobile number does not matches with entered one")
+                return LoginResponse(success=False, button_text="RETRY",
+                                     message="Latest OTP which was sent to your registered mobile number does not matches with the entered one")
         else:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No OTP record found for this phone number")
+            return LoginResponse(success=False, message="No OTP record found for this phone number",
+                                 button_text="RETRY")
 
-    def get_watchlist(self, user_id: str) -> List[InfluencerDetail]:
-
-        pass
-
-    def add_to_watchlist(self, user_id: str, influencer_id: str) -> GenericResponse:
+    def get_watchlist(self, user_id: int) -> List[InfluencerDetail]:
 
         pass
 
-    def remove_from_watchlist(self, user_id: str, influencer_id: str) -> GenericResponse:
+    def add_to_watchlist(self, user_id: int, influencer_id: int) -> GenericResponse:
 
         pass
 
-    def request_collab(self, user_id: str, influencer_id: str) -> GenericResponse:
+    def remove_from_watchlist(self, user_id: int, influencer_id: int) -> GenericResponse:
+
+        pass
+
+    def request_collab(self, user_id: int, influencer_id: int) -> GenericResponse:
 
         try:
-            timestamp_id = id_utils.get_campaign_id()
-            db_collab = self.campaign_repository.create_collab_campaign(campaign_id=timestamp_id, client_id=user_id,
+            db_collab = self.campaign_repository.create_collab_campaign(user_id=user_id,
                                                                         influencer_id=influencer_id)
-            return GenericResponse(success=True, error_code=None,
-                                   error_message="Collab created successfully, collab id {}".format(db_collab.id))
+            return GenericResponse(success=True, button_text=None,
+                                   message="Collab created successfully, Our team will get back to you soon")
         except Exception as e:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="Collab creation failed")
+            _log.error(
+                f"Error occurred while creating collaboration request for user_id: {user_id}, influencer_id: {influencer_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message="Collaboration request failed, please retry")

@@ -12,7 +12,7 @@ class WatchListRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def add_to_watchlist(self, user_id: str, influencer_id: str) -> WatchList:
+    def add_to_watchlist(self, user_id: int, influencer_id: int) -> WatchList:
         try:
             new_collab = WatchList(
                 user_id=user_id,
@@ -24,5 +24,5 @@ class WatchListRepository:
             self.db.refresh(new_collab)
             return new_collab
         except Exception as ex:
-            _log.error("Unable to add watchlist request for user_id {}".format(user_id))
-            raise FetchOneUserMetadataException(ex, user_id)
+            _log.error(f"Unable to add watchlist request for user_id {user_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(user_id))
