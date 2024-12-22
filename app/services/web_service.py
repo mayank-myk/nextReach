@@ -82,19 +82,19 @@ class WebService:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
 
         if wait_list:
-            return GenericResponse(success=True, error_code=None, error_message=None)
+            return GenericResponse(success=True, button_text=None, message=None)
         else:
-            return GenericResponse(success=False, error_code=None, error_message="Unable to create new wait_list")
+            return GenericResponse(success=False, button_text=None, message="Unable to create new wait_list")
 
     def update_lead(self, wait_list_id: str, status: Status) -> GenericResponse:
         wait_list = self.wait_list_user_repository.update_wait_list_status(wait_list_id=wait_list_id, status=status)
 
         if wait_list:
-            return GenericResponse(success=True, error_code=None, error_message=None)
+            return GenericResponse(success=True, button_text=None, message=None)
         else:
             _log.info("No record found for wait_list with wait_list_id {}".format(wait_list_id))
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No wait_list found for given wait_list_id")
+            return GenericResponse(success=False, button_text=None,
+                                   message="No wait_list found for given wait_list_id")
 
     def get_all_leads(self, page_size: int, page_number: int) -> List[WaitList] | GenericResponse:
         wait_list = self.wait_list_user_repository.get_wait_list(limit=page_size, offset=page_size * page_number)
@@ -103,5 +103,5 @@ class WebService:
             return wait_list
         else:
             _log.info("No record found for wait_list page_size {}, page_number {}".format(page_size, page_number))
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No wait_list found for at all")
+            return GenericResponse(success=False, button_text=None,
+                                   message="No wait_list found for at all")

@@ -5,8 +5,8 @@ from app.models.niche import Niche
 
 
 class InfluencerBasicDetail(BaseModel):
-    id: str = Field(min_length=13, max_length=13)
-    name: str = Field(min_length=5)
+    id: str
+    name: str
     profile_picture: str
     niche: Niche
     city: City

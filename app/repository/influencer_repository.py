@@ -1,6 +1,7 @@
 from typing import Optional
 
 from sqlalchemy.orm import Session
+
 from app.database.influencer_metric_table import InfluencerMetric
 from app.database.influencer_table import Influencer
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
@@ -49,12 +50,11 @@ class InfluencerRepository:
         self.db.refresh(db_influencer)
         return db_influencer
 
-    def update_influencer(self, influencer_id: str, influencer_request: InfluencerRequest) -> Influencer:
+    def update_influencer(self, influencer_id: str, influencer_request: InfluencerRequest) -> Optional[Influencer]:
         try:
             existing_influencer = self.db.query(Influencer).filter(Influencer.id == influencer_id).first()
 
             if not existing_influencer:
-                _log.info("No record found for influencer with with id {}".format(influencer_id))
                 return None
 
             db_influencer = Influencer(
@@ -104,7 +104,6 @@ class InfluencerRepository:
         except Exception as ex:
             _log.error("Unable to fetch influencer for influencer_id {}".format(influencer_id))
             raise FetchOneUserMetadataException(ex, influencer_id)
-
 
     def create_influencer_metric(self, influencer_metric_id: str,
                                  influencer_metric_request: InfluencerMetricRequest) -> InfluencerMetric:

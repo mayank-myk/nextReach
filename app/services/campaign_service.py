@@ -85,7 +85,6 @@ class CampaignService:
                     likes=existing_campaign.first_billing_likes,
                     comments=existing_campaign.first_billing_comments,
                     shares=existing_campaign.first_billing_shares
-
                 ),
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.first_billing_amount,
@@ -99,7 +98,6 @@ class CampaignService:
                     likes=existing_campaign.second_billing_likes,
                     comments=existing_campaign.second_billing_comments,
                     shares=existing_campaign.second_billing_shares
-
                 ),
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.second_billing_amount,
@@ -147,25 +145,30 @@ class CampaignService:
                     return GenericResponse(success=False, error_code=None,
                                            error_message="You can only rate once campaign is completed")
                 elif existing_campaign.client.id != request.user_id:
-                    raise ValueError(f"Given client has not started this campaign")
+                    return GenericResponse(success=False, error_code=None,
+                                           error_message="You can only rate the campaigns started by you")
                 else:
                     return GenericResponse(success=True, error_code=None,
                                            error_message="Campaign rated successfully, campaign_id {}".format(
                                                request.campaign_id))
 
         except Exception as e:
+            _log.error(
+                f"Error occurred while rating campaign, campaign_id: {request.campaign_id}. Error: {str(e)}")
             return GenericResponse(success=False, error_code=None,
                                    error_message="Something went wrong while rating the campaign, campaign_id {}".format(
                                        request.campaign_id))
 
     def create_campaign(self, request: CampaignRequest) -> GenericResponse:
+        timestamp_id = id_utils.get_campaign_id()
         try:
-            timestamp_id = id_utils.get_campaign_id()
             db_campaign = self.campaign_repository.create_campaign(timestamp_id, request)
             return GenericResponse(success=True, error_code=None,
                                    error_message="Campaign created successfully, with campaign_id {}".format(
                                        db_campaign.id))
         except Exception as e:
+            _log.error(
+                f"Error occurred while fetching campaigns details for campaign_id: {timestamp_id}. Error: {str(e)}")
             return GenericResponse(success=False, error_code=None,
                                    error_message="Campaign creation failed")
 

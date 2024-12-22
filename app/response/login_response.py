@@ -1,10 +1,12 @@
+from typing import Optional
+
 from pydantic import BaseModel
 
 from app.models.admin_type import AdminType
 
 
 class LoginResponse(BaseModel):
-    user_id: str
+    user_id: Optional[str] = None
     success: bool
-    error_message: str
-    admin_type: AdminType
+    message: Optional[str] = None
+    admin_type: Optional[AdminType] = None

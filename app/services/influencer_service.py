@@ -16,32 +16,45 @@ class InfluencerService:
 
     def create_influencer(self, request: InfluencerRequest) -> GenericResponse:
         timestamp_id = id_utils.get_influencer_id()
-        new_influencer = self.influencer_repository.create_influencer(timestamp_id, request)
+        try:
+            new_influencer = self.influencer_repository.create_influencer(timestamp_id, request)
 
-        if new_influencer:
-            return GenericResponse(success=True, error_code=None, error_message=None)
-        else:
-            return GenericResponse(success=False, error_code=None, error_message="Unable to create new influencer")
+            if new_influencer:
+                return GenericResponse(success=True, button_text=None, message=None)
+            else:
+                return GenericResponse(success=False, button_text=None, message="Unable to create new influencer")
+        except Exception as e:
+            _log.error(
+                f"Error occurred while creating new Influencer, influencer_id: {timestamp_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message=f"Something went wrong while creating new Influencer, influencer_id: {timestamp_id}")
 
     def update_influencer(self, influencer_id: str, request: InfluencerRequest) -> GenericResponse:
         new_influencer = self.influencer_repository.update_influencer(influencer_id=influencer_id,
                                                                       influencer_request=request)
 
         if new_influencer:
-            return GenericResponse(success=True, error_code=None, error_message=None)
+            return GenericResponse(success=True, button_text=None, message=None)
         else:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No influencer found for given influencer_id")
+            _log.info("No record found for influencer with id {}".format(influencer_id))
+            return GenericResponse(success=False, button_text=None,
+                                   message="No influencer found for given influencer_id")
 
     def create_influencer_metric(self, request: InfluencerMetricRequest) -> GenericResponse:
         timestamp_id = id_utils.get_influencer_metric_id()
-        new_influencer_metric = self.influencer_repository.create_influencer_metric(timestamp_id, request)
+        try:
+            new_influencer_metric = self.influencer_repository.create_influencer_metric(timestamp_id, request)
 
-        if new_influencer_metric:
-            return GenericResponse(success=True, error_code=None, error_message=None)
-        else:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="Unable to create new influencer metric")
+            if new_influencer_metric:
+                return GenericResponse(success=True, button_text=None, message=None)
+            else:
+                return GenericResponse(success=False, button_text=None,
+                                       message="Unable to create new influencer_metric")
+        except Exception as e:
+            _log.error(
+                f"Error occurred while creating new influencer_metric, influencer_metric_id: {timestamp_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message=f"Something went wrong while creating new influencer_metric, influencer_metric_id: {timestamp_id}")
 
     def update_influencer_metric(self, influencer_metric_id: str, request: InfluencerMetricRequest) -> GenericResponse:
 
@@ -50,7 +63,8 @@ class InfluencerService:
             influencer_metric_request=request)
 
         if new_influencer_metric:
-            return GenericResponse(success=True, error_code=None, error_message=None)
+            return GenericResponse(success=True, button_text=None, message=None)
         else:
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No influencer_metric found for given influencer_metric_id")
+            _log.info("No record found for influencer_metric with id {}".format(influencer_metric_id))
+            return GenericResponse(success=False, button_text=None,
+                                   message="No influencer_metric found for given influencer_metric_id")
