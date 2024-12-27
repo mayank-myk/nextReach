@@ -1,11 +1,17 @@
-from datetime import datetime
 from typing import Optional, List
 
 from app.database.waitlist_table import WaitList
+from app.enums.average_view import AverageView
 from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.engagement_rate import EngagementRate
+from app.enums.follower_count import FollowerCount
 from app.enums.gender import Gender
+from app.enums.influencer_age import InfluencerAge
 from app.enums.niche import Niche
 from app.enums.platform import Platform
+from app.enums.rating import Rating
+from app.enums.reach_price import ReachPrice
 from app.enums.status import Status
 from app.repository.client_repository import ClientRepository
 from app.repository.influencer_repository import InfluencerRepository
@@ -13,9 +19,14 @@ from app.repository.profile_visit_repository import ProfileVisitRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.requests.influencer_insights import InfluencerInsights
 from app.requests.waitlist_request import WaitListRequest
+from app.response.facebook_detail import FacebookDetail
 from app.response.generic_response import GenericResponse
+from app.response.influencer_collab_charge import InfluencerCollabCharge
 from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing
+from app.response.influencer_metric_detail import InfluencerMetricDetail
+from app.response.instagram_detail import InstagramDetail
+from app.response.youtube_detail import YouTubeDetail
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -58,25 +69,61 @@ class WebService:
     def get_influencer_listing(self, user_id: str,
                                page_number: int,
                                page_size: int,
-                               platform: Optional[Platform],
-                               content_price: Optional[List[int]],
-                               reach_price: Optional[List[int]],
                                niche: Optional[List[Niche]],
-                               gender: Optional[List[Gender]],
-                               age: Optional[List[int]],
                                city: Optional[List[City]],
-                               rating: Optional[int],
-                               followers: Optional[List[int]],
-                               avg_views: Optional[List[int]],
-                               engagement: Optional[int],
-                               consistency: Optional[int],
-                               score: Optional[int]) -> InfluencerListing:
-        # Generate a timestamp-based ID
-        timestamp_id = 'B' + datetime.now().strftime('%Y%m%d%H%M%S')
+                               reach_price: Optional[List[ReachPrice]],
+                               followers: Optional[List[FollowerCount]],
+                               avg_views: Optional[List[AverageView]],
+                               engagement: Optional[EngagementRate],
+                               platform: Optional[Platform],
+                               collab_type: Optional[CollabType],
+                               gender: Optional[List[Gender]],
+                               age: Optional[List[InfluencerAge]],
+                               rating: Optional[Rating],
+                               ) -> InfluencerListing:
         pass
 
-    def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail:
-        pass
+    def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
+        try:
+            influencer = self.influencer_repository.get_influencer_by_id(influencer_id=request.influencer_id)
+
+            collab_charge = InfluencerCollabCharge(
+
+                min=influencer.content_charge,
+                average=influencer.views_charge * 100,
+                max=influencer.content_charge * 1000,
+            )
+            instagram_detail = InstagramDetail()
+            youtube_detail = YouTubeDetail()
+            facebook_detail = FacebookDetail()
+
+            platform_details = InfluencerMetricDetail(instagram_detail=instagram_detail, youtube_detail=youtube_detail,
+                                                      facebook_detail=facebook_detail)
+
+            return InfluencerDetail(
+                id=influencer.id,
+                last_updated_at=influencer.last_updated_at,
+                collaboration_request_already_raised=False,
+                primary_platform=influencer.primary_platform,
+                name=influencer.name,
+                gender=influencer.gender,
+                profile_picture=influencer.profile_picture,
+                languages=influencer.languages,
+                next_reach_score=0,
+                niche=influencer.niche,
+                city=influencer.city,
+                collab_type=influencer.collab_type,
+                deliverables=influencer.deliverables,
+                content_charge=influencer.content_charge,
+                views_charge=influencer.views_charge,
+                collab_charge=collab_charge,
+                platform_details=platform_details)
+
+        except Exception as e:
+            _log.error(
+                f"Error occurred while fetching influencer details for influencer_id: {request.influencer_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message="Something went wrong while fetching influencer details")
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)

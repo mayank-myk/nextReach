@@ -31,6 +31,7 @@ class InfluencerRepository:
             profile_picture=influencer_request.profile_picture,
             languages=influencer_request.languages,
             next_reach_score=influencer_request.next_reach_score,
+            age=influencer_request.age,
             insta_username=influencer_request.insta_username,
             insta_profile_link=influencer_request.insta_profile_link,
             youtube_username=influencer_request.youtube_username,
@@ -86,6 +87,9 @@ class InfluencerRepository:
 
             if hasattr(influencer_request, 'next_reach_score'):
                 setattr(existing_influencer, 'next_reach_score', influencer_request.next_reach_score)
+
+            if hasattr(influencer_request, 'age'):
+                setattr(existing_influencer, 'age', influencer_request.age)
 
             if hasattr(influencer_request, 'created_by'):
                 setattr(existing_influencer, 'last_updated_by', influencer_request.created_by)

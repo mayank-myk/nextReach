@@ -21,7 +21,7 @@ class InfluencerDetail(BaseModel):
     name: str
     gender: Gender
     profile_picture: str
-    languages: List[Language]
+    languages: List[Language] = None
     next_reach_score: int
     niche: Niche
     city: City

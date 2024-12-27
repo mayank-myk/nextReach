@@ -1,45 +1,36 @@
-if hasattr(influencer_metric_request, 'fb_followers'):
-    setattr(existing_influencer_metric, 'fb_followers', influencer_metric_request.fb_followers)
+from typing import List, Optional
 
-if hasattr(influencer_metric_request, 'fb_avg_views'):
-    setattr(existing_influencer_metric, 'fb_avg_views', influencer_metric_request.fb_avg_views)
+from pydantic import BaseModel, Field
 
-if hasattr(influencer_metric_request, 'fb_max_views'):
-    setattr(existing_influencer_metric, 'fb_max_views', influencer_metric_request.fb_max_views)
+from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.gender import Gender
+from app.enums.language import Language
+from app.enums.niche import Niche
+from app.enums.platform import Platform
 
-if hasattr(influencer_metric_request, 'fb_min_views'):
-    setattr(existing_influencer_metric, 'fb_min_views', influencer_metric_request.fb_min_views)
 
-if hasattr(influencer_metric_request, 'fb_spread'):
-    setattr(existing_influencer_metric, 'fb_spread', influencer_metric_request.fb_spread)
-
-if hasattr(influencer_metric_request, 'fb_avg_likes'):
-    setattr(existing_influencer_metric, 'fb_avg_likes', influencer_metric_request.fb_avg_likes)
-
-if hasattr(influencer_metric_request, 'fb_avg_comments'):
-    setattr(existing_influencer_metric, 'fb_avg_comments', influencer_metric_request.fb_avg_comments)
-
-if hasattr(influencer_metric_request, 'fb_avg_shares'):
-    setattr(existing_influencer_metric, 'fb_avg_shares', influencer_metric_request.fb_avg_shares)
-
-if hasattr(influencer_metric_request, 'fb_engagement_rate'):
-    setattr(existing_influencer_metric, 'fb_engagement_rate',
-            influencer_metric_request.fb_engagement_rate)
-
-if hasattr(influencer_metric_request, 'fb_city_1'):
-    setattr(existing_influencer_metric, 'fb_city_1', influencer_metric_request.fb_city_1)
-
-if hasattr(influencer_metric_request, 'fb_city_pc_1'):
-    setattr(existing_influencer_metric, 'fb_city_pc_1', influencer_metric_request.fb_city_pc_1)
-
-if hasattr(influencer_metric_request, 'fb_city_2'):
-    setattr(existing_influencer_metric, 'fb_city_2', influencer_metric_request.fb_city_2)
-
-if hasattr(influencer_metric_request, 'fb_city_pc_2'):
-    setattr(existing_influencer_metric, 'fb_city_pc_2', influencer_metric_request.fb_city_pc_2)
-
-if hasattr(influencer_metric_request, 'fb_city_3'):
-    setattr(existing_influencer_metric, 'fb_city_3', influencer_metric_request.fb_city_3)
-
-if hasattr(influencer_metric_request, 'fb_city_pc_3'):
-    setattr(existing_influencer_metric, 'fb_city_pc_3', influencer_metric_request.fb_city_pc_3)
+class InfluencerRequest(BaseModel):
+    created_by: str = Field(..., min_length=5)
+    primary_platform: Platform
+    name: str = Field(..., min_length=5)
+    gender: Gender
+    phone_number: str = Field(..., min_length=10, max_length=10)
+    email: Optional[str] = Field(None, max_length=255)
+    address: Optional[str] = Field(None, max_length=255)
+    profile_picture: str = Field(..., min_length=5)
+    languages: List[Language]
+    next_reach_score: int = Field(..., ge=0, default=0)
+    age: int = Field(None, ge=0)
+    insta_username: Optional[str] = Field(None, max_length=255)
+    insta_profile_link: Optional[str] = Field(None, max_length=255)
+    youtube_username: Optional[str] = Field(None, max_length=255)
+    youtube_profile_link: Optional[str] = Field(None, max_length=255)
+    fb_username: Optional[str] = Field(None, max_length=255)
+    fb_profile_link: Optional[str] = Field(None, max_length=255)
+    niche: Niche
+    city: City
+    collab_type: CollabType
+    deliverables: Optional[List[str]] = None
+    content_charge: int = Field(..., ge=0)
+    views_charge: int = Field(..., ge=0)

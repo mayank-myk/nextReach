@@ -50,8 +50,8 @@ class CampaignService:
 
         except Exception as e:
             _log.error(f"Error occurred while fetching campaigns for client_id: {user_id}. Error: {str(e)}")
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="Something went wrong while fetching your campaigns, please report the issue")
+            return GenericResponse(success=False, button_text=None,
+                                   message="Something went wrong while fetching your campaigns, please report the issue")
 
     def get_user_campaign_detail(self, campaign_id: str) -> CampaignDetail | GenericResponse:
         try:
@@ -129,8 +129,8 @@ class CampaignService:
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching campaigns details for campaign_id: {campaign_id}. Error: {str(e)}")
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="Something went wrong while rating the campaign, campaign_id {}".format(
+            return GenericResponse(success=False, button_text=None,
+                                   message="Something went wrong while rating the campaign, campaign_id {}".format(
                                        campaign_id))
 
     def rate_campaign(self, request: RateCampaign) -> GenericResponse:
@@ -138,48 +138,48 @@ class CampaignService:
             existing_campaign = self.campaign_repository.create_campaign_rating(request)
 
             if not existing_campaign:
-                return GenericResponse(success=False, error_code=None,
-                                       error_message="No Campaign found for campaign_id {}".format(request.campaign_id))
+                return GenericResponse(success=False, button_text=None,
+                                       message="No Campaign found for campaign_id {}".format(request.campaign_id))
             else:
                 if existing_campaign.status != Status.COMPLETED:
-                    return GenericResponse(success=False, error_code=None,
-                                           error_message="You can only rate once campaign is completed")
+                    return GenericResponse(success=False, button_text=None,
+                                           message="You can only rate once campaign is completed")
                 elif existing_campaign.client.id != request.user_id:
-                    return GenericResponse(success=False, error_code=None,
-                                           error_message="You can only rate the campaigns started by you")
+                    return GenericResponse(success=False, button_text=None,
+                                           message="You can only rate the campaigns started by you")
                 else:
-                    return GenericResponse(success=True, error_code=None,
-                                           error_message="Campaign rated successfully, campaign_id {}".format(
+                    return GenericResponse(success=True, button_text=None,
+                                           message="Campaign rated successfully, campaign_id {}".format(
                                                request.campaign_id))
 
         except Exception as e:
             _log.error(
                 f"Error occurred while rating campaign, campaign_id: {request.campaign_id}. Error: {str(e)}")
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="Something went wrong while rating the campaign, campaign_id {}".format(
+            return GenericResponse(success=False, button_text=None,
+                                   message="Something went wrong while rating the campaign, campaign_id {}".format(
                                        request.campaign_id))
 
     def create_campaign(self, request: CampaignRequest) -> GenericResponse:
         timestamp_id = id_utils.get_campaign_id()
         try:
             db_campaign = self.campaign_repository.create_campaign(timestamp_id, request)
-            return GenericResponse(success=True, error_code=None,
-                                   error_message="Campaign created successfully, with campaign_id {}".format(
+            return GenericResponse(success=True, button_text=None,
+                                   message="Campaign created successfully, with campaign_id {}".format(
                                        db_campaign.id))
         except Exception as e:
             _log.error(
-                f"Error occurred while fetching campaigns details for campaign_id: {timestamp_id}. Error: {str(e)}")
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="Campaign creation failed")
+                f"Error occurred while fetching campaign details for campaign_id: {timestamp_id}. Error: {str(e)}")
+            return GenericResponse(success=False, button_text=None,
+                                   message="Campaign creation failed")
 
     def update_campaign(self, campaign_id: str, request: CampaignRequest) -> GenericResponse:
         db_campaign = self.campaign_repository.update_campaign(campaign_id, request)
 
         if db_campaign:
-            return GenericResponse(success=True, error_code=None,
-                                   error_message="Campaign updated successfully, campaign_id {}".format(
+            return GenericResponse(success=True, button_text=None,
+                                   message="Campaign updated successfully, campaign_id {}".format(
                                        db_campaign.id))
         else:
             _log.info("No record found for campaign_id {}".format(campaign_id))
-            return GenericResponse(success=False, error_code=None,
-                                   error_message="No campaign found for given campaign_id")
+            return GenericResponse(success=False, button_text=None,
+                                   message="No campaign found for given campaign_id")

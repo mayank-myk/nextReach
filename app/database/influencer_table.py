@@ -34,6 +34,7 @@ class Influencer(Base):
     profile_picture = Column(String(255), nullable=False)  # URL for profile picture
     languages = Column(ARRAY(Enum(Language)), nullable=True)  # List of languages
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)
+    age = Column(Integer, CheckConstraint('age >= 0'), default=0)
 
     # Social profiles
     insta_username = Column(String(255), nullable=True)
