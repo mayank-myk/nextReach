@@ -403,3 +403,87 @@ class InfluencerRepository:
         except Exception as ex:
             _log.error("Unable to update influencer_metric record with id {}".format(influencer_metric_id))
             raise FetchOneUserMetadataException(ex, influencer_metric_id)
+
+    def get_latest_influencer_metric(self):
+        """
+        Fetch the latest metrics for each influencer.
+        """
+        latest_metric = (
+            self.db.query(InfluencerMetric)
+                .filter(InfluencerMetric.influencer_id == influencer_id)
+                .order_by(InfluencerMetric.created_at.desc())
+                .limit(1)
+                .one_or_none()
+        )
+        return latest_metric
+
+    def filter_influencers(
+            self,
+            page_number: int,
+            page_size: int,
+            niche: Optional[List[Niche]],
+            city: Optional[List[City]],
+            reach_price: Optional[List[ReachPrice]],
+            followers: Optional[List[FollowerCount]],
+            avg_views: Optional[List[AverageView]],
+            engagement: Optional[EngagementRate],
+            platform: Optional[Platform],
+            collab_type: Optional[CollabType],
+            gender: Optional[List[Gender]],
+            age: Optional[List[InfluencerAge]],
+            rating: Optional[Rating]
+    ):
+        """
+        Filter influencers based on the criteria.
+        """
+        query = (
+            self.db.query(Influencer).join(InfluencerMetric, Influencer.id == InfluencerMetric.influencer_id)
+        )
+
+        latest_metrics_subquery = (
+            self.db.query(
+                InfluencerMetric.influencer_id,
+                func.max(InfluencerMetric.created_at).label('latest_created_at')
+            )
+                .group_by(InfluencerMetric.influencer_id)
+                .subquery()
+        )
+
+        # Main Query
+        query = (
+            self.db.query(Influencer)
+                .join(InfluencerMetric, Influencer.id == InfluencerMetric.influencer_id)
+                .join(latest_metrics_subquery, and_(
+                InfluencerMetric.influencer_id == latest_metrics_subquery.c.influencer_id,
+                InfluencerMetric.created_at == latest_metrics_subquery.c.latest_created_at
+            )
+                      )
+        )
+
+        # Apply filters
+        if niche:
+            query = query.filter(Influencer.niche.in_(niche))
+        if city:
+            query = query.filter(Influencer.city.in_(city))
+        if reach_price:
+            query = query.filter(Influencer.views_charge.between(reach_price[0], reach_price[-1]))
+        if followers:
+            query = query.filter(InfluencerMetric.insta_followers.between(followers[0], followers[-1]))
+        if avg_views:
+            query = query.filter(InfluencerMetric.insta_avg_views.between(avg_views[0], avg_views[-1]))
+        if engagement:
+            query = query.filter(InfluencerMetric.insta_engagement_rate.between(engagement[0], engagement[-1]))
+        if platform:
+            query = query.filter(Influencer.primary_platform == platform)
+        if collab_type:
+            query = query.filter(Influencer.collab_type == collab_type)
+        if gender:
+            query = query.filter(Influencer.gender.in_(gender))
+        if age:
+            query = query.filter(Influencer.age.between(age[0], age[-1]))
+        if rating:
+            query = query.filter(InfluencerMetric.insta_engagement_rate >= rating)
+
+        # Pagination
+        influencers = query.limit(page_size).offset((page_number - 1) * page_size).all()
+        return influencers

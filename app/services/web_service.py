@@ -81,7 +81,51 @@ class WebService:
                                age: Optional[List[InfluencerAge]],
                                rating: Optional[Rating],
                                ) -> InfluencerListing:
-        pass
+        """
+        Retrieve filtered influencer listings with latest metrics.
+        """
+        influencers = self.influencer_repository.filter_influencers(
+            page_number=page_number,
+            page_size=page_size,
+            niche=niche,
+            city=city,
+            reach_price=reach_price,
+            followers=followers,
+            avg_views=avg_views,
+            engagement=engagement,
+            platform=platform,
+            collab_type=collab_type,
+            gender=gender,
+            age=age,
+            rating=rating
+        )
+
+        # Format response
+        results = []
+        for influencer in influencers:
+            latest_metric = max(influencer.influencer_metric, key=lambda m: m.created_at, default=None)
+            results.append({
+                "id": influencer.id,
+                "name": influencer.name,
+                "primary_platform": influencer.primary_platform,
+                "gender": influencer.gender,
+                "age": influencer.age,
+                "city": influencer.city,
+                "niche": influencer.niche,
+                "reach_price": influencer.views_charge,
+                "followers": latest_metric.insta_followers if latest_metric else 0,
+                "avg_views": latest_metric.insta_avg_views if latest_metric else 0,
+                "engagement_rate": latest_metric.insta_engagement_rate if latest_metric else 0,
+                "profile_picture": influencer.profile_picture,
+            })
+
+        return {
+            "user_id": user_id,
+            "page_number": page_number,
+            "page_size": page_size,
+            "total_results": len(results),
+            "influencers": results
+        }
 
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
         try:
