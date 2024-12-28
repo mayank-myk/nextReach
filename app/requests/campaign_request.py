@@ -11,8 +11,8 @@ from app.enums.status import Status
 class CampaignRequest(BaseModel):
     created_by: str = Field(..., min_length=5, max_length=255)  # Required field
     campaign_managed_by: str = Field(..., max_length=255)  # Required field
-    influencer_id: str = Field(..., min_length=13, max_length=13)  # Required field
-    client_id: str = Field(..., min_length=13, max_length=13)  # Required field
+    influencer_id: str = Field(...)  # Required field
+    user_id: str = Field(...)  # Required field
     stage: CampaignStage  # Required field (assuming it's an enum)
     content_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     views_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided

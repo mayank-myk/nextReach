@@ -2,7 +2,7 @@ from sqlalchemy import Column, Integer, String, DateTime, Enum, Date, CheckConst
 import datetime
 
 from app.database.session import Base
-from app.models.expense_type import ExpenseType
+from app.enums.expense_type import ExpenseType
 
 
 class Expense(Base):

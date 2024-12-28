@@ -24,5 +24,5 @@ class WatchListRepository:
             self.db.refresh(new_collab)
             return new_collab
         except Exception as ex:
-            _log.error("Unable to add watchlist request for user_id {}".format(user_id))
+            _log.error(f"Unable to add watchlist request for user_id {user_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, user_id)

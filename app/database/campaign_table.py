@@ -13,7 +13,7 @@ class Campaign(Base):
     __tablename__ = "campaign"
 
     # Primary Key
-    id = Column(String(13), primary_key=True, unique=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     last_updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow,
@@ -24,7 +24,7 @@ class Campaign(Base):
 
     # Foreign Keys
     influencer_id = Column(String(13), ForeignKey('influencer.id'), nullable=False)
-    client_id = Column(String(13), ForeignKey('client.id'), nullable=False)
+    user_id = Column(String(13), ForeignKey('user.id'), nullable=False)
 
     # Campaign stage and content info
     stage = Column(Enum(CampaignStage), nullable=False)
@@ -87,4 +87,4 @@ class Campaign(Base):
     pending_deliverables = Column(ARRAY(String), nullable=True)
 
     influencer = relationship("Influencer", back_populates="profile_visit")
-    client = relationship("Client", back_populates="profile_visit")
+    user = relationship("User", back_populates="profile_visit")

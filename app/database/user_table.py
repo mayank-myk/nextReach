@@ -9,11 +9,11 @@ from app.enums.city import City
 from app.enums.niche import Niche
 
 
-class Client(Base):
-    __tablename__ = "client"
+class User(Base):
+    __tablename__ = "user"
 
     # Primary Key
-    id = Column(String(13), primary_key=True, unique=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     last_updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow,
@@ -22,7 +22,7 @@ class Client(Base):
     last_updated_by = Column(String(255), nullable=False)
 
     # Client information
-    name = Column(String(255), nullable=False)
+    name = Column(String(255), nullable=True)
     phone_number = Column(String(10), nullable=False)  # Phone is unique and fixed length
     business_name = Column(String(255), nullable=True)  # Business name should be present
     email = Column(String(255), nullable=True)  # Email can be checked using validation logic
@@ -53,11 +53,11 @@ class Client(Base):
     # The relationship
     profile_visit = relationship(
         "ProfileVisit",
-        back_populates="client",
+        back_populates="user",
         cascade="all, delete-orphan"
     )
     collab = relationship(
         "Collab",
-        back_populates="client",
+        back_populates="user",
         cascade="all, delete-orphan"
     )

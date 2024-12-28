@@ -2,8 +2,8 @@ from sqlalchemy import Column, String, DateTime, Enum, Integer
 import datetime
 
 from app.database.session import Base
-from app.models.entity_type import EntityType
-from app.models.status import Status
+from app.enums.entity_type import EntityType
+from app.enums.status import Status
 
 
 class WaitList(Base):

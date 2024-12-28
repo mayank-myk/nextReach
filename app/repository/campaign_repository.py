@@ -19,12 +19,12 @@ class CampaignRepository:
 
     def create_campaign(self, campaign_id: str, campaign_request: CampaignRequest) -> Campaign:
         new_campaign = Campaign(
-            id=campaign_id,
+            # id=campaign_id,
             created_by=campaign_request.created_by,
             last_updated_by=campaign_request.created_by,
             campaign_managed_by=campaign_request.campaign_managed_by,
             influencer_id=campaign_request.influencer_id,
-            client_id=campaign_request.client_id,
+            user_id=campaign_request.user_id,
             stage=CampaignStage.CREATED,
             content_charge=campaign_request.content_charge,
             views_charge=campaign_request.views_charge,
@@ -66,15 +66,15 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def create_collab_campaign(self, campaign_id: str, client_id: str, influencer_id: str) -> Campaign:
+    def create_collab_campaign(self, campaign_id: str, user_id: str, influencer_id: str) -> Campaign:
 
         new_campaign = Campaign(
-            id=campaign_id,
-            created_by=client_id,
+            # id=campaign_id,
+            created_by=user_id,
             campaign_managed_by='system',
-            last_updated_by=client_id,
+            last_updated_by=user_id,
             influencer_id=influencer_id,
-            client_id=client_id,
+            user_id=user_id,
             stage=CampaignStage.CREATED
         )
 
@@ -206,7 +206,7 @@ class CampaignRepository:
             return existing_campaign
 
         except Exception as ex:
-            _log.error("Unable to update campaign for campaign_id {}".format(campaign_id))
+            _log.error(f"Unable to update campaign for campaign_id {campaign_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, campaign_id)
 
     def create_campaign_rating(self, rate_campaign: RateCampaign) -> Optional[Campaign]:
@@ -226,9 +226,9 @@ class CampaignRepository:
     def get_campaign_by_id(self, campaign_id: str) -> Campaign:
         return self.db.query(Campaign).filter(Campaign.id == campaign_id).first()
 
-    def get_all_campaign_for_a_user(self, client_id: str) -> List[Campaign]:
-        return self.db.query(Campaign).filter(Campaign.client_id == client_id).all()
+    def get_all_campaign_for_a_user(self, user_id: str) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.user_id == user_id).all()
 
-    def get_all_running_campaign_with_an_influencer(self, client_id: str, influencer_id: str) -> List[Campaign]:
-        return self.db.query(Campaign).filter(Campaign.client_id == client_id).filter(
+    def get_all_running_campaign_with_an_influencer(self, user_id: str, influencer_id: str) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.user_id == user_id).filter(
             Campaign.influencer_id == influencer_id).all()

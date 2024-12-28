@@ -19,7 +19,7 @@ class AdminUserRepository:
         try:
             new_admin = AdminUser(
                 created_by=request.created_by,
-                user_id=request.user_id,
+                admin_id=request.admin_id,
                 password=request.password,
                 admin_type=request.admin_type
             )
@@ -29,12 +29,12 @@ class AdminUserRepository:
             self.db.refresh(new_admin)
             return new_admin
         except Exception as ex:
-            _log.error("Unable to create admin record with user_id {}".format(request.user_id))
-            raise FetchOneUserMetadataException(ex, request.user_id)
+            _log.error(f"Unable to create admin record with admin_id {request.admin_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, request.admin_id)
 
     def update_admin(self, request: AdminUserRequest) -> Optional[AdminUser]:
         try:
-            existing_admin = self.db.query(AdminUser).filter(AdminUser.user_id == request.user_id).first()
+            existing_admin = self.db.query(AdminUser).filter(AdminUser.admin_id == request.admin_id).first()
 
             if not existing_admin:
                 return None
@@ -46,12 +46,12 @@ class AdminUserRepository:
             self.db.refresh(existing_admin)
             return existing_admin
         except Exception as ex:
-            _log.error("Unable to update admin record with user_id {}".format(request.user_id))
-            raise FetchOneUserMetadataException(ex, request.user_id)
+            _log.error(f"Unable to update admin record with admin_id {request.admin_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, request.admin_id)
 
-    def delete_admin(self, user_id: str) -> Optional[AdminUser]:
+    def delete_admin(self, admin_id: str) -> Optional[AdminUser]:
         try:
-            existing_admin = self.db.query(AdminUser).filter(AdminUser.user_id == user_id).first()
+            existing_admin = self.db.query(AdminUser).filter(AdminUser.admin_id == admin_id).first()
 
             if not existing_admin:
                 return None
@@ -60,17 +60,17 @@ class AdminUserRepository:
             self.db.commit()
             return existing_admin
         except Exception as ex:
-            _log.error("Unable to delete admin record with user_id {}".format(user_id))
-            raise FetchOneUserMetadataException(ex, user_id)
+            _log.error(f"Unable to delete admin record with admin_id {admin_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, admin_id)
 
-    def get_admin_by_user_id(self, user_id: str) -> Optional[AdminUser]:
+    def get_admin_by_admin_id(self, admin_id: str) -> Optional[AdminUser]:
 
         try:
-            existing_admin = self.db.query(AdminUser).filter(AdminUser.user_id == user_id).first()
+            existing_admin = self.db.query(AdminUser).filter(AdminUser.admin_id == admin_id).first()
             if not existing_admin:
                 return None
             return existing_admin
 
         except Exception as ex:
-            _log.error("Unable to fetch admin record with user_id {}".format(user_id))
-            raise FetchOneUserMetadataException(ex, user_id)
+            _log.error(f"Unable to fetch admin record with admin_id {admin_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, admin_id)

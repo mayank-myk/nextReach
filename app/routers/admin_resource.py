@@ -4,10 +4,10 @@ from fastapi.params import Query
 from app.database.session import DatabaseSessionManager
 from app.enums.status import Status
 from app.requests.admin_user_request import AdminUserRequest
-from app.requests.client_request import ClientRequest
 from app.requests.expense_request import ExpenseRequest
 from app.requests.login_request import LoginRequest
 from app.requests.revenue_request import RevenueRequest
+from app.requests.user_request import UserRequest
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
 from app.services.admin_service import AdminService
@@ -39,19 +39,19 @@ def generate_bill(campaign_id: str, db=Depends(db_manager.get_db)) -> GenericRes
 @router.post("/create")
 def create_user(user: AdminUserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
-    return admin_service.create_user(new_user=user)
+    return admin_service.create_admin(new_user=user)
 
 
 @router.post("/update")
 def update_user(user: AdminUserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
-    return admin_service.update_user(user=user)
+    return admin_service.update_admin(user=user)
 
 
 @router.put("/delete")
-def delete_user(user_id: str, db=Depends(db_manager.get_db)) -> GenericResponse:
+def delete_user(admin_id: str, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
-    return admin_service.delete_user(user_id=user_id)
+    return admin_service.delete_admin(admin_id=admin_id)
 
 
 @router.post("/create/revenue")
@@ -94,16 +94,16 @@ def get_all_expense(page_number: int = Query(0, description="Page number to fetc
     return admin_service.get_all_expense(page_size=page_size, page_number=page_number)
 
 
-@router.post("/create/client")
-def create_client(request: ClientRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+@router.post("/create/user")
+def create_user(request: UserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
-    return admin_service.create_client(request=request)
+    return admin_service.create_user(request=request)
 
 
-@router.post("/update/client/{client_id}")
-def update_client(client_id: str, request: ClientRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+@router.post("/update/user/{user_id}")
+def update_user(user_id: str, request: UserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
-    return admin_service.update_client(client_id=client_id, request=request)
+    return admin_service.update_user(user_id=user_id, request=request)
 
 
 @router.post("/update/lead/status/{wait_list_id}")

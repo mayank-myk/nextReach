@@ -151,7 +151,23 @@ class InfluencerRepository:
             self.db.refresh(existing_influencer)
             return existing_influencer
         except Exception as ex:
-            _log.error("Unable to update influencer record with id {}".format(influencer_id))
+            _log.error(f"Unable to update influencer record with id {influencer_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, influencer_id)
+
+    def update_influencer_profile_picture(self, influencer_id: str, profile_picture_path: str) -> Optional[Influencer]:
+        try:
+            existing_influencer = self.db.query(Influencer).filter(Influencer.id == influencer_id).first()
+
+            if not existing_influencer:
+                return None
+
+            setattr(existing_influencer, 'profile_picture', profile_picture_path)
+
+            self.db.commit()
+            self.db.refresh(existing_influencer)
+            return existing_influencer
+        except Exception as ex:
+            _log.error(f"Unable to update influencer record with id {influencer_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, influencer_id)
 
     def get_influencer_by_id(self, influencer_id: str) -> Optional[Influencer]:
@@ -165,14 +181,14 @@ class InfluencerRepository:
             return existing_influencer
 
         except Exception as ex:
-            _log.error("Unable to fetch influencer for influencer_id {}".format(influencer_id))
+            _log.error(f"Unable to fetch influencer record with id {influencer_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, influencer_id)
 
     def create_influencer_metric(self, influencer_metric_id: str,
                                  influencer_metric_request: InfluencerMetricRequest) -> InfluencerMetric:
 
         db_influencer_metric = InfluencerMetric(
-            id=influencer_metric_id,
+            # id=influencer_metric_id,
             created_by=influencer_metric_request.created_by,
             last_updated_by=influencer_metric_request.created_by,
             insta_followers=influencer_metric_request.insta_followers,
@@ -415,7 +431,7 @@ class InfluencerRepository:
             self.db.refresh(existing_influencer_metric)
             return existing_influencer_metric
         except Exception as ex:
-            _log.error("Unable to update influencer_metric record with id {}".format(influencer_metric_id))
+            _log.error(f"Unable to update influencer_metric record with id {influencer_metric_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, influencer_metric_id)
 
     def get_latest_influencer_metric(self, influencer_id: str) -> Optional[InfluencerMetric]:

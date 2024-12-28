@@ -1,5 +1,6 @@
 from __future__ import print_function
 
+from app.clients.azure_client import upload_influencer_image
 from app.repository.influencer_repository import InfluencerRepository
 from app.requests.influencer_metrics_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
@@ -14,15 +15,20 @@ class InfluencerService:
     def __init__(self, session):
         self.influencer_repository = InfluencerRepository(session)
 
-    def create_influencer(self, request: InfluencerRequest) -> GenericResponse:
+    def create_influencer(self, request: InfluencerRequest, image_file) -> GenericResponse:
         timestamp_id = id_utils.get_influencer_id()
         try:
             new_influencer = self.influencer_repository.create_influencer(timestamp_id, request)
-
-            if new_influencer:
-                return GenericResponse(success=True, button_text=None, message=None)
-            else:
-                return GenericResponse(success=False, button_text=None, message="Unable to create new influencer")
+            if image_file:
+                image_url = upload_influencer_image(new_influencer.id, image_file)
+                influencer_found = self.influencer_repository.update_influencer_profile_picture(
+                    influencer_id=new_influencer.id,
+                    profile_picture_path=image_url)
+                if influencer_found:
+                    return GenericResponse(success=True, button_text=None, message=None)
+                else:
+                    return GenericResponse(success=False, button_text=None,
+                                           message="Unable to save image for the new influencer")
         except Exception as e:
             _log.error(
                 f"Error occurred while creating new Influencer, influencer_id: {timestamp_id}. Error: {str(e)}")

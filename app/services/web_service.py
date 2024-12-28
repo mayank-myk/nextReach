@@ -18,9 +18,9 @@ from app.enums.reach_price import ReachPrice
 from app.enums.sort_applied import SortApplied
 from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
-from app.repository.client_repository import ClientRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository
+from app.repository.user_repository import UserRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.requests.influencer_insights import InfluencerInsights
 from app.requests.waitlist_request import WaitListRequest
@@ -44,34 +44,34 @@ class WebService:
         self.influencer_repository = InfluencerRepository(session)
         self.wait_list_user_repository = WaitListRepository(session)
         self.profile_visit_repository = ProfileVisitRepository(session)
-        self.client_repository = ClientRepository(session)
+        self.user_repository = UserRepository(session)
         self.campaign_repository = CampaignRepository(session)
 
     def get_web_metadata(self) -> GenericResponse:
         pass
 
-    def track_profile_visit(self, client_id: str, influencer_id: str) -> bool:
+    def track_profile_visit(self, user_id: str, influencer_id: str) -> bool:
         """
-        Track a profile visit. If the client has reached the maximum number of visits allowed,
+        Track a profile visit. If the user has reached the maximum number of visits allowed,
         the visit is not logged, and an error is raised.
         """
-        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(client_id,
+        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(user_id,
                                                                                                         influencer_id)
         if influencery_already_visited > 0:
             return True
 
-        client = self.client_repository.get_client_by_id(client_id)
-        balance_profile_visit_count = client.balance_profile_visits
+        user = self.user_repository.get_user_by_id(user_id)
+        balance_profile_visit_count = user.balance_profile_visits
 
         if balance_profile_visit_count > 0:
             # Log the profile visit in the database
-            self.profile_visit_repository.log_profile_visit(client_id, influencer_id)
-            self.client_repository.update_profile_visit_count(client_id)
-            _log.info(f"Profile visit successfully logged for client {client_id} to influencer {influencer_id}.")
+            self.profile_visit_repository.log_profile_visit(user_id, influencer_id)
+            self.user_repository.update_profile_visit_count(user_id)
+            _log.info(f"Profile visit successfully logged for user {user_id} to influencer {influencer_id}.")
             return True
         else:
             _log.info(
-                f"Client {client_id} has no balance left to visit influencer {influencer_id}.")
+                f"user {user_id} has no balance left to visit influencer {influencer_id}.")
             return False
 
     def get_influencer_listing(self, user_id: str,
@@ -130,8 +130,8 @@ class WebService:
             )
             influencer_basic_detail_list.append(influencer_basic_detail)
 
-        client = self.client_repository.get_client_by_id(user_id)
-        balance_profile_visit_count = client.balance_profile_visits
+        user = self.user_repository.get_user_by_id(user_id)
+        balance_profile_visit_count = user.balance_profile_visits
 
         return InfluencerListing(
             user_id=user_id,
@@ -161,7 +161,7 @@ class WebService:
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
         try:
 
-            profile_visit_success = self.track_profile_visit(client_id=request.user_id,
+            profile_visit_success = self.track_profile_visit(user_id=request.user_id,
                                                              influencer_id=request.influencer_id)
 
             if not profile_visit_success:
@@ -229,7 +229,7 @@ class WebService:
 
             collaboration_request_raised = False
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
-                client_id=request.user_id, influencer_id=request.influencer_id)
+                user_id=request.user_id, influencer_id=request.influencer_id)
             for request in all_collaboration_request_raised:
                 if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT,
                                      CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING]:

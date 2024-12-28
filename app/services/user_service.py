@@ -1,9 +1,10 @@
 from datetime import datetime
 from typing import List
 
+from app.clients.interakt_client import send_otp_via_whatsapp
 from app.repository.campaign_repository import CampaignRepository
-from app.repository.client_repository import ClientRepository
 from app.repository.user_login_repository import UserLoginRepository
+from app.repository.user_repository import UserRepository
 from app.requests.profile_update import ProfileUpdate
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
@@ -18,12 +19,12 @@ _log = configure_logger()
 class UserService:
     def __init__(self, session):
         self.user_login_repository = UserLoginRepository(session)
-        self.client_repository = ClientRepository(session)
+        self.user_repository = UserRepository(session)
         self.campaign_repository = CampaignRepository(session)
 
     def get_user_profile(self, user_id: str) -> UserProfile | GenericResponse:
         try:
-            user_profile = self.client_repository.get_client_by_id(client_id=user_id)
+            user_profile = self.user_repository.get_user_by_id(user_id=user_id)
             if user_profile:
                 return UserProfile(
                     id=user_profile.id,
@@ -49,7 +50,7 @@ class UserService:
 
     def update_user_profile(self, user_id: str, profile: ProfileUpdate) -> GenericResponse:
         try:
-            user_profile = self.client_repository.update_client_from_user(client_id=user_id, request=profile)
+            user_profile = self.user_repository.update_user_from_user(user_id=user_id, request=profile)
             if user_profile:
                 return GenericResponse(success=True, button_text=None,
                                        message="User profile updated successfully")
@@ -71,6 +72,10 @@ class UserService:
                                        message="OTP has already been send to this number, and it is valid for 1hour")
 
         otp = id_utils.generate_otp()
+        otp_sent_successfully = send_otp_via_whatsapp(phone_number=phone_number, otp=otp)
+        if not otp_sent_successfully:
+            return GenericResponse(success=False, button_text=None, message="Unable to send OTP")
+
         login_record = self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
 
         if login_record:
@@ -81,13 +86,14 @@ class UserService:
     def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
         login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
-        client_record = self.client_repository.get_client_by_phone_number(phone_number=phone_number)
+        user_record = self.user_repository.get_or_create_user_by_phone_number(phone_number=phone_number)
         if login_record:
             if login_record.otp == otp:
-                return LoginResponse(user_id=client_record.id, success=True,
-                                     message="OTP has been verified successfully")
+                return LoginResponse(user_id=user_record.id, success=True,
+                                     message="OTP has been verified successfully", button_text="OKAY")
             elif (datetime.now() - login_record.created_at).total_seconds() > 3600:
-                return LoginResponse(success=False, message="OTP has expired, use the latest one or request resend OTP")
+                return LoginResponse(success=False, message="OTP has expired, use the latest one or request resend OTP",
+                                     button_text="OKAY")
             else:
                 return LoginResponse(success=False,
                                      message="Latest OTP which was sent to your registered mobile number does not matches with entered one")
@@ -110,7 +116,7 @@ class UserService:
 
         try:
             timestamp_id = id_utils.get_campaign_id()
-            db_collab = self.campaign_repository.create_collab_campaign(campaign_id=timestamp_id, client_id=user_id,
+            db_collab = self.campaign_repository.create_collab_campaign(campaign_id=timestamp_id, user_id=user_id,
                                                                         influencer_id=influencer_id)
             return GenericResponse(success=True, button_text=None,
                                    message="Collab created successfully, Our team will get back to you soon")

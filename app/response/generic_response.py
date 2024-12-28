@@ -5,5 +5,5 @@ from pydantic import BaseModel
 
 class GenericResponse(BaseModel):
     success: bool
-    button_text: Optional[str] = None
+    button_text: Optional[str] = "OKAY"
     message: Optional[str] = None

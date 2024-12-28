@@ -1,4 +1,5 @@
 import time
+from contextlib import asynccontextmanager
 
 import uvicorn
 from dotenv import load_dotenv
@@ -9,16 +10,26 @@ from starlette.exceptions import HTTPException as StarletteException
 from uvicorn.workers import UvicornWorker
 
 from app.exceptions import GenericException
+from app.exceptions.error_response import ErrorResponse
 from app.exceptions.validation_exceptions import MissingRequiredField
-from app.models.error import ErrorResponse
 from app.routers import admin_resource, campaign_resource, website_resource, user_resource, influencer_resource
 from app.utils.logger import configure_logger
-from app.utils.postgresdb import prod_others_db_writer
 
 load_dotenv()
 
 log = configure_logger()
-server = FastAPI(title="Scalable FastAPI Project")
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    log.info("Starting up the application...")
+    try:
+        yield
+    finally:
+        log.info("Shutting down the application...")
+
+
+server = FastAPI(title="Scalable FastAPI Project", lifespan=lifespan)
 
 server.include_router(admin_resource.router)
 server.include_router(campaign_resource.router)
@@ -29,17 +40,6 @@ server.include_router(influencer_resource.router)
 
 class AsyncioUvicornWorker(UvicornWorker):
     CONFIG_KWARGS = {"loop": "asyncio", "http": "auto"}
-
-
-@server.on_event("startup")
-async def startup_event():
-    pass
-
-
-@server.on_event("shutdown")
-async def app_shutdown():
-    # prod_others_db_reader.close()
-    prod_others_db_writer.close()
 
 
 @server.middleware("http")
@@ -101,4 +101,5 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 if __name__ == "__main__":
+    load_dotenv(dotenv_path='/Users/mayank.agrawal/PycharmProjects/nextReach/.env')
     uvicorn.run(server, host="0.0.0.0", port=8000)

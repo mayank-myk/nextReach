@@ -33,7 +33,7 @@ class ExpenseRepository:
             self.db.refresh(new_revenue)
             return new_revenue
         except Exception as ex:
-            _log.error("Unable to create expense for account_id: {}".format(request.account_id))
+            _log.error(f"Unable to create expense for account_id: {request.account_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, request.account_id)
 
     def update_expense(self, expense_id: str, request: ExpenseRequest) -> Optional[Expense]:
@@ -55,7 +55,7 @@ class ExpenseRepository:
             self.db.refresh(existing_expense)
             return existing_expense
         except Exception as ex:
-            _log.error("Unable to update expense for expense_id {}".format(expense_id))
+            _log.error(f"Unable to update expense for expense_id {expense_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, expense_id)
 
     def get_all_expense(self, limit: int, offset: int) -> Optional[List[Expense]]:
@@ -75,5 +75,5 @@ class ExpenseRepository:
             return existing_expense
 
         except Exception as ex:
-            _log.error("Unable to update expense for expense_id {}".format(expense_id))
+            _log.error(f"Unable to get expense for expense_id {expense_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, expense_id)

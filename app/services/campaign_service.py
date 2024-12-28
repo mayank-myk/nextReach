@@ -49,7 +49,7 @@ class CampaignService:
             return campaign_basic_details
 
         except Exception as e:
-            _log.error(f"Error occurred while fetching campaigns for client_id: {user_id}. Error: {str(e)}")
+            _log.error(f"Error occurred while fetching campaigns for user_id: {user_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text=None,
                                    message="Something went wrong while fetching your campaigns, please report the issue")
 
@@ -144,7 +144,7 @@ class CampaignService:
                 if existing_campaign.status != Status.COMPLETED:
                     return GenericResponse(success=False, button_text=None,
                                            message="You can only rate once campaign is completed")
-                elif existing_campaign.client.id != request.user_id:
+                elif existing_campaign.user.id != request.user_id:
                     return GenericResponse(success=False, button_text=None,
                                            message="You can only rate the campaigns started by you")
                 else:

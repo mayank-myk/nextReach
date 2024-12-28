@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class RateCampaign(BaseModel):
-    user_id: str = Field(..., min_length=13, max_length=13)
-    campaign_id: str = Field(..., min_length=13, max_length=13)
+    user_id: str = Field(...)
+    campaign_id: str = Field(...)
     rating: int = Field(..., ge=1, le=5)
     comment: Optional[str] = Field(None, max_length=1000)

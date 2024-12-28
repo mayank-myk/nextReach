@@ -34,7 +34,7 @@ class WaitListRepository:
             self.db.refresh(db_wait_list)
             return db_wait_list
         except Exception as ex:
-            _log.error("Unable to create wait_list record for phone_number {}".format(request.phone_number))
+            _log.error(f"Unable to create wait_list record for phone_number {request.phone_number}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, request.phone_number)
 
     def update_wait_list_status(self, wait_list_id: str, status: Status) -> Optional[WaitList]:
@@ -50,7 +50,7 @@ class WaitListRepository:
             self.db.refresh(db_wait_list)
             return db_wait_list
         except Exception as ex:
-            _log.error("Unable to update wait_list record for wait_list_id {}".format(wait_list_id))
+            _log.error(f"Unable to update wait_list record for wait_list_id {wait_list_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, wait_list_id)
 
     def get_wait_list(self, limit: int, offset: int) -> Optional[List[WaitList]]:
@@ -58,5 +58,5 @@ class WaitListRepository:
             return self.db.query(WaitList).offset(offset).limit(limit).all()
 
         except Exception as ex:
-            _log.error("Unable to get wait_list record for page_number {}".format(offset))
+            _log.error(f"Unable to get wait_list record for page_number {offset}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, str(offset))

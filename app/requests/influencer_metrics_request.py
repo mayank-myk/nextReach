@@ -4,7 +4,7 @@ from pydantic import BaseModel, Field
 
 
 class InfluencerMetricRequest(BaseModel):
-    influencer_id: str = Field(..., min_length=13, max_length=13)
+    influencer_id: str = Field(...)
     created_by: str = Field(..., min_length=5)
     insta_followers: Optional[int] = Field(None, ge=0)
     insta_city_1: Optional[int] = Field(None, ge=0)

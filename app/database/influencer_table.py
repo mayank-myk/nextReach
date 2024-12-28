@@ -16,7 +16,7 @@ class Influencer(Base):
     __tablename__ = "influencer"
 
     # Primary Key
-    id = Column(String(13), primary_key=True, unique=True, nullable=False)
+    id = Column(Integer, primary_key=True, autoincrement=True)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     last_updated_at = Column(DateTime, default=datetime.datetime.utcnow, onupdate=datetime.datetime.utcnow,
