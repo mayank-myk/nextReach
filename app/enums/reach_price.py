@@ -2,9 +2,9 @@ from enum import Enum
 
 
 class ReachPrice(Enum):
-    LE_20 = 1
-    BTN_20_29 = 2
-    BTN_30_39 = 3
-    BTN_40_49 = 4
-    BTN_50_59 = 5
-    GE_60 = 6
+    LE_20 = [0, 20]
+    BTN_20_29 = [20, 30]
+    BTN_30_39 = [30, 40]
+    BTN_40_49 = [40, 49]
+    BTN_50_59 = [50, 60]
+    GE_60 = [60, 1000]

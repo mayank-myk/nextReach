@@ -2,31 +2,38 @@ from typing import Optional, List
 
 from app.database.waitlist_table import WaitList
 from app.enums.average_view import AverageView
+from app.enums.campaign_stage import CampaignStage
 from app.enums.city import City
 from app.enums.collab_type import CollabType
+from app.enums.content_price import ContentPrice
 from app.enums.engagement_rate import EngagementRate
 from app.enums.follower_count import FollowerCount
 from app.enums.gender import Gender
 from app.enums.influencer_age import InfluencerAge
+from app.enums.language import Language
 from app.enums.niche import Niche
 from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
+from app.enums.sort_applied import SortApplied
 from app.enums.status import Status
+from app.repository.campaign_repository import CampaignRepository
 from app.repository.client_repository import ClientRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.requests.influencer_insights import InfluencerInsights
 from app.requests.waitlist_request import WaitListRequest
-from app.response.facebook_detail import FacebookDetail
 from app.response.generic_response import GenericResponse
+from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.influencer_collab_charge import InfluencerCollabCharge
 from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing
 from app.response.influencer_metric_detail import InfluencerMetricDetail
 from app.response.instagram_detail import InstagramDetail
+from app.response.search_filter import SearchFilter
 from app.response.youtube_detail import YouTubeDetail
+from app.utils.converters import int_to_str_k
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -38,6 +45,7 @@ class WebService:
         self.wait_list_user_repository = WaitListRepository(session)
         self.profile_visit_repository = ProfileVisitRepository(session)
         self.client_repository = ClientRepository(session)
+        self.campaign_repository = CampaignRepository(session)
 
     def get_web_metadata(self) -> GenericResponse:
         pass
@@ -62,24 +70,27 @@ class WebService:
             _log.info(f"Profile visit successfully logged for client {client_id} to influencer {influencer_id}.")
             return True
         else:
-            _log.warning(
+            _log.info(
                 f"Client {client_id} has no balance left to visit influencer {influencer_id}.")
             return False
 
     def get_influencer_listing(self, user_id: str,
                                page_number: int,
                                page_size: int,
+                               sort_applied: Optional[SortApplied],
                                niche: Optional[List[Niche]],
                                city: Optional[List[City]],
                                reach_price: Optional[List[ReachPrice]],
-                               followers: Optional[List[FollowerCount]],
+                               follower_count: Optional[List[FollowerCount]],
                                avg_views: Optional[List[AverageView]],
                                engagement: Optional[EngagementRate],
                                platform: Optional[Platform],
+                               content_price: Optional[ContentPrice],
                                collab_type: Optional[CollabType],
                                gender: Optional[List[Gender]],
                                age: Optional[List[InfluencerAge]],
                                rating: Optional[Rating],
+                               languages: Optional[List[Language]]
                                ) -> InfluencerListing:
         """
         Retrieve filtered influencer listings with latest metrics.
@@ -90,64 +101,145 @@ class WebService:
             niche=niche,
             city=city,
             reach_price=reach_price,
-            followers=followers,
+            follower_count=follower_count,
             avg_views=avg_views,
             engagement=engagement,
             platform=platform,
+            content_price=content_price,
             collab_type=collab_type,
             gender=gender,
-            age=age,
-            rating=rating
+            influencer_age=age,
+            rating=rating,
+            languages=languages
         )
 
-        # Format response
-        results = []
+        influencer_basic_detail_list = []
         for influencer in influencers:
             latest_metric = max(influencer.influencer_metric, key=lambda m: m.created_at, default=None)
-            results.append({
-                "id": influencer.id,
-                "name": influencer.name,
-                "primary_platform": influencer.primary_platform,
-                "gender": influencer.gender,
-                "age": influencer.age,
-                "city": influencer.city,
-                "niche": influencer.niche,
-                "reach_price": influencer.views_charge,
-                "followers": latest_metric.insta_followers if latest_metric else 0,
-                "avg_views": latest_metric.insta_avg_views if latest_metric else 0,
-                "engagement_rate": latest_metric.insta_engagement_rate if latest_metric else 0,
-                "profile_picture": influencer.profile_picture,
-            })
+            influencer_basic_detail = InfluencerBasicDetail(
+                id=influencer.id,
+                name=influencer.name,
+                profile_picture=influencer.profile_picture,
+                niche=influencer.niche,
+                city=influencer.city,
+                profile_visited=False,
+                views_charge=influencer.views_charge,
+                content_charge=influencer.content_charge,
+                instagram_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
+                youtube_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
+            )
+            influencer_basic_detail_list.append(influencer_basic_detail)
 
-        return {
-            "user_id": user_id,
-            "page_number": page_number,
-            "page_size": page_size,
-            "total_results": len(results),
-            "influencers": results
-        }
+        client = self.client_repository.get_client_by_id(user_id)
+        balance_profile_visit_count = client.balance_profile_visits
+
+        return InfluencerListing(
+            user_id=user_id,
+            coin_balance=balance_profile_visit_count,
+            influencer_list=influencer_basic_detail_list,
+            filters_applied=SearchFilter(
+                niche=niche,
+                city=city,
+                reach_price=reach_price,
+                follower_count=follower_count,
+                avg_views=avg_views,
+                engagement=engagement,
+                platform=platform,
+                content_price=content_price,
+                gender=gender,
+                collab_type=collab_type,
+                age=age,
+                rating=rating,
+                languages=languages
+            ),
+            sorting_applied=sort_applied,
+            page_number=page_number,
+            page_size=page_size,
+            total_match_number=len(influencer_basic_detail_list)
+        )
 
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
         try:
+
+            profile_visit_success = self.track_profile_visit(client_id=request.user_id,
+                                                             influencer_id=request.influencer_id)
+
+            if not profile_visit_success:
+                return GenericResponse(success=False, button_text="OKAY",
+                                       message="No coin balance left")
+
             influencer = self.influencer_repository.get_influencer_by_id(influencer_id=request.influencer_id)
+            influencer_metric = self.influencer_repository.get_latest_influencer_metric(
+                influencer_id=request.influencer_id)
 
             collab_charge = InfluencerCollabCharge(
-
                 min=influencer.content_charge,
-                average=influencer.views_charge * 100,
-                max=influencer.content_charge * 1000,
+                average=(influencer_metric.insta_avg_views // 1000) * influencer.views_charge,
+                max=(influencer_metric.insta_max_views // 1000) * influencer.views_charge,
             )
-            instagram_detail = InstagramDetail()
-            youtube_detail = YouTubeDetail()
-            facebook_detail = FacebookDetail()
+            instagram_detail = InstagramDetail(
+                username=influencer_metric.insta_avg_views,
+                followers=influencer_metric.insta_followers,
+                city_1=influencer_metric.insta_city_1,
+                city_pc_1=influencer_metric.insta_city_pc_1,
+                city_2=influencer_metric.insta_city_2,
+                city_pc_2=influencer_metric.insta_city_pc_2,
+                city_3=influencer_metric.insta_city_3,
+                city_pc_3=influencer_metric.insta_city_pc_3,
+                age_13_to_17=influencer_metric.insta_age_13_to_17,
+                age_18_to_24=influencer_metric.insta_age_18_to_24,
+                age_25_to_34=influencer_metric.insta_age_25_to_34,
+                age_35_to_44=influencer_metric.insta_age_35_to_44,
+                age_45_to_54=influencer_metric.insta_age_45_to_54,
+                age_55=influencer_metric.insta_age_55,
+                men_follower_pc=influencer_metric.insta_men_follower_pc,
+                women_follower_pc=influencer_metric.insta_women_follower_pc,
+                avg_views=influencer_metric.insta_avg_views,
+                max_views=influencer_metric.insta_max_views,
+                min_views=influencer_metric.insta_min_views,
+                spread=influencer_metric.insta_spread,
+                avg_likes=influencer_metric.insta_avg_likes,
+                avg_comments=influencer_metric.insta_avg_comments,
+                avg_shares=influencer_metric.insta_avg_shares,
+                engagement_rate=influencer_metric.insta_engagement_rate
+            )
+            youtube_detail = YouTubeDetail(
+                username=influencer_metric.yt_avg_views,
+                followers=influencer_metric.yt_followers,
+                city_1=influencer_metric.yt_city_1,
+                city_pc_1=influencer_metric.yt_city_pc_1,
+                city_2=influencer_metric.yt_city_2,
+                city_pc_2=influencer_metric.yt_city_pc_2,
+                city_3=influencer_metric.yt_city_3,
+                city_pc_3=influencer_metric.yt_city_pc_3,
+                avg_views=influencer_metric.yt_avg_views,
+                max_views=influencer_metric.yt_max_views,
+                min_views=influencer_metric.yt_min_views,
+                spread=influencer_metric.yt_spread,
+                avg_likes=influencer_metric.yt_avg_likes,
+                avg_comments=influencer_metric.yt_avg_comments,
+                avg_shares=influencer_metric.yt_avg_shares,
+                engagement_rate=influencer_metric.yt_engagement_rate
+            )
+            facebook_detail = None
 
-            platform_details = InfluencerMetricDetail(instagram_detail=instagram_detail, youtube_detail=youtube_detail,
+            platform_details = InfluencerMetricDetail(instagram_detail=instagram_detail,
+                                                      youtube_detail=youtube_detail,
                                                       facebook_detail=facebook_detail)
+
+            collaboration_request_raised = False
+            all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
+                client_id=request.user_id, influencer_id=request.influencer_id)
+            for request in all_collaboration_request_raised:
+                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT,
+                                     CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING]:
+                    collaboration_request_raised = True
+                    continue
 
             return InfluencerDetail(
                 id=influencer.id,
                 last_updated_at=influencer.last_updated_at,
-                collaboration_request_already_raised=False,
+                collaboration_request_raised=collaboration_request_raised,
                 primary_platform=influencer.primary_platform,
                 name=influencer.name,
                 gender=influencer.gender,
@@ -166,7 +258,7 @@ class WebService:
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching influencer details for influencer_id: {request.influencer_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False, button_text="OKAY",
                                    message="Something went wrong while fetching influencer details")
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:

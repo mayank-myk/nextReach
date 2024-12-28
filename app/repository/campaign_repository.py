@@ -228,3 +228,7 @@ class CampaignRepository:
 
     def get_all_campaign_for_a_user(self, client_id: str) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.client_id == client_id).all()
+
+    def get_all_running_campaign_with_an_influencer(self, client_id: str, influencer_id: str) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.client_id == client_id).filter(
+            Campaign.influencer_id == influencer_id).all()

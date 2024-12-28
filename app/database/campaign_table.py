@@ -4,9 +4,9 @@ from sqlalchemy import Column, String, DateTime, Integer, Enum, ARRAY, CheckCons
 from sqlalchemy.orm import relationship
 
 from app.database.session import Base
-from app.models.campaign_stage import CampaignStage
-from app.models.content_type import ContentType
-from app.models.status import Status
+from app.enums.campaign_stage import CampaignStage
+from app.enums.content_type import ContentType
+from app.enums.status import Status
 
 
 class Campaign(Base):

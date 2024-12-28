@@ -2,23 +2,31 @@ from typing import List, Optional
 
 from pydantic import BaseModel
 
+from app.enums.average_view import AverageView
 from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.engagement_rate import EngagementRate
+from app.enums.follower_count import FollowerCount
 from app.enums.gender import Gender
+from app.enums.influencer_age import InfluencerAge
+from app.enums.language import Language
 from app.enums.niche import Niche
 from app.enums.platform import Platform
+from app.enums.rating import Rating
+from app.enums.reach_price import ReachPrice
 
 
 class SearchFilter(BaseModel):
-    platform: Optional[Platform] = None  # Optional field (Platform type)
-    content_price: Optional[List[int]] = None  # Optional list of integers
-    reach_price: Optional[List[int]] = None  # Optional list of integers
-    niche: Optional[List[Niche]] = None  # Optional list of Niche items
-    gender: Optional[List[Gender]] = None  # Optional list of Gender items
-    age: Optional[List[int]] = None  # Optional list of integers
-    city: Optional[List[City]] = None  # Optional list of City items
-    followers: Optional[List[int]] = None  # Optional list of integers
-    avg_views: Optional[List[int]] = None  # Optional list of integers
-    rating: Optional[int] = None  # Optional integer field
-    engagement: Optional[int] = None  # Optional integer field
-    consistency: Optional[int] = None  # Optional integer field
-    score: Optional[int] = None  # Optional integer field
+    niche: Optional[List[Niche]] = None
+    city: Optional[List[City]] = None
+    reach_price: Optional[List[ReachPrice]] = None
+    follower_count: Optional[List[FollowerCount]] = None
+    avg_views: Optional[List[AverageView]] = None
+    engagement: Optional[EngagementRate] = None
+    platform: Optional[Platform] = None
+    content_price: Optional[List[int]] = None
+    gender: Optional[List[Gender]] = None
+    collab_type: Optional[CollabType] = None
+    age: Optional[List[InfluencerAge]] = None
+    rating: Optional[Rating] = None
+    languages: Optional[List[Language]] = None

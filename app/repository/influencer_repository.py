@@ -1,9 +1,23 @@
-from typing import Optional
+from typing import Optional, List
 
+from sqlalchemy import or_
 from sqlalchemy.orm import Session
 
 from app.database.influencer_metric_table import InfluencerMetric
 from app.database.influencer_table import Influencer
+from app.enums.average_view import AverageView
+from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.content_price import ContentPrice
+from app.enums.engagement_rate import EngagementRate
+from app.enums.follower_count import FollowerCount
+from app.enums.gender import Gender
+from app.enums.influencer_age import InfluencerAge
+from app.enums.language import Language
+from app.enums.niche import Niche
+from app.enums.platform import Platform
+from app.enums.rating import Rating
+from app.enums.reach_price import ReachPrice
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.requests.influencer_metrics_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
@@ -404,16 +418,16 @@ class InfluencerRepository:
             _log.error("Unable to update influencer_metric record with id {}".format(influencer_metric_id))
             raise FetchOneUserMetadataException(ex, influencer_metric_id)
 
-    def get_latest_influencer_metric(self):
+    def get_latest_influencer_metric(self, influencer_id: str) -> Optional[InfluencerMetric]:
         """
         Fetch the latest metrics for each influencer.
         """
         latest_metric = (
             self.db.query(InfluencerMetric)
-                .filter(InfluencerMetric.influencer_id == influencer_id)
-                .order_by(InfluencerMetric.created_at.desc())
-                .limit(1)
-                .one_or_none()
+            .filter(InfluencerMetric.influencer_id == influencer_id)
+            .order_by(InfluencerMetric.created_at.desc())
+            .limit(1)
+            .one_or_none()
         )
         return latest_metric
 
@@ -424,40 +438,31 @@ class InfluencerRepository:
             niche: Optional[List[Niche]],
             city: Optional[List[City]],
             reach_price: Optional[List[ReachPrice]],
-            followers: Optional[List[FollowerCount]],
+            follower_count: Optional[List[FollowerCount]],
             avg_views: Optional[List[AverageView]],
             engagement: Optional[EngagementRate],
             platform: Optional[Platform],
+            content_price: Optional[ContentPrice],
             collab_type: Optional[CollabType],
             gender: Optional[List[Gender]],
-            age: Optional[List[InfluencerAge]],
-            rating: Optional[Rating]
+            influencer_age: Optional[List[InfluencerAge]],
+            rating: Optional[Rating],
+            languages: Optional[List[Language]]
     ):
         """
         Filter influencers based on the criteria.
         """
-        query = (
-            self.db.query(Influencer).join(InfluencerMetric, Influencer.id == InfluencerMetric.influencer_id)
-        )
-
-        latest_metrics_subquery = (
-            self.db.query(
-                InfluencerMetric.influencer_id,
-                func.max(InfluencerMetric.created_at).label('latest_created_at')
-            )
-                .group_by(InfluencerMetric.influencer_id)
-                .subquery()
-        )
-
         # Main Query
         query = (
             self.db.query(Influencer)
-                .join(InfluencerMetric, Influencer.id == InfluencerMetric.influencer_id)
-                .join(latest_metrics_subquery, and_(
-                InfluencerMetric.influencer_id == latest_metrics_subquery.c.influencer_id,
-                InfluencerMetric.created_at == latest_metrics_subquery.c.latest_created_at
+            .join(InfluencerMetric, on=(Influencer.id == InfluencerMetric.influencer_id))
+            .filter(InfluencerMetric.id.in_(
+                self.db.query(InfluencerMetric.id)
+                .filter(on=(InfluencerMetric.influencer_id == Influencer.id))
+                .order_by(InfluencerMetric.created_at.desc())
+                .limit(1)
             )
-                      )
+            )
         )
 
         # Apply filters
@@ -466,23 +471,42 @@ class InfluencerRepository:
         if city:
             query = query.filter(Influencer.city.in_(city))
         if reach_price:
-            query = query.filter(Influencer.views_charge.between(reach_price[0], reach_price[-1]))
-        if followers:
-            query = query.filter(InfluencerMetric.insta_followers.between(followers[0], followers[-1]))
+            filters = [
+                Influencer.views_charge.between(price.value[0], price.value[1])
+                for price in reach_price
+            ]
+            query = query.filter(or_(*filters))
+        if follower_count:
+            filters = [
+                InfluencerMetric.insta_followers.between(fc.value[0], fc.value[1])
+                for fc in follower_count
+            ]
+            query = query.filter(or_(*filters))
         if avg_views:
-            query = query.filter(InfluencerMetric.insta_avg_views.between(avg_views[0], avg_views[-1]))
+            filters = [
+                InfluencerMetric.insta_avg_views.between(av.value[0], av.value[1])
+                for av in avg_views
+            ]
+            query = query.filter(or_(*filters))
         if engagement:
-            query = query.filter(InfluencerMetric.insta_engagement_rate.between(engagement[0], engagement[-1]))
+            query = query.filter(
+                InfluencerMetric.insta_engagement_rate.between(engagement.value[0], engagement.value[1]))
         if platform:
             query = query.filter(Influencer.primary_platform == platform)
+        if content_price:
+            query = query.filter(Influencer.content_charge.between(content_price.value[0], content_price.value[1]))
         if collab_type:
             query = query.filter(Influencer.collab_type == collab_type)
         if gender:
             query = query.filter(Influencer.gender.in_(gender))
-        if age:
-            query = query.filter(Influencer.age.between(age[0], age[-1]))
-        if rating:
-            query = query.filter(InfluencerMetric.insta_engagement_rate >= rating)
+        if influencer_age:
+            filters = [
+                Influencer.age.between(ia.value[0], ia.value[1])
+                for ia in influencer_age
+            ]
+            query = query.filter(or_(*filters))
+        if languages:
+            query = query.filter(Influencer.languages.any(Influencer.languages.in_(languages)))
 
         # Pagination
         influencers = query.limit(page_size).offset((page_number - 1) * page_size).all()

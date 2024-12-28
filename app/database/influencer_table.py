@@ -4,12 +4,12 @@ from sqlalchemy import Column, String, DateTime, Integer, Enum, ARRAY, CheckCons
 from sqlalchemy.orm import relationship
 
 from app.database.session import Base
-from app.models.city import City
-from app.models.collab_type import CollabType
-from app.models.gender import Gender
-from app.models.language import Language
-from app.models.niche import Niche
-from app.models.platform import Platform
+from app.enums.city import City
+from app.enums.collab_type import CollabType
+from app.enums.gender import Gender
+from app.enums.language import Language
+from app.enums.niche import Niche
+from app.enums.platform import Platform
 
 
 class Influencer(Base):
