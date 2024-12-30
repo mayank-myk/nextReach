@@ -7,7 +7,7 @@ from app.enums.niche import Niche
 
 
 class InfluencerBasicDetail(BaseModel):
-    id: str
+    id: int
     name: str
     profile_picture: str
     niche: Niche

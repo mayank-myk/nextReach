@@ -11,9 +11,9 @@ from app.enums.platform import Platform
 
 
 class InfluencerRequest(BaseModel):
-    created_by: str = Field(..., min_length=5)
+    created_by: str = Field(..., min_length=3)
     primary_platform: Platform
-    name: str = Field(..., min_length=5)
+    name: str = Field(..., min_length=3)
     gender: Gender
     phone_number: str = Field(..., min_length=10, max_length=10)
     email: Optional[str] = Field(None, max_length=255)

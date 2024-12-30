@@ -8,8 +8,9 @@ from app.enums.niche import Niche
 
 
 class UserProfile(BaseModel):
-    id: str
+    id: int
     name: str
+    phone_number: str
     profile_picture: Optional[str] = None
     business_name: Optional[str] = None
     email: Optional[str] = None

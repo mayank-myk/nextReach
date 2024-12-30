@@ -1,6 +1,8 @@
-from sqlalchemy import Column, String, DateTime, Integer, ForeignKey
 import datetime
+
+from sqlalchemy import Column, DateTime, Integer, ForeignKey
 from sqlalchemy.orm import relationship
+
 from app.database.session import Base
 
 
@@ -9,7 +11,7 @@ class ProfileVisit(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
-    influencer_id = Column(String(13), ForeignKey('influencer.id'), nullable=False)
-    user_id = Column(String(13), ForeignKey('user.id'), nullable=False)
+    influencer_id = Column(Integer, ForeignKey('influencer.id'), nullable=False, index=True)
+    user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False, index=True)
     influencer = relationship("Influencer", back_populates="profile_visit")
     user = relationship("User", back_populates="profile_visit")

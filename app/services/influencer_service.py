@@ -5,7 +5,6 @@ from app.repository.influencer_repository import InfluencerRepository
 from app.requests.influencer_metrics_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
 from app.response.generic_response import GenericResponse
-from app.utils import id_utils
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -16,9 +15,8 @@ class InfluencerService:
         self.influencer_repository = InfluencerRepository(session)
 
     def create_influencer(self, request: InfluencerRequest, image_file) -> GenericResponse:
-        timestamp_id = id_utils.get_influencer_id()
         try:
-            new_influencer = self.influencer_repository.create_influencer(timestamp_id, request)
+            new_influencer = self.influencer_repository.create_influencer(request)
             if image_file:
                 image_url = upload_influencer_image(new_influencer.id, image_file)
                 influencer_found = self.influencer_repository.update_influencer_profile_picture(
@@ -31,11 +29,11 @@ class InfluencerService:
                                            message="Unable to save image for the new influencer")
         except Exception as e:
             _log.error(
-                f"Error occurred while creating new Influencer, influencer_id: {timestamp_id}. Error: {str(e)}")
+                f"Error occurred while creating new Influencer, influencer_id. Error: {str(e)}")
             return GenericResponse(success=False, button_text=None,
-                                   message=f"Something went wrong while creating new Influencer, influencer_id: {timestamp_id}")
+                                   message="Something went wrong while creating new Influencer")
 
-    def update_influencer(self, influencer_id: str, request: InfluencerRequest) -> GenericResponse:
+    def update_influencer(self, influencer_id: int, request: InfluencerRequest) -> GenericResponse:
         new_influencer = self.influencer_repository.update_influencer(influencer_id=influencer_id,
                                                                       influencer_request=request)
 
@@ -47,9 +45,8 @@ class InfluencerService:
                                    message="No influencer found for given influencer_id")
 
     def create_influencer_metric(self, request: InfluencerMetricRequest) -> GenericResponse:
-        timestamp_id = id_utils.get_influencer_metric_id()
         try:
-            new_influencer_metric = self.influencer_repository.create_influencer_metric(timestamp_id, request)
+            new_influencer_metric = self.influencer_repository.create_influencer_metric(request)
 
             if new_influencer_metric:
                 return GenericResponse(success=True, button_text=None, message=None)
@@ -58,11 +55,11 @@ class InfluencerService:
                                        message="Unable to create new influencer_metric")
         except Exception as e:
             _log.error(
-                f"Error occurred while creating new influencer_metric, influencer_metric_id: {timestamp_id}. Error: {str(e)}")
+                f"Error occurred while creating new influencer_metric. Error: {str(e)}")
             return GenericResponse(success=False, button_text=None,
-                                   message=f"Something went wrong while creating new influencer_metric, influencer_metric_id: {timestamp_id}")
+                                   message=f"Something went wrong while creating new influencer_metric")
 
-    def update_influencer_metric(self, influencer_metric_id: str, request: InfluencerMetricRequest) -> GenericResponse:
+    def update_influencer_metric(self, influencer_metric_id: int, request: InfluencerMetricRequest) -> GenericResponse:
 
         new_influencer_metric = self.influencer_repository.update_influencer_metric(
             influencer_metric_id=influencer_metric_id,

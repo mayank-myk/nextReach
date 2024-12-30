@@ -2,7 +2,7 @@ from enum import Enum
 
 
 class Status(Enum):
-    PROCESSING = "processing"
-    IN_PROGRESS = "in_progress"
-    CANCELLED = "cancelled"
-    COMPLETED = "completed"
+    PROCESSING = "PROCESSING"
+    IN_PROGRESS = "IN_PROGRESS"
+    CANCELLED = "CANCELLED"
+    COMPLETED = "COMPLETED"

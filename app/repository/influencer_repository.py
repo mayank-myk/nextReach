@@ -31,9 +31,8 @@ class InfluencerRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_influencer(self, influencer_id: str, influencer_request: InfluencerRequest) -> Influencer:
+    def create_influencer(self, influencer_request: InfluencerRequest) -> Influencer:
         db_influencer = Influencer(
-            id=influencer_id,
             created_by=influencer_request.created_by,
             last_updated_by=influencer_request.created_by,
             primary_platform=influencer_request.primary_platform,
@@ -65,7 +64,7 @@ class InfluencerRepository:
         self.db.refresh(db_influencer)
         return db_influencer
 
-    def update_influencer(self, influencer_id: str, influencer_request: InfluencerRequest) -> Optional[Influencer]:
+    def update_influencer(self, influencer_id: int, influencer_request: InfluencerRequest) -> Optional[Influencer]:
         try:
             existing_influencer = self.db.query(Influencer).filter(Influencer.id == influencer_id).first()
 
@@ -152,9 +151,9 @@ class InfluencerRepository:
             return existing_influencer
         except Exception as ex:
             _log.error(f"Unable to update influencer record with id {influencer_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, influencer_id)
+            raise FetchOneUserMetadataException(ex, str(influencer_id))
 
-    def update_influencer_profile_picture(self, influencer_id: str, profile_picture_path: str) -> Optional[Influencer]:
+    def update_influencer_profile_picture(self, influencer_id: int, profile_picture_path: str) -> Optional[Influencer]:
         try:
             existing_influencer = self.db.query(Influencer).filter(Influencer.id == influencer_id).first()
 
@@ -168,9 +167,9 @@ class InfluencerRepository:
             return existing_influencer
         except Exception as ex:
             _log.error(f"Unable to update influencer record with id {influencer_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, influencer_id)
+            raise FetchOneUserMetadataException(ex, str(influencer_id))
 
-    def get_influencer_by_id(self, influencer_id: str) -> Optional[Influencer]:
+    def get_influencer_by_id(self, influencer_id: int) -> Optional[Influencer]:
 
         try:
             existing_influencer = self.db.get(Influencer, influencer_id)
@@ -182,13 +181,11 @@ class InfluencerRepository:
 
         except Exception as ex:
             _log.error(f"Unable to fetch influencer record with id {influencer_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, influencer_id)
+            raise FetchOneUserMetadataException(ex, str(influencer_id))
 
-    def create_influencer_metric(self, influencer_metric_id: str,
-                                 influencer_metric_request: InfluencerMetricRequest) -> InfluencerMetric:
+    def create_influencer_metric(self, influencer_metric_request: InfluencerMetricRequest) -> InfluencerMetric:
 
         db_influencer_metric = InfluencerMetric(
-            # id=influencer_metric_id,
             created_by=influencer_metric_request.created_by,
             last_updated_by=influencer_metric_request.created_by,
             insta_followers=influencer_metric_request.insta_followers,
@@ -251,7 +248,7 @@ class InfluencerRepository:
         self.db.refresh(db_influencer_metric)
         return db_influencer_metric
 
-    def update_influencer_metric(self, influencer_metric_id: str,
+    def update_influencer_metric(self, influencer_metric_id: int,
                                  influencer_metric_request: InfluencerMetricRequest) -> Optional[InfluencerMetric]:
         try:
             existing_influencer_metric = self.db.query(InfluencerMetric).filter(
@@ -432,9 +429,9 @@ class InfluencerRepository:
             return existing_influencer_metric
         except Exception as ex:
             _log.error(f"Unable to update influencer_metric record with id {influencer_metric_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, influencer_metric_id)
+            raise FetchOneUserMetadataException(ex, str(influencer_metric_id))
 
-    def get_latest_influencer_metric(self, influencer_id: str) -> Optional[InfluencerMetric]:
+    def get_latest_influencer_metric(self, influencer_id: int) -> Optional[InfluencerMetric]:
         """
         Fetch the latest metrics for each influencer.
         """

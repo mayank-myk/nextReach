@@ -36,7 +36,7 @@ class ExpenseRepository:
             _log.error(f"Unable to create expense for account_id: {request.account_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, request.account_id)
 
-    def update_expense(self, expense_id: str, request: ExpenseRequest) -> Optional[Expense]:
+    def update_expense(self, expense_id: int, request: ExpenseRequest) -> Optional[Expense]:
         try:
             existing_expense = self.db.get(Expense, expense_id)
 
@@ -56,7 +56,7 @@ class ExpenseRepository:
             return existing_expense
         except Exception as ex:
             _log.error(f"Unable to update expense for expense_id {expense_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, expense_id)
+            raise FetchOneUserMetadataException(ex, str(expense_id))
 
     def get_all_expense(self, limit: int, offset: int) -> Optional[List[Expense]]:
         try:
@@ -65,7 +65,7 @@ class ExpenseRepository:
         except Exception as ex:
             raise FetchOneUserMetadataException(ex, str(offset))
 
-    def get_expense_by_id(self, expense_id: str) -> Optional[Expense]:
+    def get_expense_by_id(self, expense_id: int) -> Optional[Expense]:
         try:
             existing_expense = self.db.get(Expense, expense_id)
 
@@ -76,4 +76,4 @@ class ExpenseRepository:
 
         except Exception as ex:
             _log.error(f"Unable to get expense for expense_id {expense_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, expense_id)
+            raise FetchOneUserMetadataException(ex, str(expense_id))

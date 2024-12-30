@@ -27,13 +27,13 @@ db_manager = DatabaseSessionManager()
 
 
 @router.get("/profile/get/{user_id}")
-def get_user_profile(user_id: str, db=Depends(db_manager.get_db)) -> UserProfile | GenericResponse:
+def get_user_profile(user_id: int, db=Depends(db_manager.get_db)) -> UserProfile | GenericResponse:
     user_service = UserService(db)
     return user_service.get_user_profile(user_id=user_id)
 
 
 @router.post("/profile/update/{user_id}")
-def update_user_profile(user_id: str, profile: ProfileUpdate, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_user_profile(user_id: int, profile: ProfileUpdate, db=Depends(db_manager.get_db)) -> GenericResponse:
     user_service = UserService(db)
     return user_service.update_user_profile(user_id=user_id, profile=profile)
 
@@ -51,7 +51,7 @@ def validate_otp(request: UserLogin, db=Depends(db_manager.get_db)) -> LoginResp
 
 
 @router.get("/watchlist/all/{user_id}")
-def get_watchlist(user_id: str, db=Depends(db_manager.get_db)) -> List[InfluencerDetail]:
+def get_watchlist(user_id: int, db=Depends(db_manager.get_db)) -> List[InfluencerDetail]:
     user_service = UserService(db)
     return user_service.get_watchlist(user_id=user_id)
 
@@ -75,13 +75,13 @@ def request_collab(request: CollabRequest, db=Depends(db_manager.get_db)) -> Gen
 
 
 @router.get("/campaign/all/{user_id}")
-def get_user_campaign_all(user_id: str, db=Depends(db_manager.get_db)) -> List[CampaignBasicDetail] | GenericResponse:
+def get_user_campaign_all(user_id: int, db=Depends(db_manager.get_db)) -> List[CampaignBasicDetail] | GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.get_user_campaign_all(user_id=user_id)
 
 
 @router.get("/campaign/detail/{campaign_id}")
-def get_user_campaign_detail(campaign_id: str, db=Depends(db_manager.get_db)) -> CampaignDetail | GenericResponse:
+def get_user_campaign_detail(campaign_id: int, db=Depends(db_manager.get_db)) -> CampaignDetail | GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.get_user_campaign_detail(campaign_id=campaign_id)
 

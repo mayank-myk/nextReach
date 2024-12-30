@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class RevenueType(Enum):
-    CONTENT = 1
-    REACH_1 = 2
-    REACH_2 = 3
-    PROFILE_VISIT = 4
-    LISTING = 5
+    CONTENT = "CONTENT"
+    REACH_1 = "REACH_1"
+    REACH_2 = "REACH_2"
+    PROFILE_VISIT = "PROFILE_VISIT"
+    LISTING = "LISTING"

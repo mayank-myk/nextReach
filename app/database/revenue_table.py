@@ -26,8 +26,8 @@ class Revenue(Base):
     description = Column(String(255), nullable=False)  # Description of the revenue source
     mode_of_payment = Column(String(255), nullable=False)  # Payment method
     account_id = Column(String(255), nullable=False)  # The account used for payment (can be related to another table)
-    campaign_id = Column(String(13), ForeignKey('campaign.id'), nullable=False)  # Foreign key to Campaign
+    campaign_id = Column(Integer, ForeignKey('campaign.id'), nullable=False)
     paid_by = Column(Enum(EntityType), nullable=False)  # Paid by, as an enum from EntityType
 
     # Relationship to Campaign
-    revenue = relationship("Campaign", back_populates="revenue")
+    campaign = relationship("Campaign", back_populates="revenue")

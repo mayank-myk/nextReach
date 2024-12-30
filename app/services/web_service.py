@@ -50,7 +50,7 @@ class WebService:
     def get_web_metadata(self) -> GenericResponse:
         pass
 
-    def track_profile_visit(self, user_id: str, influencer_id: str) -> bool:
+    def track_profile_visit(self, user_id: int, influencer_id: int) -> bool:
         """
         Track a profile visit. If the user has reached the maximum number of visits allowed,
         the visit is not logged, and an error is raised.
@@ -74,7 +74,7 @@ class WebService:
                 f"user {user_id} has no balance left to visit influencer {influencer_id}.")
             return False
 
-    def get_influencer_listing(self, user_id: str,
+    def get_influencer_listing(self, user_id: int,
                                page_number: int,
                                page_size: int,
                                sort_applied: Optional[SortApplied],
@@ -269,22 +269,3 @@ class WebService:
         else:
             return GenericResponse(success=False, button_text=None, message="Unable to create new wait_list")
 
-    def update_lead(self, wait_list_id: str, status: Status) -> GenericResponse:
-        wait_list = self.wait_list_user_repository.update_wait_list_status(wait_list_id=wait_list_id, status=status)
-
-        if wait_list:
-            return GenericResponse(success=True, button_text=None, message=None)
-        else:
-            _log.info("No record found for wait_list with wait_list_id {}".format(wait_list_id))
-            return GenericResponse(success=False, button_text=None,
-                                   message="No wait_list found for given wait_list_id")
-
-    def get_all_leads(self, page_size: int, page_number: int) -> List[WaitList] | GenericResponse:
-        wait_list = self.wait_list_user_repository.get_wait_list(limit=page_size, offset=page_size * page_number)
-
-        if wait_list and len(wait_list) > 0:
-            return wait_list
-        else:
-            _log.info("No record found for wait_list page_size {}, page_number {}".format(page_size, page_number))
-            return GenericResponse(success=False, button_text=None,
-                                   message="No wait_list found for at all")

@@ -43,7 +43,7 @@ def get_web_metadata(db=Depends(db_manager.get_db)) -> GenericResponse:
 
 @router.get('/influencer/discover/{user_id}')
 def get_influencer_listings(
-        user_id: str,
+        user_id: int,
         page_number: int = Query(1, description="Page number to fetch", ge=1),
         page_size: int = Query(40, description="Number of influencers per page", ge=1, le=100),
         sort_applied: Optional[SortApplied] = Query(None, description="Sorting applied"),

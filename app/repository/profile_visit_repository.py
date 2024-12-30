@@ -12,7 +12,7 @@ class ProfileVisitRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def log_profile_visit(self, user_id: str, influencer_id: str) -> ProfileVisit:
+    def log_profile_visit(self, user_id: int, influencer_id: int) -> ProfileVisit:
         """Creates a new profile visit log for a user viewing an influencer's profile."""
         try:
             profile_visit = ProfileVisit(
@@ -30,9 +30,9 @@ class ProfileVisitRepository:
         except Exception as ex:
             _log.error(
                 f"Exception while logging profile visit for user {user_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, user_id)
+            raise FetchOneUserMetadataException(ex, str(user_id))
 
-    def check_if_influencer_already_visited(self, user_id: str, influencer_id: str) -> int:
+    def check_if_influencer_already_visited(self, user_id: int, influencer_id: int) -> int:
         """Counts total visits by a user to a specific influencer."""
         try:
             count = self.db.query(ProfileVisit).filter(
@@ -46,9 +46,9 @@ class ProfileVisitRepository:
         except Exception as ex:
             _log.error(
                 f"Exception while getting total profile visits for user {user_id} to influencer {influencer_id}: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, user_id)
+            raise FetchOneUserMetadataException(ex, str(user_id))
 
-    # def get_total_visits_by_user(self, user_id: str) -> int:
+    # def get_total_visits_by_user(self, user_id: int) -> int:
     #     """Counts total visits by a user to a specific influencer."""
     #     try:
     #         count = self.db.query(ProfileVisit).filter(

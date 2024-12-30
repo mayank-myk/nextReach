@@ -17,9 +17,8 @@ class CampaignRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create_campaign(self, campaign_id: str, campaign_request: CampaignRequest) -> Campaign:
+    def create_campaign(self, campaign_request: CampaignRequest) -> Campaign:
         new_campaign = Campaign(
-            # id=campaign_id,
             created_by=campaign_request.created_by,
             last_updated_by=campaign_request.created_by,
             campaign_managed_by=campaign_request.campaign_managed_by,
@@ -66,10 +65,9 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def create_collab_campaign(self, campaign_id: str, user_id: str, influencer_id: str) -> Campaign:
+    def create_collab_campaign(self, user_id: int, influencer_id: int) -> Campaign:
 
         new_campaign = Campaign(
-            # id=campaign_id,
             created_by=user_id,
             campaign_managed_by='system',
             last_updated_by=user_id,
@@ -83,7 +81,7 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def update_campaign(self, campaign_id: str, campaign_request: CampaignRequest) -> Optional[Campaign]:
+    def update_campaign(self, campaign_id: int, campaign_request: CampaignRequest) -> Optional[Campaign]:
         try:
             existing_campaign = self.db.get(Campaign, campaign_id)
 
@@ -223,12 +221,12 @@ class CampaignRepository:
         self.db.refresh(existing_campaign)
         return existing_campaign
 
-    def get_campaign_by_id(self, campaign_id: str) -> Campaign:
+    def get_campaign_by_id(self, campaign_id: int) -> Campaign:
         return self.db.query(Campaign).filter(Campaign.id == campaign_id).first()
 
-    def get_all_campaign_for_a_user(self, user_id: str) -> List[Campaign]:
+    def get_all_campaign_for_a_user(self, user_id: int) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.user_id == user_id).all()
 
-    def get_all_running_campaign_with_an_influencer(self, user_id: str, influencer_id: str) -> List[Campaign]:
+    def get_all_running_campaign_with_an_influencer(self, user_id: int, influencer_id: int) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.user_id == user_id).filter(
             Campaign.influencer_id == influencer_id).all()

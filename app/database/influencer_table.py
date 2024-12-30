@@ -38,11 +38,11 @@ class Influencer(Base):
 
     # Social profiles
     insta_username = Column(String(255), nullable=True)
-    insta_profile_link = Column(String(255), nullable=True)
+    insta_profile_link = Column(String(1000), nullable=True)
     youtube_username = Column(String(255), nullable=True)
-    youtube_profile_link = Column(String(255), nullable=True)
+    youtube_profile_link = Column(String(1000), nullable=True)
     fb_username = Column(String(255), nullable=True)
-    fb_profile_link = Column(String(255), nullable=True)
+    fb_profile_link = Column(String(1000), nullable=True)
 
     # Niche and business location
     niche = Column(Enum(Niche), nullable=False)
@@ -55,6 +55,13 @@ class Influencer(Base):
     # The relationship to SocialMediaDetail (One-to-Many)
     influencer_metric = relationship(
         "InfluencerMetric",
-        back_populates="influencer",
-        cascade="all, delete-orphan"
+        back_populates="influencer"
+    )
+    campaign = relationship(
+        "Campaign",
+        back_populates="influencer"
+    )
+    profile_visit = relationship(
+        "ProfileVisit",
+        back_populates="influencer"
     )

@@ -10,7 +10,7 @@ from app.enums.niche import Niche
 
 
 class User(Base):
-    __tablename__ = "user"
+    __tablename__ = "user_table"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -21,7 +21,7 @@ class User(Base):
     created_by = Column(String(255), nullable=False)
     last_updated_by = Column(String(255), nullable=False)
 
-    # Client information
+    # User information
     name = Column(String(255), nullable=True)
     phone_number = Column(String(10), nullable=False)  # Phone is unique and fixed length
     business_name = Column(String(255), nullable=True)  # Business name should be present
@@ -53,11 +53,9 @@ class User(Base):
     # The relationship
     profile_visit = relationship(
         "ProfileVisit",
-        back_populates="user",
-        cascade="all, delete-orphan"
+        back_populates="user"
     )
-    collab = relationship(
-        "Collab",
-        back_populates="user",
-        cascade="all, delete-orphan"
+    campaign = relationship(
+        "Campaign",
+        back_populates="user"
     )

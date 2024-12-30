@@ -36,9 +36,9 @@ class RevenueRepository:
             return new_revenue
         except Exception as ex:
             _log.error(f"Unable to create revenue for campaign_id {request.campaign_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, request.campaign_id)
+            raise FetchOneUserMetadataException(ex, str(request.campaign_id))
 
-    def update_revenue(self, revenue_id: str, request: RevenueRequest) -> Optional[Revenue]:
+    def update_revenue(self, revenue_id: int, request: RevenueRequest) -> Optional[Revenue]:
         try:
             existing_revenue = self.db.get(Revenue, revenue_id)
 
@@ -59,9 +59,9 @@ class RevenueRepository:
             return existing_revenue
         except Exception as ex:
             _log.error(f"Unable to update revenue for revenue_id {revenue_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, revenue_id)
+            raise FetchOneUserMetadataException(ex, str(revenue_id))
 
-    def get_revenue_by_id(self, revenue_id: str) -> Optional[Revenue]:
+    def get_revenue_by_id(self, revenue_id: int) -> Optional[Revenue]:
 
         try:
             existing_revenue = self.db.get(Revenue, revenue_id)
@@ -73,7 +73,7 @@ class RevenueRepository:
 
         except Exception as ex:
             _log.error(f"Unable to fetch revenue for revenue_id {revenue_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, revenue_id)
+            raise FetchOneUserMetadataException(ex, str(revenue_id))
 
     def get_all_revenue(self, limit: int, offset: int) -> Optional[List[Revenue]]:
         try:

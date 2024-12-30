@@ -27,7 +27,7 @@ class CampaignService:
         self.campaign_repository = CampaignRepository(session)
         self.influencer_repository = InfluencerRepository(session)
 
-    def get_user_campaign_all(self, user_id: str) -> List[CampaignBasicDetail] | GenericResponse:
+    def get_user_campaign_all(self, user_id: int) -> List[CampaignBasicDetail] | GenericResponse:
         try:
             all_campaigns = self.campaign_repository.get_all_campaign_for_a_user(user_id)
             campaign_basic_details = []
@@ -53,7 +53,7 @@ class CampaignService:
             return GenericResponse(success=False, button_text=None,
                                    message="Something went wrong while fetching your campaigns, please report the issue")
 
-    def get_user_campaign_detail(self, campaign_id: str) -> CampaignDetail | GenericResponse:
+    def get_user_campaign_detail(self, campaign_id: int) -> CampaignDetail | GenericResponse:
         try:
             existing_campaign = self.campaign_repository.get_campaign_by_id(campaign_id)
             influencer = existing_campaign.influencer
@@ -160,9 +160,8 @@ class CampaignService:
                                        request.campaign_id))
 
     def create_campaign(self, request: CampaignRequest) -> GenericResponse:
-        timestamp_id = id_utils.get_campaign_id()
         try:
-            db_campaign = self.campaign_repository.create_campaign(timestamp_id, request)
+            db_campaign = self.campaign_repository.create_campaign(request)
             return GenericResponse(success=True, button_text=None,
                                    message="Campaign created successfully, with campaign_id {}".format(
                                        db_campaign.id))
@@ -172,7 +171,7 @@ class CampaignService:
             return GenericResponse(success=False, button_text=None,
                                    message="Campaign creation failed")
 
-    def update_campaign(self, campaign_id: str, request: CampaignRequest) -> GenericResponse:
+    def update_campaign(self, campaign_id: int, request: CampaignRequest) -> GenericResponse:
         db_campaign = self.campaign_repository.update_campaign(campaign_id, request)
 
         if db_campaign:

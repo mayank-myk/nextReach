@@ -2,6 +2,6 @@ from enum import Enum
 
 
 class Platform(Enum):
-    INSTAGRAM = "instagram"
-    FACEBOOK = "facebook"
-    YOUTUBE = "youtube"
+    INSTAGRAM = "INSTAGRAM"
+    FACEBOOK = "FACEBOOK"
+    YOUTUBE = "YOUTUBE"

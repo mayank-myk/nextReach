@@ -8,7 +8,7 @@ from app.response.search_filter import SearchFilter
 
 
 class InfluencerListing(BaseModel):
-    user_id: str
+    user_id: int
     coin_balance: int
     influencer_list: List[InfluencerBasicDetail]
     filters_applied: SearchFilter

@@ -8,7 +8,7 @@ from app.response.influencer_basic_detail import InfluencerBasicDetail
 
 
 class CampaignBasicDetail(BaseModel):
-    id: str
+    id: int
     created_at: datetime.datetime
     influencer_basic_detail: InfluencerBasicDetail
     stage: CampaignStage

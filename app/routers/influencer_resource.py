@@ -31,13 +31,13 @@ def create_influencer_metric(request: InfluencerMetricRequest, db=Depends(db_man
 
 
 @router.post("/update/{influencer_id}")
-def update_influencer(influencer_id: str, request: InfluencerRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_influencer(influencer_id: int, request: InfluencerRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer(influencer_id=influencer_id, request=request)
 
 
 @router.post("/update/metric/{influencer_metric_id}")
-def update_influencer_metric(influencer_metric_id: str, request: InfluencerMetricRequest,
+def update_influencer_metric(influencer_metric_id: int, request: InfluencerMetricRequest,
                              db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer_metric(influencer_metric_id=influencer_metric_id, request=request)

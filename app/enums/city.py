@@ -2,8 +2,8 @@ from enum import Enum
 
 
 class City(Enum):
-    BENGALURU = "bengaluru"
-    DELHI = "delhi"
-    MUMBAI = "mumbai"
-    HYDERABAD = "hyderabad"
-    OTHER = "other"
+    BENGALURU = "BENGALURU"
+    DELHI = "DELHI"
+    MUMBAI = "MUMBAI"
+    HYDERABAD = "HYDERABAD"
+    OTHER = "OTHER"

@@ -14,7 +14,7 @@ from app.response.influencer_metric_detail import InfluencerMetricDetail
 
 
 class InfluencerDetail(BaseModel):
-    id: str
+    id: int
     last_updated_at: datetime.datetime
     collaboration_request_raised: bool
     primary_platform: Platform

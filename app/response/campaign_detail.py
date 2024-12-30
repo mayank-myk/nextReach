@@ -11,7 +11,7 @@ from app.response.influencer_basic_detail import InfluencerBasicDetail
 
 
 class CampaignDetail(BaseModel):
-    id: str
+    id: int
     last_updated_at: datetime.datetime
     campaign_managed_by: Optional[str] = None
     influencer_basic_detail: InfluencerBasicDetail

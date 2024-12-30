@@ -22,12 +22,13 @@ class UserService:
         self.user_repository = UserRepository(session)
         self.campaign_repository = CampaignRepository(session)
 
-    def get_user_profile(self, user_id: str) -> UserProfile | GenericResponse:
+    def get_user_profile(self, user_id: int) -> UserProfile | GenericResponse:
         try:
             user_profile = self.user_repository.get_user_by_id(user_id=user_id)
             if user_profile:
                 return UserProfile(
                     id=user_profile.id,
+                    phone_number=user_profile.phone_number,
                     name=user_profile.name,
                     business_name=user_profile.business_name,
                     email=user_profile.email,
@@ -48,7 +49,7 @@ class UserService:
             return GenericResponse(success=False, button_text=None,
                                    message="Something went wrong while fetching user profile")
 
-    def update_user_profile(self, user_id: str, profile: ProfileUpdate) -> GenericResponse:
+    def update_user_profile(self, user_id: int, profile: ProfileUpdate) -> GenericResponse:
         try:
             user_profile = self.user_repository.update_user_from_user(user_id=user_id, request=profile)
             if user_profile:
@@ -100,23 +101,22 @@ class UserService:
         else:
             return LoginResponse(success=False, message="No OTP record found for this phone number")
 
-    def get_watchlist(self, user_id: str) -> List[InfluencerDetail]:
+    def get_watchlist(self, user_id: int) -> List[InfluencerDetail]:
 
         pass
 
-    def add_to_watchlist(self, user_id: str, influencer_id: str) -> GenericResponse:
+    def add_to_watchlist(self, user_id: int, influencer_id: int) -> GenericResponse:
 
         pass
 
-    def remove_from_watchlist(self, user_id: str, influencer_id: str) -> GenericResponse:
+    def remove_from_watchlist(self, user_id: int, influencer_id: int) -> GenericResponse:
 
         pass
 
-    def request_collab(self, user_id: str, influencer_id: str) -> GenericResponse:
+    def request_collab(self, user_id: int, influencer_id: int) -> GenericResponse:
 
         try:
-            timestamp_id = id_utils.get_campaign_id()
-            db_collab = self.campaign_repository.create_collab_campaign(campaign_id=timestamp_id, user_id=user_id,
+            db_collab = self.campaign_repository.create_collab_campaign(user_id=user_id,
                                                                         influencer_id=influencer_id)
             return GenericResponse(success=True, button_text=None,
                                    message="Collab created successfully, Our team will get back to you soon")
