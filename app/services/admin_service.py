@@ -16,7 +16,6 @@ from app.requests.revenue_request import RevenueRequest
 from app.requests.user_request import UserRequest
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
-from app.utils import id_utils
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -39,7 +38,7 @@ class AdminService:
                 return LoginResponse(success=False, message="Incorrect password", admin_type=None)
         else:
             _log.info("No record found for admin login with admin_id {}".format(request.admin_id))
-            return LoginResponse(success=False, message="User Id does not exists", admin_type=None)
+            return LoginResponse(success=False, message="Admin id does not exists", admin_type=None)
 
     def generate_bill(self, campaign_id: int) -> GenericResponse:
         return GenericResponse(success=False)
@@ -74,7 +73,8 @@ class AdminService:
         new_revenue = self.revenue_repository.create_revenue(request=request)
 
         if new_revenue:
-            return GenericResponse(success=True, button_text=None, message="Successfully created new revenue")
+            return GenericResponse(success=True, button_text=None,
+                                   message=f"Successfully created new revenue with revenue_id: {new_revenue.id}")
         else:
             return GenericResponse(success=False, button_text=None, message="Unable to create new revenue")
 
@@ -102,7 +102,8 @@ class AdminService:
         new_expense = self.expense_repository.create_expense(request=request)
 
         if new_expense:
-            return GenericResponse(success=True, button_text=None, message="Successfully created new expense")
+            return GenericResponse(success=True, button_text=None,
+                                   message=f"Successfully created new expense with expense_id: {new_expense.id}")
         else:
             return GenericResponse(success=False, button_text=None, message="Unable to create new expense")
 
@@ -130,16 +131,18 @@ class AdminService:
         new_user = self.user_repository.create_user_from_admin(request=request)
 
         if new_user:
-            return GenericResponse(success=True, button_text=None, message="Successfully created new business user")
+            return GenericResponse(success=True, button_text=None,
+                                   message=f"Successfully created new business user with user_id: {new_user.id}")
         else:
-            _log.info("Unable to create new user with user_id {}".format(timestamp_id))
+            _log.info("Unable to create new business user with phone_number {}".format(request.phone_number))
             return GenericResponse(success=False, button_text=None, message="Unable to create new user")
 
     def update_user(self, user_id: int, request: UserRequest) -> GenericResponse:
         new_user = self.user_repository.update_user_from_admin(user_id=user_id, request=request)
 
         if new_user:
-            return GenericResponse(success=True, button_text=None, message="Successfully updated business user")
+            return GenericResponse(success=True, button_text=None,
+                                   message=f"Successfully updated business user with user_id: {user_id}")
         else:
             _log.info("No record found for user with user_id {}".format(user_id))
             return GenericResponse(success=False, button_text=None,
@@ -149,7 +152,8 @@ class AdminService:
         wait_list = self.wait_list_user_repository.update_wait_list_status(wait_list_id=wait_list_id, status=status)
 
         if wait_list:
-            return GenericResponse(success=True, button_text=None, message="Successfully updated lead status")
+            return GenericResponse(success=True, button_text=None,
+                                   message=f"Successfully updated lead status for wait_list_id: {wait_list_id}")
         else:
             _log.info("No record found for wait_list with wait_list_id {}".format(wait_list_id))
             return GenericResponse(success=False, button_text=None,

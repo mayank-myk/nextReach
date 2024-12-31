@@ -186,7 +186,6 @@ class UserRepository:
             return user_optional
         else:
             new_user = User(
-                # id=user_id,
                 created_by='system',
                 last_updated_by='system',
                 phone_number=phone_number

@@ -54,8 +54,8 @@ def upload_influencer_image(influencer_id: int, image_file) -> str:
     """
     try:
         # Generate a consistent filename based on influencer_id
-        file_extension = os.path.splitext(image_file.filename)[1]
-        blob_filename = f"influencer_{influencer_id}_image{file_extension}"
+        # file_extension = os.path.splitext(image_file.filename)[1]
+        blob_filename = f"influencer_{influencer_id}_image"
         # Get a blob client
         blob_service_client = AzureBlobClient.get_client()
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_filename)

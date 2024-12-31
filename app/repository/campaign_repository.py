@@ -88,116 +88,128 @@ class CampaignRepository:
             if not existing_campaign:
                 return None
 
-            if hasattr(campaign_request, 'created_by'):
+            if hasattr(campaign_request, 'created_by') and campaign_request.created_by is not None:
                 setattr(existing_campaign, 'last_updated_by', campaign_request.created_by)
 
-            if hasattr(campaign_request, 'campaign_managed_by'):
+            if hasattr(campaign_request, 'campaign_managed_by') and campaign_request.campaign_managed_by is not None:
                 setattr(existing_campaign, 'campaign_managed_by', campaign_request.campaign_managed_by)
 
-            if hasattr(campaign_request, 'stage'):
+            if hasattr(campaign_request, 'stage') and campaign_request.stage is not None:
                 setattr(existing_campaign, 'stage', campaign_request.stage)
 
-            if hasattr(campaign_request, 'content_charge'):
+            if hasattr(campaign_request, 'content_charge') and campaign_request.content_charge is not None:
                 setattr(existing_campaign, 'content_charge', campaign_request.content_charge)
 
-            if hasattr(campaign_request, 'views_charge'):
+            if hasattr(campaign_request, 'views_charge') and campaign_request.views_charge is not None:
                 setattr(existing_campaign, 'views_charge', campaign_request.views_charge)
 
-            if hasattr(campaign_request, 'type_of_content'):
+            if hasattr(campaign_request, 'type_of_content') and campaign_request.type_of_content is not None:
                 setattr(existing_campaign, 'type_of_content', campaign_request.type_of_content)
 
-            if hasattr(campaign_request, 'campaign_notes'):
+            if hasattr(campaign_request, 'campaign_notes') and campaign_request.campaign_notes is not None:
                 setattr(existing_campaign, 'campaign_notes', campaign_request.campaign_notes)
 
-            if hasattr(campaign_request, 'rating'):
+            if hasattr(campaign_request, 'rating') and campaign_request.rating is not None:
                 setattr(existing_campaign, 'rating', campaign_request.rating)
 
-            if hasattr(campaign_request, 'review'):
+            if hasattr(campaign_request, 'review') and campaign_request.review is not None:
                 setattr(existing_campaign, 'review', campaign_request.review)
 
-            if hasattr(campaign_request, 'influencer_finalization_date'):
+            if hasattr(campaign_request,
+                       'influencer_finalization_date') and campaign_request.influencer_finalization_date is not None:
                 setattr(existing_campaign, 'influencer_finalization_date',
                         campaign_request.influencer_finalization_date)
 
-            if hasattr(campaign_request, 'content_shoot_date'):
+            if hasattr(campaign_request, 'content_shoot_date') and campaign_request.content_shoot_date is not None:
                 setattr(existing_campaign, 'content_shoot_date', campaign_request.content_shoot_date)
 
-            if hasattr(campaign_request, 'insta_post_link'):
+            if hasattr(campaign_request, 'insta_post_link') and campaign_request.insta_post_link is not None:
                 setattr(existing_campaign, 'insta_post_link', campaign_request.insta_post_link)
 
-            if hasattr(campaign_request, 'youtube_post_link'):
+            if hasattr(campaign_request, 'youtube_post_link') and campaign_request.youtube_post_link is not None:
                 setattr(existing_campaign, 'youtube_post_link', campaign_request.youtube_post_link)
 
-            if hasattr(campaign_request, 'fb_post_link'):
+            if hasattr(campaign_request, 'fb_post_link') and campaign_request.fb_post_link is not None:
                 setattr(existing_campaign, 'fb_post_link', campaign_request.fb_post_link)
 
-            if hasattr(campaign_request, 'content_post_date'):
+            if hasattr(campaign_request, 'content_post_date') and campaign_request.content_post_date is not None:
                 setattr(existing_campaign, 'content_post_date', campaign_request.content_post_date)
 
-            if hasattr(campaign_request, 'content_billing_amount'):
+            if hasattr(campaign_request,
+                       'content_billing_amount') and campaign_request.content_billing_amount is not None:
                 setattr(existing_campaign, 'content_billing_amount', campaign_request.content_billing_amount)
 
-            if hasattr(campaign_request, 'content_billing_payment_at'):
+            if hasattr(campaign_request,
+                       'content_billing_payment_at') and campaign_request.content_billing_payment_at is not None:
                 setattr(existing_campaign, 'content_billing_payment_at', campaign_request.content_billing_payment_at)
 
-            if hasattr(campaign_request, 'content_billing_payment_status'):
+            if hasattr(campaign_request,
+                       'content_billing_payment_status') and campaign_request.content_billing_payment_status is not None:
                 setattr(existing_campaign, 'content_billing_payment_status',
                         campaign_request.content_billing_payment_status)
 
-            if hasattr(campaign_request, 'first_billing_date'):
+            if hasattr(campaign_request, 'first_billing_date') and campaign_request.first_billing_date is not None:
                 setattr(existing_campaign, 'first_billing_date', campaign_request.first_billing_date)
 
-            if hasattr(campaign_request, 'first_billing_views'):
+            if hasattr(campaign_request, 'first_billing_views') and campaign_request.first_billing_views is not None:
                 setattr(existing_campaign, 'first_billing_views', campaign_request.first_billing_views)
 
-            if hasattr(campaign_request, 'first_billing_likes'):
+            if hasattr(campaign_request, 'first_billing_likes') and campaign_request.first_billing_likes is not None:
                 setattr(existing_campaign, 'first_billing_likes', campaign_request.first_billing_likes)
 
-            if hasattr(campaign_request, 'first_billing_comments'):
+            if hasattr(campaign_request,
+                       'first_billing_comments') and campaign_request.first_billing_comments is not None:
                 setattr(existing_campaign, 'first_billing_comments', campaign_request.first_billing_comments)
 
-            if hasattr(campaign_request, 'first_billing_shares'):
+            if hasattr(campaign_request, 'first_billing_shares') and campaign_request.first_billing_shares is not None:
                 setattr(existing_campaign, 'first_billing_shares', campaign_request.first_billing_shares)
 
-            if hasattr(campaign_request, 'first_billing_amount'):
+            if hasattr(campaign_request, 'first_billing_amount') and campaign_request.first_billing_amount is not None:
                 setattr(existing_campaign, 'first_billing_amount', campaign_request.first_billing_amount)
 
-            if hasattr(campaign_request, 'first_billing_payment_at'):
+            if hasattr(campaign_request,
+                       'first_billing_payment_at') and campaign_request.first_billing_payment_at is not None:
                 setattr(existing_campaign, 'first_billing_payment_at', campaign_request.first_billing_payment_at)
 
-            if hasattr(campaign_request, 'first_billing_payment_status'):
+            if hasattr(campaign_request,
+                       'first_billing_payment_status') and campaign_request.first_billing_payment_status is not None:
                 setattr(existing_campaign, 'first_billing_payment_status',
                         campaign_request.first_billing_payment_status)
 
-            if hasattr(campaign_request, 'second_billing_date'):
+            if hasattr(campaign_request, 'second_billing_date') and campaign_request.second_billing_date is not None:
                 setattr(existing_campaign, 'second_billing_date', campaign_request.second_billing_date)
 
-            if hasattr(campaign_request, 'second_billing_views'):
+            if hasattr(campaign_request, 'second_billing_views') and campaign_request.second_billing_views is not None:
                 setattr(existing_campaign, 'second_billing_views', campaign_request.second_billing_views)
 
-            if hasattr(campaign_request, 'second_billing_likes'):
+            if hasattr(campaign_request, 'second_billing_likes') and campaign_request.second_billing_likes is not None:
                 setattr(existing_campaign, 'second_billing_likes', campaign_request.second_billing_likes)
 
-            if hasattr(campaign_request, 'second_billing_comments'):
+            if hasattr(campaign_request,
+                       'second_billing_comments') and campaign_request.second_billing_comments is not None:
                 setattr(existing_campaign, 'second_billing_comments', campaign_request.second_billing_comments)
 
-            if hasattr(campaign_request, 'second_billing_shares'):
+            if hasattr(campaign_request,
+                       'second_billing_shares') and campaign_request.second_billing_shares is not None:
                 setattr(existing_campaign, 'second_billing_shares', campaign_request.second_billing_shares)
 
-            if hasattr(campaign_request, 'second_billing_amount'):
+            if hasattr(campaign_request,
+                       'second_billing_amount') and campaign_request.second_billing_amount is not None:
                 setattr(existing_campaign, 'second_billing_amount', campaign_request.second_billing_amount)
 
-            if hasattr(campaign_request, 'second_billing_payment_at'):
+            if hasattr(campaign_request,
+                       'second_billing_payment_at') and campaign_request.second_billing_payment_at is not None:
                 setattr(existing_campaign, 'second_billing_payment_at', campaign_request.second_billing_payment_at)
 
-            if hasattr(campaign_request, 'second_billing_payment_status'):
+            if hasattr(campaign_request,
+                       'second_billing_payment_status') and campaign_request.second_billing_payment_status is not None:
                 setattr(existing_campaign, 'second_billing_payment_status',
                         campaign_request.second_billing_payment_status)
 
-            if hasattr(campaign_request, 'post_insights'):
+            if hasattr(campaign_request, 'post_insights') and campaign_request.post_insights is not None:
                 setattr(existing_campaign, 'post_insights', campaign_request.post_insights)
 
-            if hasattr(campaign_request, 'pending_deliverables'):
+            if hasattr(campaign_request, 'pending_deliverables') and campaign_request.pending_deliverables is not None:
                 setattr(existing_campaign, 'pending_deliverables', campaign_request.pending_deliverables)
             self.db.commit()
             self.db.refresh(existing_campaign)

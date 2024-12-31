@@ -1,3 +1,5 @@
+import os
+
 from fastapi import APIRouter, Depends, UploadFile, File
 
 from app.database.session import DatabaseSessionManager
@@ -8,6 +10,8 @@ from app.services.influencer_service import InfluencerService
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
+ALLOWED_IMAGE_MIME_TYPES = ["image/jpeg", "image/png", "image/jpg"]
+ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"]
 
 router = APIRouter(
     prefix='/v1/influencer',
@@ -18,10 +22,25 @@ db_manager = DatabaseSessionManager()
 
 
 @router.post("/create")
-def create_influencer(request: InfluencerRequest, image_file: UploadFile = File(...),
-                      db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_influencer(request: InfluencerRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
-    return influencer_service.create_influencer(request=request, image_file=image_file)
+    return influencer_service.create_influencer(request=request)
+
+
+@router.post("/upload/image/{influencer_id}")
+def create_influencer(influencer_id: int, image_file: UploadFile = File(...),
+                      db=Depends(db_manager.get_db)) -> GenericResponse:
+    if image_file.content_type not in ALLOWED_IMAGE_MIME_TYPES:
+        return GenericResponse(success=False, status_code=400,
+                               message="Invalid image type. Only JPEG, PNG, and JPG are allowed.")
+
+    file_extension = os.path.splitext(image_file.filename)[1].lower()
+    if file_extension not in ALLOWED_IMAGE_EXTENSIONS:
+        return GenericResponse(success=False, status_code=400,
+                               message="Invalid file extension. Only .jpg, .jpeg, .png are allowed.")
+
+    influencer_service = InfluencerService(db)
+    return influencer_service.upload_image(influencer_id=influencer_id, image_file=image_file)
 
 
 @router.post("/create/metric")

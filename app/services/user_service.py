@@ -66,23 +66,23 @@ class UserService:
                                    message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
-        login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
-        if login_record:
-            if (datetime.now() - login_record.created_at).total_seconds() < 3600:
-                return GenericResponse(success=True, button_text=None,
-                                       message="OTP has already been send to this number, and it is valid for 1hour")
+        try:
+            # login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
+            # if login_record:
+            #     if (datetime.now() - login_record.created_at).total_seconds() < 600:
+            #         return GenericResponse(success=True,
+            #                                message="OTP has already been send to this number, it's valid for 10minutes")
+            otp = id_utils.generate_otp()
+            otp_sent_successfully = send_otp_via_whatsapp(phone_number=phone_number, otp=otp)
+            if not otp_sent_successfully:
+                return GenericResponse(success=False, button_text="RETRY", message="Unable to send OTP")
 
-        otp = id_utils.generate_otp()
-        otp_sent_successfully = send_otp_via_whatsapp(phone_number=phone_number, otp=otp)
-        if not otp_sent_successfully:
-            return GenericResponse(success=False, button_text=None, message="Unable to send OTP")
+            login_record = self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
 
-        login_record = self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
-
-        if login_record:
-            return GenericResponse(success=True, button_text=None, message="OTP has been sent successfully")
-        else:
-            return GenericResponse(success=False, button_text=None, message="Unable to send OTP")
+            return GenericResponse(success=True, message="OTP has been sent successfully")
+        except Exception as ex:
+            _log.error(f"Unable to create otp record for phone_number {phone_number}. Error: {str(ex)}")
+            return GenericResponse(success=False, button_text="RETRY", message="Something went wrong")
 
     def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
@@ -92,14 +92,15 @@ class UserService:
             if login_record.otp == otp:
                 return LoginResponse(user_id=user_record.id, success=True,
                                      message="OTP has been verified successfully", button_text="OKAY")
-            elif (datetime.now() - login_record.created_at).total_seconds() > 3600:
+            elif (datetime.now() - login_record.created_at).total_seconds() > 600:
                 return LoginResponse(success=False, message="OTP has expired, use the latest one or request resend OTP",
-                                     button_text="OKAY")
+                                     button_text="RETRY")
             else:
-                return LoginResponse(success=False,
-                                     message="Latest OTP which was sent to your registered mobile number does not matches with entered one")
+                return LoginResponse(success=False, button_text="RETRY",
+                                     message="Latest OTP which was sent to your registered mobile number does not matches with the entered one")
         else:
-            return LoginResponse(success=False, message="No OTP record found for this phone number")
+            return LoginResponse(success=False, message="No OTP record found for this phone number",
+                                 button_text="RETRY")
 
     def get_watchlist(self, user_id: int) -> List[InfluencerDetail]:
 

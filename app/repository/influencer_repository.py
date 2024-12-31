@@ -41,7 +41,6 @@ class InfluencerRepository:
             phone_number=influencer_request.phone_number,
             email=influencer_request.email,
             address=influencer_request.address,
-            profile_picture=influencer_request.profile_picture,
             languages=influencer_request.languages,
             next_reach_score=influencer_request.next_reach_score,
             age=influencer_request.age,
@@ -91,9 +90,6 @@ class InfluencerRepository:
 
             if hasattr(influencer_request, 'address'):
                 setattr(existing_influencer, 'address', influencer_request.address)
-
-            if hasattr(influencer_request, 'profile_picture'):
-                setattr(existing_influencer, 'profile_picture', influencer_request.profile_picture)
 
             if hasattr(influencer_request, 'languages'):
                 setattr(existing_influencer, 'languages', influencer_request.languages)

@@ -167,7 +167,7 @@ class CampaignService:
                                        db_campaign.id))
         except Exception as e:
             _log.error(
-                f"Error occurred while fetching campaign details for campaign_id: {timestamp_id}. Error: {str(e)}")
+                f"Error occurred while creating campaign. Error: {str(e)}")
             return GenericResponse(success=False, button_text=None,
                                    message="Campaign creation failed")
 

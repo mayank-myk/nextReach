@@ -32,7 +32,7 @@ class Influencer(Base):
     email = Column(String(255), nullable=True)
     address = Column(String(255), nullable=True)
     profile_picture = Column(String(255), nullable=False)  # URL for profile picture
-    languages = Column(ARRAY(Enum(Language)), nullable=True)  # List of languages
+    languages = Column(ARRAY(Enum(Language, name="language_enum")), nullable=True)  # List of languages
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)
     age = Column(Integer, CheckConstraint('age >= 0'), default=0)
 
