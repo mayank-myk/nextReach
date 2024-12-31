@@ -2,16 +2,18 @@ from typing import Optional
 
 from pydantic import BaseModel, Field
 
+from app.enums.city import City
 
-class InfluencerMetricRequest(BaseModel):
+
+class UpdateInfluencerMetricRequest(BaseModel):
+    updated_by: str = Field(..., min_length=3)
     influencer_id: int = Field(...)
-    created_by: str = Field(..., min_length=3)
     insta_followers: Optional[int] = Field(None, ge=0)
-    insta_city_1: Optional[int] = Field(None, ge=0)
+    insta_city_1: Optional[City] = Field(None, ge=0)
     insta_city_pc_1: Optional[int] = Field(None, ge=0)
-    insta_city_2: Optional[int] = Field(None, ge=0)
+    insta_city_2: Optional[City] = Field(None, ge=0)
     insta_city_pc_2: Optional[int] = Field(None, ge=0)
-    insta_city_3: Optional[int] = Field(None, ge=0)
+    insta_city_3: Optional[City] = Field(None, ge=0)
     insta_city_pc_3: Optional[int] = Field(None, ge=0)
     insta_age_13_to_17: Optional[int] = Field(None, ge=0)
     insta_age_18_to_24: Optional[int] = Field(None, ge=0)
@@ -24,7 +26,7 @@ class InfluencerMetricRequest(BaseModel):
     insta_avg_views: Optional[int] = Field(None, ge=0)
     insta_max_views: Optional[int] = Field(None, ge=0)
     insta_min_views: Optional[int] = Field(None, ge=0)
-    insta_spread: Optional[int] = Field(None, ge=0)
+    insta_consistency_score: Optional[int] = Field(None, ge=0)
     insta_avg_likes: Optional[int] = Field(None, ge=0)
     insta_avg_comments: Optional[int] = Field(None, ge=0)
     insta_avg_shares: Optional[int] = Field(None, ge=0)
@@ -39,7 +41,7 @@ class InfluencerMetricRequest(BaseModel):
     yt_avg_views: Optional[int] = Field(None, ge=0)
     yt_max_views: Optional[int] = Field(None, ge=0)
     yt_min_views: Optional[int] = Field(None, ge=0)
-    yt_spread: Optional[int] = Field(None, ge=0)
+    yt_consistency_score: Optional[int] = Field(None, ge=0)
     yt_avg_likes: Optional[int] = Field(None, ge=0)
     yt_avg_comments: Optional[int] = Field(None, ge=0)
     yt_avg_shares: Optional[int] = Field(None, ge=0)
@@ -54,7 +56,7 @@ class InfluencerMetricRequest(BaseModel):
     fb_avg_views: Optional[int] = Field(None, ge=0)
     fb_max_views: Optional[int] = Field(None, ge=0)
     fb_min_views: Optional[int] = Field(None, ge=0)
-    fb_spread: Optional[int] = Field(None, ge=0)
+    fb_consistency_score: Optional[int] = Field(None, ge=0)
     fb_avg_likes: Optional[int] = Field(None, ge=0)
     fb_avg_comments: Optional[int] = Field(None, ge=0)
     fb_avg_shares: Optional[int] = Field(None, ge=0)

@@ -19,8 +19,10 @@ from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.influencer_metrics_request import InfluencerMetricRequest
+from app.requests.influencer_metric_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
+from app.requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
+from app.requests.update_influencer_request import UpdateInfluencerRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -36,6 +38,7 @@ class InfluencerRepository:
             created_by=influencer_request.created_by,
             last_updated_by=influencer_request.created_by,
             primary_platform=influencer_request.primary_platform,
+            profile_picture="DEFAULT",
             name=influencer_request.name,
             gender=influencer_request.gender,
             phone_number=influencer_request.phone_number,
@@ -63,7 +66,8 @@ class InfluencerRepository:
         self.db.refresh(db_influencer)
         return db_influencer
 
-    def update_influencer(self, influencer_id: int, influencer_request: InfluencerRequest) -> Optional[Influencer]:
+    def update_influencer(self, influencer_id: int, influencer_request: UpdateInfluencerRequest) -> Optional[
+        Influencer]:
         try:
             existing_influencer = self.db.query(Influencer).filter(Influencer.id == influencer_id).first()
 
@@ -100,11 +104,8 @@ class InfluencerRepository:
             if hasattr(influencer_request, 'age'):
                 setattr(existing_influencer, 'age', influencer_request.age)
 
-            if hasattr(influencer_request, 'created_by'):
-                setattr(existing_influencer, 'last_updated_by', influencer_request.created_by)
-
-            if hasattr(influencer_request, 'created_by'):
-                setattr(existing_influencer, 'last_updated_by', influencer_request.created_by)
+            if hasattr(influencer_request, 'updated_by'):
+                setattr(existing_influencer, 'last_updated_by', influencer_request.updated_by)
 
             if hasattr(influencer_request, 'insta_username'):
                 setattr(existing_influencer, 'insta_username', influencer_request.insta_username)
@@ -202,7 +203,7 @@ class InfluencerRepository:
             insta_avg_views=influencer_metric_request.insta_avg_views,
             insta_max_views=influencer_metric_request.insta_max_views,
             insta_min_views=influencer_metric_request.insta_min_views,
-            insta_spread=influencer_metric_request.insta_spread,
+            insta_consistency_score=influencer_metric_request.insta_consistency_score,
             insta_avg_likes=influencer_metric_request.insta_avg_likes,
             insta_avg_comments=influencer_metric_request.insta_avg_comments,
             insta_avg_shares=influencer_metric_request.insta_avg_shares,
@@ -217,7 +218,7 @@ class InfluencerRepository:
             yt_avg_views=influencer_metric_request.yt_avg_views,
             yt_max_views=influencer_metric_request.yt_max_views,
             yt_min_views=influencer_metric_request.yt_min_views,
-            yt_spread=influencer_metric_request.yt_spread,
+            yt_consistency_score=influencer_metric_request.yt_consistency_score,
             yt_avg_likes=influencer_metric_request.yt_avg_likes,
             yt_avg_comments=influencer_metric_request.yt_avg_comments,
             yt_avg_shares=influencer_metric_request.yt_avg_shares,
@@ -232,7 +233,7 @@ class InfluencerRepository:
             fb_avg_views=influencer_metric_request.fb_avg_views,
             fb_max_views=influencer_metric_request.fb_max_views,
             fb_min_views=influencer_metric_request.fb_min_views,
-            fb_spread=influencer_metric_request.fb_spread,
+            fb_consistency_score=influencer_metric_request.fb_consistency_score,
             fb_avg_likes=influencer_metric_request.fb_avg_likes,
             fb_avg_comments=influencer_metric_request.fb_avg_comments,
             fb_avg_shares=influencer_metric_request.fb_avg_shares,
@@ -245,7 +246,7 @@ class InfluencerRepository:
         return db_influencer_metric
 
     def update_influencer_metric(self, influencer_metric_id: int,
-                                 influencer_metric_request: InfluencerMetricRequest) -> Optional[InfluencerMetric]:
+                                 influencer_metric_request: UpdateInfluencerMetricRequest) -> Optional[InfluencerMetric]:
         try:
             existing_influencer_metric = self.db.query(InfluencerMetric).filter(
                 InfluencerMetric.id == influencer_metric_id).first()
@@ -253,8 +254,8 @@ class InfluencerRepository:
             if not existing_influencer_metric:
                 return None
 
-            if hasattr(influencer_metric_request, 'created_by'):
-                setattr(existing_influencer_metric, 'last_updated_by', influencer_metric_request.created_by)
+            if hasattr(influencer_metric_request, 'updated_by'):
+                setattr(existing_influencer_metric, 'last_updated_by', influencer_metric_request.updated_by)
 
             if hasattr(influencer_metric_request, 'insta_followers'):
                 setattr(existing_influencer_metric, 'insta_followers', influencer_metric_request.insta_followers)
@@ -312,8 +313,8 @@ class InfluencerRepository:
             if hasattr(influencer_metric_request, 'insta_min_views'):
                 setattr(existing_influencer_metric, 'insta_min_views', influencer_metric_request.insta_min_views)
 
-            if hasattr(influencer_metric_request, 'insta_spread'):
-                setattr(existing_influencer_metric, 'insta_spread', influencer_metric_request.insta_spread)
+            if hasattr(influencer_metric_request, 'insta_consistency_score'):
+                setattr(existing_influencer_metric, 'insta_consistency_score', influencer_metric_request.insta_consistency_score)
 
             if hasattr(influencer_metric_request, 'insta_avg_likes'):
                 setattr(existing_influencer_metric, 'insta_avg_likes', influencer_metric_request.insta_avg_likes)
@@ -340,8 +341,8 @@ class InfluencerRepository:
             if hasattr(influencer_metric_request, 'yt_min_views'):
                 setattr(existing_influencer_metric, 'yt_min_views', influencer_metric_request.yt_min_views)
 
-            if hasattr(influencer_metric_request, 'yt_spread'):
-                setattr(existing_influencer_metric, 'yt_spread', influencer_metric_request.yt_spread)
+            if hasattr(influencer_metric_request, 'yt_consistency_score'):
+                setattr(existing_influencer_metric, 'yt_consistency_score', influencer_metric_request.yt_consistency_score)
 
             if hasattr(influencer_metric_request, 'yt_avg_likes'):
                 setattr(existing_influencer_metric, 'yt_avg_likes', influencer_metric_request.yt_avg_likes)
@@ -386,8 +387,8 @@ class InfluencerRepository:
             if hasattr(influencer_metric_request, 'fb_min_views'):
                 setattr(existing_influencer_metric, 'fb_min_views', influencer_metric_request.fb_min_views)
 
-            if hasattr(influencer_metric_request, 'fb_spread'):
-                setattr(existing_influencer_metric, 'fb_spread', influencer_metric_request.fb_spread)
+            if hasattr(influencer_metric_request, 'fb_consistency_score'):
+                setattr(existing_influencer_metric, 'fb_consistency_score', influencer_metric_request.fb_consistency_score)
 
             if hasattr(influencer_metric_request, 'fb_avg_likes'):
                 setattr(existing_influencer_metric, 'fb_avg_likes', influencer_metric_request.fb_avg_likes)

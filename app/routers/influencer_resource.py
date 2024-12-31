@@ -3,7 +3,7 @@ import os
 from fastapi import APIRouter, Depends, UploadFile, File
 
 from app.database.session import DatabaseSessionManager
-from app.requests.influencer_metrics_request import InfluencerMetricRequest
+from app.requests.influencer_metric_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
 from app.response.generic_response import GenericResponse
 from app.services.influencer_service import InfluencerService
