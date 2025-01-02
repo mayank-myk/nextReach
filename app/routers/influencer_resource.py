@@ -5,6 +5,8 @@ from fastapi import APIRouter, Depends, UploadFile, File
 from app.database.session import DatabaseSessionManager
 from app.requests.influencer_metric_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
+from app.requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
+from app.requests.update_influencer_request import UpdateInfluencerRequest
 from app.response.generic_response import GenericResponse
 from app.services.influencer_service import InfluencerService
 from app.utils.logger import configure_logger
@@ -50,13 +52,13 @@ def create_influencer_metric(request: InfluencerMetricRequest, db=Depends(db_man
 
 
 @router.post("/update/{influencer_id}")
-def update_influencer(influencer_id: int, request: InfluencerRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_influencer(influencer_id: int, request: UpdateInfluencerRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer(influencer_id=influencer_id, request=request)
 
 
 @router.post("/update/metric/{influencer_metric_id}")
-def update_influencer_metric(influencer_metric_id: int, request: InfluencerMetricRequest,
+def update_influencer_metric(influencer_metric_id: int, request: UpdateInfluencerMetricRequest,
                              db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer_metric(influencer_metric_id=influencer_metric_id, request=request)

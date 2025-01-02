@@ -1,6 +1,5 @@
 from typing import Optional, List
 
-from app.database.waitlist_table import WaitList
 from app.enums.average_view import AverageView
 from app.enums.campaign_stage import CampaignStage
 from app.enums.city import City
@@ -16,7 +15,6 @@ from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
 from app.enums.sort_applied import SortApplied
-from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository
@@ -24,6 +22,7 @@ from app.repository.user_repository import UserRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.requests.influencer_insights import InfluencerInsights
 from app.requests.waitlist_request import WaitListRequest
+from app.response.facebook_detail import FacebookDetail
 from app.response.generic_response import GenericResponse
 from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.influencer_collab_charge import InfluencerCollabCharge
@@ -58,6 +57,8 @@ class WebService:
         influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(user_id,
                                                                                                         influencer_id)
         if influencery_already_visited > 0:
+            _log.info(f"Profile already unlocked by user_id: {user_id} for influencer_id: {influencer_id}.")
+            self.profile_visit_repository.log_already_visited_profile(user_id, influencer_id)
             return True
 
         user = self.user_repository.get_user_by_id(user_id)
@@ -67,11 +68,11 @@ class WebService:
             # Log the profile visit in the database
             self.profile_visit_repository.log_profile_visit(user_id, influencer_id)
             self.user_repository.update_profile_visit_count(user_id)
-            _log.info(f"Profile visit successfully logged for user {user_id} to influencer {influencer_id}.")
+            _log.info(f"Profile visit successfully logged for user_id {user_id} to influencer_id: {influencer_id}.")
             return True
         else:
             _log.info(
-                f"user {user_id} has no balance left to visit influencer {influencer_id}.")
+                f"user_id {user_id} has no balance left to visit influencer_id: {influencer_id}.")
             return False
 
     def get_influencer_listing(self, user_id: int,
@@ -165,8 +166,8 @@ class WebService:
                                                              influencer_id=request.influencer_id)
 
             if not profile_visit_success:
-                return GenericResponse(success=False, button_text="OKAY",
-                                       message="No coin balance left")
+                return GenericResponse(success=False, button_text="REQUEST MORE COINS",
+                                       message="Your coin balance is ZERO, please recharge to view more profiles")
 
             influencer = self.influencer_repository.get_influencer_by_id(influencer_id=request.influencer_id)
             influencer_metric = self.influencer_repository.get_latest_influencer_metric(
@@ -174,54 +175,79 @@ class WebService:
 
             collab_charge = InfluencerCollabCharge(
                 min=influencer.content_charge,
-                average=(influencer_metric.insta_avg_views // 1000) * influencer.views_charge,
+                avg=(influencer_metric.insta_avg_views // 1000) * influencer.views_charge,
                 max=(influencer_metric.insta_max_views // 1000) * influencer.views_charge,
             )
-            instagram_detail = InstagramDetail(
-                username=influencer_metric.insta_avg_views,
-                followers=influencer_metric.insta_followers,
-                city_1=influencer_metric.insta_city_1,
-                city_pc_1=influencer_metric.insta_city_pc_1,
-                city_2=influencer_metric.insta_city_2,
-                city_pc_2=influencer_metric.insta_city_pc_2,
-                city_3=influencer_metric.insta_city_3,
-                city_pc_3=influencer_metric.insta_city_pc_3,
-                age_13_to_17=influencer_metric.insta_age_13_to_17,
-                age_18_to_24=influencer_metric.insta_age_18_to_24,
-                age_25_to_34=influencer_metric.insta_age_25_to_34,
-                age_35_to_44=influencer_metric.insta_age_35_to_44,
-                age_45_to_54=influencer_metric.insta_age_45_to_54,
-                age_55=influencer_metric.insta_age_55,
-                men_follower_pc=influencer_metric.insta_men_follower_pc,
-                women_follower_pc=influencer_metric.insta_women_follower_pc,
-                avg_views=influencer_metric.insta_avg_views,
-                max_views=influencer_metric.insta_max_views,
-                min_views=influencer_metric.insta_min_views,
-                spread=influencer_metric.insta_consistency_score,
-                avg_likes=influencer_metric.insta_avg_likes,
-                avg_comments=influencer_metric.insta_avg_comments,
-                avg_shares=influencer_metric.insta_avg_shares,
-                engagement_rate=influencer_metric.insta_engagement_rate
-            )
-            youtube_detail = YouTubeDetail(
-                username=influencer_metric.yt_avg_views,
-                followers=influencer_metric.yt_followers,
-                city_1=influencer_metric.yt_city_1,
-                city_pc_1=influencer_metric.yt_city_pc_1,
-                city_2=influencer_metric.yt_city_2,
-                city_pc_2=influencer_metric.yt_city_pc_2,
-                city_3=influencer_metric.yt_city_3,
-                city_pc_3=influencer_metric.yt_city_pc_3,
-                avg_views=influencer_metric.yt_avg_views,
-                max_views=influencer_metric.yt_max_views,
-                min_views=influencer_metric.yt_min_views,
-                spread=influencer_metric.yt_consistency_score,
-                avg_likes=influencer_metric.yt_avg_likes,
-                avg_comments=influencer_metric.yt_avg_comments,
-                avg_shares=influencer_metric.yt_avg_shares,
-                engagement_rate=influencer_metric.yt_engagement_rate
-            )
+            instagram_detail = None
+            if influencer.insta_username:
+                instagram_detail = InstagramDetail(
+                    username=influencer.insta_username,
+                    followers=influencer_metric.insta_followers,
+                    city_1=influencer_metric.insta_city_1,
+                    city_pc_1=influencer_metric.insta_city_pc_1,
+                    city_2=influencer_metric.insta_city_2,
+                    city_pc_2=influencer_metric.insta_city_pc_2,
+                    city_3=influencer_metric.insta_city_3,
+                    city_pc_3=influencer_metric.insta_city_pc_3,
+                    age_13_to_17=influencer_metric.insta_age_13_to_17,
+                    age_18_to_24=influencer_metric.insta_age_18_to_24,
+                    age_25_to_34=influencer_metric.insta_age_25_to_34,
+                    age_35_to_44=influencer_metric.insta_age_35_to_44,
+                    age_45_to_54=influencer_metric.insta_age_45_to_54,
+                    age_55=influencer_metric.insta_age_55,
+                    men_follower_pc=influencer_metric.insta_men_follower_pc,
+                    women_follower_pc=influencer_metric.insta_women_follower_pc,
+                    avg_views=influencer_metric.insta_avg_views,
+                    max_views=influencer_metric.insta_max_views,
+                    min_views=influencer_metric.insta_min_views,
+                    spread=influencer_metric.insta_consistency_score,
+                    avg_likes=influencer_metric.insta_avg_likes,
+                    avg_comments=influencer_metric.insta_avg_comments,
+                    avg_shares=influencer_metric.insta_avg_shares,
+                    engagement_rate=influencer_metric.insta_engagement_rate
+                )
+
+            youtube_detail = None
+            if influencer.yt_username:
+                youtube_detail = YouTubeDetail(
+                    username=influencer.yt_username,
+                    followers=influencer_metric.yt_followers,
+                    city_1=influencer_metric.yt_city_1,
+                    city_pc_1=influencer_metric.yt_city_pc_1,
+                    city_2=influencer_metric.yt_city_2,
+                    city_pc_2=influencer_metric.yt_city_pc_2,
+                    city_3=influencer_metric.yt_city_3,
+                    city_pc_3=influencer_metric.yt_city_pc_3,
+                    avg_views=influencer_metric.yt_avg_views,
+                    max_views=influencer_metric.yt_max_views,
+                    min_views=influencer_metric.yt_min_views,
+                    spread=influencer_metric.yt_consistency_score,
+                    avg_likes=influencer_metric.yt_avg_likes,
+                    avg_comments=influencer_metric.yt_avg_comments,
+                    avg_shares=influencer_metric.yt_avg_shares,
+                    engagement_rate=influencer_metric.yt_engagement_rate
+                )
+
             facebook_detail = None
+            if influencer.fb_username:
+                facebook_detail = FacebookDetail(
+                    username=influencer.fb_username,
+                    followers=influencer_metric.fb_followers,
+                    city_1=influencer_metric.fb_city_1,
+                    city_pc_1=influencer_metric.fb_city_pc_1,
+                    city_2=influencer_metric.fb_city_2,
+                    city_pc_2=influencer_metric.fb_city_pc_2,
+                    city_3=influencer_metric.fb_city_3,
+                    city_pc_3=influencer_metric.fb_city_pc_3,
+                    avg_views=influencer_metric.fb_avg_views,
+                    max_views=influencer_metric.fb_max_views,
+                    min_views=influencer_metric.fb_min_views,
+                    spread=influencer_metric.fb_consistency_score,
+                    avg_likes=influencer_metric.fb_avg_likes,
+                    avg_comments=influencer_metric.fb_avg_comments,
+                    avg_shares=influencer_metric.fb_avg_shares,
+                    engagement_rate=influencer_metric.fb_engagement_rate
+                )
 
             platform_details = InfluencerMetricDetail(instagram_detail=instagram_detail,
                                                       youtube_detail=youtube_detail,
@@ -258,7 +284,7 @@ class WebService:
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching influencer details for influencer_id: {request.influencer_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text="OKAY",
+            return GenericResponse(success=False, button_text="RETRY",
                                    message="Something went wrong while fetching influencer details")
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
@@ -268,4 +294,3 @@ class WebService:
             return GenericResponse(success=True, button_text=None, message=None)
         else:
             return GenericResponse(success=False, button_text=None, message="Unable to create new wait_list")
-

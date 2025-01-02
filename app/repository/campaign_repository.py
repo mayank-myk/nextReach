@@ -68,8 +68,8 @@ class CampaignRepository:
     def create_collab_campaign(self, user_id: int, influencer_id: int) -> Campaign:
 
         new_campaign = Campaign(
-            created_by=user_id,
-            campaign_managed_by='system',
+            created_by="user_id_" + str(user_id),
+            campaign_managed_by="user_id_" + str(user_id),
             last_updated_by=user_id,
             influencer_id=influencer_id,
             user_id=user_id,

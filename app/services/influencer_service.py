@@ -4,6 +4,8 @@ from app.clients.azure_client import upload_influencer_image
 from app.repository.influencer_repository import InfluencerRepository
 from app.requests.influencer_metric_request import InfluencerMetricRequest
 from app.requests.influencer_request import InfluencerRequest
+from app.requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
+from app.requests.update_influencer_request import UpdateInfluencerRequest
 from app.response.generic_response import GenericResponse
 from app.utils.logger import configure_logger
 
@@ -46,7 +48,7 @@ class InfluencerService:
             return GenericResponse(success=False, button_text=None,
                                    message="Something went wrong while creating new Influencer")
 
-    def update_influencer(self, influencer_id: int, request: InfluencerRequest) -> GenericResponse:
+    def update_influencer(self, influencer_id: int, request: UpdateInfluencerRequest) -> GenericResponse:
         new_influencer = self.influencer_repository.update_influencer(influencer_id=influencer_id,
                                                                       influencer_request=request)
 
@@ -76,7 +78,8 @@ class InfluencerService:
             return GenericResponse(success=False, button_text=None,
                                    message=f"Something went wrong while creating new influencer_metric")
 
-    def update_influencer_metric(self, influencer_metric_id: int, request: InfluencerMetricRequest) -> GenericResponse:
+    def update_influencer_metric(self, influencer_metric_id: int,
+                                 request: UpdateInfluencerMetricRequest) -> GenericResponse:
 
         new_influencer_metric = self.influencer_repository.update_influencer_metric(
             influencer_metric_id=influencer_metric_id,

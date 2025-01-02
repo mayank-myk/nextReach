@@ -6,7 +6,7 @@ from app.enums.admin_type import AdminType
 
 
 class LoginResponse(BaseModel):
-    user_id: Optional[str] = None
+    user_id: Optional[int] = None
     success: bool
     button_text: Optional[str] = "OKAY"
     message: Optional[str] = None

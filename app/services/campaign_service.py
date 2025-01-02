@@ -15,7 +15,6 @@ from app.response.campaign_basic_detail import CampaignBasicDetail
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
 from app.response.influencer_basic_detail import InfluencerBasicDetail
-from app.utils import id_utils
 from app.utils.converters import campaign_stage_to_status
 from app.utils.logger import configure_logger
 
@@ -35,12 +34,15 @@ class CampaignService:
                 influencer_basic_detail = self.influencer_repository.get_influencer_by_id(
                     influencer_id=campaign.influencer_id)
                 campaign_basic_detail = CampaignBasicDetail(id=campaign.id,
-                                                            created_at=campaign.created_at,
+                                                            last_updated_at=campaign.last_updated_at.strftime(
+                                                                "%d %b %Y"),
                                                             influencer_basic_detail=InfluencerBasicDetail(
-                                                                influencer_id=campaign.influencer_id,
-                                                                influencer_image=influencer_basic_detail.profile_picture,
+                                                                id=campaign.influencer_id,
+                                                                name=influencer_basic_detail.name,
+                                                                profile_picture=influencer_basic_detail.profile_picture,
                                                                 niche=influencer_basic_detail.niche,
-                                                                city=influencer_basic_detail.city
+                                                                city=influencer_basic_detail.city,
+                                                                profile_visited=True
                                                             ),
                                                             stage=campaign.stage,
                                                             status=campaign_stage_to_status(campaign.stage))
@@ -64,8 +66,9 @@ class CampaignService:
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                views_charge=influencer.views_charge,
-                content_charge=influencer.content_charge
+                views_charge=existing_campaign.views_charge,
+                content_charge=existing_campaign.content_charge,
+                profile_visited=True
             )
 
             content_post = ContentPost(
@@ -109,7 +112,7 @@ class CampaignService:
             return CampaignDetail(
                 id=existing_campaign.id,
                 last_updated_at=existing_campaign.last_updated_at,
-                campaign_managed_by=existing_campaign.last_updated_at,
+                campaign_managed_by=existing_campaign.campaign_managed_by,
                 influencer_basic_detail=influencer_basic_detail,
                 stage=existing_campaign.stage,
                 content_charge=existing_campaign.content_charge,

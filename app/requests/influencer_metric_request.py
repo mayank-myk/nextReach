@@ -9,11 +9,11 @@ class InfluencerMetricRequest(BaseModel):
     created_by: str = Field(..., min_length=3)
     influencer_id: int = Field(...)
     insta_followers: Optional[int] = Field(None, ge=0)
-    insta_city_1: Optional[City] = Field(None, ge=0)
+    insta_city_1: Optional[City] = None
     insta_city_pc_1: Optional[int] = Field(None, ge=0)
-    insta_city_2: Optional[City] = Field(None, ge=0)
+    insta_city_2: Optional[City] = None
     insta_city_pc_2: Optional[int] = Field(None, ge=0)
-    insta_city_3: Optional[City] = Field(None, ge=0)
+    insta_city_3: Optional[City] = None
     insta_city_pc_3: Optional[int] = Field(None, ge=0)
     insta_age_13_to_17: Optional[int] = Field(None, ge=0)
     insta_age_18_to_24: Optional[int] = Field(None, ge=0)
@@ -32,11 +32,11 @@ class InfluencerMetricRequest(BaseModel):
     insta_avg_shares: Optional[int] = Field(None, ge=0)
     insta_engagement_rate: Optional[int] = Field(None, ge=0)
     yt_followers: Optional[int] = Field(None, ge=0)
-    yt_city_1: Optional[int] = Field(None, ge=0)
+    yt_city_1: Optional[City] = None
     yt_city_pc_1: Optional[int] = Field(None, ge=0)
-    yt_city_2: Optional[int] = Field(None, ge=0)
+    yt_city_2: Optional[City] = None
     yt_city_pc_2: Optional[int] = Field(None, ge=0)
-    yt_city_3: Optional[int] = Field(None, ge=0)
+    yt_city_3: Optional[City] = None
     yt_city_pc_3: Optional[int] = Field(None, ge=0)
     yt_avg_views: Optional[int] = Field(None, ge=0)
     yt_max_views: Optional[int] = Field(None, ge=0)
@@ -47,11 +47,11 @@ class InfluencerMetricRequest(BaseModel):
     yt_avg_shares: Optional[int] = Field(None, ge=0)
     yt_engagement_rate: Optional[int] = Field(None, ge=0)
     fb_followers: Optional[int] = Field(None, ge=0)
-    fb_city_1: Optional[int] = Field(None, ge=0)
+    fb_city_1: Optional[City] = None
     fb_city_pc_1: Optional[int] = Field(None, ge=0)
-    fb_city_2: Optional[int] = Field(None, ge=0)
+    fb_city_2: Optional[City] = None
     fb_city_pc_2: Optional[int] = Field(None, ge=0)
-    fb_city_3: Optional[int] = Field(None, ge=0)
+    fb_city_3: Optional[City] = None
     fb_city_pc_3: Optional[int] = Field(None, ge=0)
     fb_avg_views: Optional[int] = Field(None, ge=0)
     fb_max_views: Optional[int] = Field(None, ge=0)

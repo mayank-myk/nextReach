@@ -19,7 +19,7 @@ class UpdateInfluencerRequest(BaseModel):
     email: Optional[str] = Field(None, max_length=255)
     address: Optional[str] = Field(None, max_length=255)
     profile_picture: Optional[str] = Field(None, min_length=5)
-    languages: Optional[List[Language]]
+    languages: Optional[List[Language]] = None
     next_reach_score: Optional[int] = Field(None, ge=0)
     age: Optional[int] = Field(None, ge=0)
     insta_username: Optional[str] = Field(None, max_length=255)
@@ -28,9 +28,9 @@ class UpdateInfluencerRequest(BaseModel):
     youtube_profile_link: Optional[str] = Field(None, max_length=255)
     fb_username: Optional[str] = Field(None, max_length=255)
     fb_profile_link: Optional[str] = Field(None, max_length=255)
-    niche: Optional[Niche]
-    city: Optional[City]
-    collab_type: Optional[CollabType]
+    niche: Optional[Niche] = None
+    city: Optional[City] = None
+    collab_type: Optional[CollabType] = None
     deliverables: Optional[List[str]] = None
     content_charge: Optional[int] = Field(None, ge=0)
     views_charge: Optional[int] = Field(None, ge=0)

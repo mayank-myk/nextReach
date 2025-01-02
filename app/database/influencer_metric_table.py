@@ -1,6 +1,8 @@
 import datetime
+
 from sqlalchemy import Column, String, DateTime, Integer, ForeignKey, CheckConstraint, Enum
 from sqlalchemy.orm import relationship
+
 from app.database.session import Base
 from app.enums.city import City
 
@@ -17,7 +19,7 @@ class InfluencerMetric(Base):
     last_updated_by = Column(String(255), nullable=False)
 
     # Foreign Key to Influencer
-    influencer_id = Column(String(13), ForeignKey('influencer.id'), nullable=False)
+    influencer_id = Column(Integer, ForeignKey('influencer.id'), nullable=False, index=True)
 
     # Social media data
     insta_followers = Column(Integer, CheckConstraint('insta_followers >= 0'), default=0)
@@ -25,7 +27,7 @@ class InfluencerMetric(Base):
     insta_city_pc_1 = Column(Integer, CheckConstraint('insta_city_pc_1 >= 0'), default=0)
     insta_city_2 = Column(Enum(City), nullable=True)
     insta_city_pc_2 = Column(Integer, CheckConstraint('insta_city_pc_2 >= 0'), default=0)
-    insta_city_3 = Column(Enum(City), Cnullable=True)
+    insta_city_3 = Column(Enum(City), nullable=True)
     insta_city_pc_3 = Column(Integer, CheckConstraint('insta_city_pc_3 >= 0'), default=0)
     insta_age_13_to_17 = Column(Integer, CheckConstraint('insta_age_13_to_17 >= 0'), default=0)
     insta_age_18_to_24 = Column(Integer, CheckConstraint('insta_age_18_to_24 >= 0'), default=0)
@@ -47,9 +49,9 @@ class InfluencerMetric(Base):
     yt_followers = Column(Integer, CheckConstraint('yt_followers >= 0'), default=0)
     yt_city_1 = Column(Enum(City), nullable=True)
     yt_city_pc_1 = Column(Integer, CheckConstraint('yt_city_pc_1 >= 0'), default=0)
-    yt_city_2 = Column(Enum(City),nullable=True)
+    yt_city_2 = Column(Enum(City), nullable=True)
     yt_city_pc_2 = Column(Integer, CheckConstraint('yt_city_pc_2 >= 0'), default=0)
-    yt_city_3 = Column(Enum(City),nullable=True)
+    yt_city_3 = Column(Enum(City), nullable=True)
     yt_city_pc_3 = Column(Integer, CheckConstraint('yt_city_pc_3 >= 0'), default=0)
     yt_avg_views = Column(Integer, CheckConstraint('yt_avg_views >= 0'), default=0)
     yt_max_views = Column(Integer, CheckConstraint('yt_max_views >= 0'), default=0)

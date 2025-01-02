@@ -39,8 +39,8 @@ class Influencer(Base):
     # Social profiles
     insta_username = Column(String(255), nullable=True)
     insta_profile_link = Column(String(1000), nullable=True)
-    youtube_username = Column(String(255), nullable=True)
-    youtube_profile_link = Column(String(1000), nullable=True)
+    yt_username = Column(String(255), nullable=True)
+    yt_profile_link = Column(String(1000), nullable=True)
     fb_username = Column(String(255), nullable=True)
     fb_profile_link = Column(String(1000), nullable=True)
 

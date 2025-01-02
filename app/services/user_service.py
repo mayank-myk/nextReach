@@ -87,9 +87,9 @@ class UserService:
     def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
         login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
-        user_record = self.user_repository.get_or_create_user_by_phone_number(phone_number=phone_number)
         if login_record:
             if login_record.otp == otp:
+                user_record = self.user_repository.get_or_create_user_by_phone_number(phone_number=phone_number)
                 return LoginResponse(user_id=user_record.id, success=True,
                                      message="OTP has been verified successfully", button_text="OKAY")
             elif (datetime.now() - login_record.created_at).total_seconds() > 600:

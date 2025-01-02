@@ -3,5 +3,5 @@ from pydantic import BaseModel
 
 class InfluencerCollabCharge(BaseModel):
     min: int
-    average: int
+    avg: int
     max: int

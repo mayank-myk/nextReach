@@ -11,6 +11,7 @@ class ProfileVisit(Base):
 
     id = Column(Integer, primary_key=True, autoincrement=True)
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
+    last_visited_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     influencer_id = Column(Integer, ForeignKey('influencer.id'), nullable=False, index=True)
     user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False, index=True)
     influencer = relationship("Influencer", back_populates="profile_visit")
