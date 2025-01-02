@@ -20,8 +20,8 @@ from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository
 from app.repository.user_repository import UserRepository
 from app.repository.wait_list_repository import WaitListRepository
-from app.requests.influencer_insights import InfluencerInsights
-from app.requests.waitlist_request import WaitListRequest
+from app.api_requests.influencer_insights import InfluencerInsights
+from app.api_requests.waitlist_request import WaitListRequest
 from app.response.facebook_detail import FacebookDetail
 from app.response.generic_response import GenericResponse
 from app.response.influencer_basic_detail import InfluencerBasicDetail

@@ -4,8 +4,8 @@ from sqlalchemy.orm import Session
 
 from app.database.user_table import User
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.profile_update import ProfileUpdate
-from app.requests.user_request import UserRequest
+from app.api_requests.profile_update import ProfileUpdate
+from app.api_requests.user_request import UserRequest
 from app.utils.config import get_config
 from app.utils.logger import configure_logger
 

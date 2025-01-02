@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database.admin_user_table import AdminUser
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.admin_user_request import AdminUserRequest
+from app.api_requests.admin_user_request import AdminUserRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()

@@ -8,11 +8,11 @@ from app.database.revenue_table import Revenue
 from app.database.session import DatabaseSessionManager
 from app.database.waitlist_table import WaitList
 from app.enums.status import Status
-from app.requests.admin_user_request import AdminUserRequest
-from app.requests.expense_request import ExpenseRequest
-from app.requests.login_request import LoginRequest
-from app.requests.revenue_request import RevenueRequest
-from app.requests.user_request import UserRequest
+from app.api_requests.admin_user_request import AdminUserRequest
+from app.api_requests.expense_request import ExpenseRequest
+from app.api_requests.login_request import LoginRequest
+from app.api_requests.revenue_request import RevenueRequest
+from app.api_requests.user_request import UserRequest
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
 from app.services.admin_service import AdminService

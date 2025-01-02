@@ -17,8 +17,8 @@ from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
 from app.enums.sort_applied import SortApplied
-from app.requests.influencer_insights import InfluencerInsights
-from app.requests.waitlist_request import WaitListRequest
+from app.api_requests.influencer_insights import InfluencerInsights
+from app.api_requests.waitlist_request import WaitListRequest
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing

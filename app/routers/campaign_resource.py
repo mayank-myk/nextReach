@@ -1,5 +1,5 @@
 from app.database.session import DatabaseSessionManager
-from app.requests.campaign_request import CampaignRequest
+from app.api_requests.campaign_request import CampaignRequest
 from app.response.generic_response import GenericResponse
 from app.services.campaign_service import CampaignService
 from app.utils.logger import configure_logger

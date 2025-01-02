@@ -3,10 +3,10 @@ import os
 from fastapi import APIRouter, Depends, UploadFile, File
 
 from app.database.session import DatabaseSessionManager
-from app.requests.influencer_metric_request import InfluencerMetricRequest
-from app.requests.influencer_request import InfluencerRequest
-from app.requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
-from app.requests.update_influencer_request import UpdateInfluencerRequest
+from app.api_requests.influencer_metric_request import InfluencerMetricRequest
+from app.api_requests.influencer_request import InfluencerRequest
+from app.api_requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
+from app.api_requests.update_influencer_request import UpdateInfluencerRequest
 from app.response.generic_response import GenericResponse
 from app.services.influencer_service import InfluencerService
 from app.utils.logger import configure_logger

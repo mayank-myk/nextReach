@@ -5,8 +5,8 @@ from sqlalchemy.orm import Session
 from app.database.campaign_table import Campaign
 from app.enums.campaign_stage import CampaignStage
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.campaign_request import CampaignRequest
-from app.requests.rate_campaign import RateCampaign
+from app.api_requests.campaign_request import CampaignRequest
+from app.api_requests.rate_campaign import RateCampaign
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
