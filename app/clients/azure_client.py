@@ -1,15 +1,17 @@
-import os
 from threading import Lock
 
 from azure.storage.blob import BlobServiceClient
 
-from app.utils.config import get_config
 from app.utils.logger import configure_logger
 
 logger = configure_logger()
 
 # Initialize Azure Blob Storage Client
-container_name = get_config("AZURE_CONTAINER_NAME")
+# container_name = get_config("AZURE_CONTAINER_NAME")
+# connection_string = get_config("AZURE_STORAGE_CONNECTION_STRING")
+
+container_name = "profile-picture"
+connection_string = "DefaultEndpointsProtocol=https;AccountName=nextreachblob;AccountKey=yAOzUPyHmPJyBoTj702xd/pvoKX9PWG9ZSxu0fg7u6mtOpy9dQ5X2cMGnQ9uG0xPxzffrhgSuq8E+AStyUeP5g==;EndpointSuffix=core.windows.net"
 
 
 class AzureBlobClient:
@@ -20,7 +22,6 @@ class AzureBlobClient:
         self._refresh_client()
 
     def _refresh_client(self):
-        connection_string = get_config("AZURE_STORAGE_CONNECTION_STRING")
         if not connection_string:
             raise ValueError("AZURE_STORAGE_CONNECTION_STRING is not set in env variables")
         self._client = BlobServiceClient.from_connection_string(connection_string)

@@ -2,10 +2,10 @@ from __future__ import print_function
 
 from app.clients.azure_client import upload_influencer_image
 from app.repository.influencer_repository import InfluencerRepository
-from app.requests.influencer_metric_request import InfluencerMetricRequest
-from app.requests.influencer_request import InfluencerRequest
-from app.requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
-from app.requests.update_influencer_request import UpdateInfluencerRequest
+from app.api_requests.influencer_metric_request import InfluencerMetricRequest
+from app.api_requests.influencer_request import InfluencerRequest
+from app.api_requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
+from app.api_requests.update_influencer_request import UpdateInfluencerRequest
 from app.response.generic_response import GenericResponse
 from app.utils.logger import configure_logger
 

@@ -5,7 +5,7 @@ from app.clients.interakt_client import send_otp_via_whatsapp
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.user_login_repository import UserLoginRepository
 from app.repository.user_repository import UserRepository
-from app.requests.profile_update import ProfileUpdate
+from app.api_requests.profile_update import ProfileUpdate
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
 from app.response.login_response import LoginResponse

@@ -2,12 +2,10 @@ from sqlalchemy import create_engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
-
-from app.utils.config import get_config
-
 MAX_POOL_CONN = 5
 MAX_OVERFLOW = 10
-DATABASE_URL = get_config("DATABASE_URL")
+# DATABASE_URL = get_config("DATABASE_URL")
+DATABASE_URL = "postgresql://mayank:NextReach1@nextreach-database.postgres.database.azure.com:5432/next-reach"
 
 # Create SQLAlchemy Engine and Session
 # engine = create_engine(DATABASE_URL, pool_size=MAX_POOL_CONN, max_overflow=10)

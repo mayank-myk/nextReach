@@ -5,8 +5,8 @@ from typing import List
 from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.influencer_repository import InfluencerRepository
-from app.requests.campaign_request import CampaignRequest
-from app.requests.rate_campaign import RateCampaign
+from app.api_requests.campaign_request import CampaignRequest
+from app.api_requests.rate_campaign import RateCampaign
 from app.response.campaign.billing_info import BillingInfo
 from app.response.campaign.campaign_billing import CampaignBilling
 from app.response.campaign.campaign_metrics import CampaignMetrics

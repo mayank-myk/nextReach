@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database.expense_table import Expense
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.expense_request import ExpenseRequest
+from app.api_requests.expense_request import ExpenseRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()

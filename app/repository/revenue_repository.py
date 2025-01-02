@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.database.revenue_table import Revenue
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.revenue_request import RevenueRequest
+from app.api_requests.revenue_request import RevenueRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()

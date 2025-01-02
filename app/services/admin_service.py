@@ -9,11 +9,11 @@ from app.repository.expense_repository import ExpenseRepository
 from app.repository.revenue_repository import RevenueRepository
 from app.repository.user_repository import UserRepository
 from app.repository.wait_list_repository import WaitListRepository
-from app.requests.admin_user_request import AdminUserRequest
-from app.requests.expense_request import ExpenseRequest
-from app.requests.login_request import LoginRequest
-from app.requests.revenue_request import RevenueRequest
-from app.requests.user_request import UserRequest
+from app.api_requests.admin_user_request import AdminUserRequest
+from app.api_requests.expense_request import ExpenseRequest
+from app.api_requests.login_request import LoginRequest
+from app.api_requests.revenue_request import RevenueRequest
+from app.api_requests.user_request import UserRequest
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
 from app.utils.logger import configure_logger

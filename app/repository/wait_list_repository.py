@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.database.waitlist_table import WaitList
 from app.enums.status import Status
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.waitlist_request import WaitListRequest
+from app.api_requests.waitlist_request import WaitListRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()

@@ -1,7 +1,7 @@
 import os
 
 # The port to bind Gunicorn to, typically set via environment variable or default to 80
-port = os.getenv("PORT", "80")
+port = os.getenv("PORT", "8000")
 
 # Maximum number of requests a worker can handle before being restarted
 max_requests = 0  # Set to 0 for no limit, or specify a number for controlled restarts

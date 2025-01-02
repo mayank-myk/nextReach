@@ -5,8 +5,7 @@ set -e
 cd $APP_HOME
 
 # Run Gunicorn using the custom worker from server.py
-exec gunicorn server:app \
-  -k server.AsyncioUvicornWorker \
+exec gunicorn server:server \
+  -k uvicorn.workers.UvicornWorker \
   --config ./gunicorn_config.py \
   "$@"
-

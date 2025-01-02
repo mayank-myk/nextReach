@@ -1,17 +1,17 @@
 import requests
 
-from app.utils.config import get_config
 from app.utils.logger import configure_logger
 
 logger = configure_logger()
-API_KEY = "Basic " + get_config("INTERAKT_API_KEY")
+# INTERAKT_API_KEY = get_config("INTERAKT_API_KEY")
+INTERAKT_API_KEY = "bGJEM09RRE0zTlp1bVplRURESUlQZnA3LXNYY3B4WExCOWJXMG1PZ0ZNazo="
 
 
 def send_otp_via_whatsapp(phone_number: str, otp: str):
     API_URL = "https://api.interakt.ai/v1/public/message/"
 
     headers = {
-        "Authorization": API_KEY,
+        "Authorization": "Basic " + INTERAKT_API_KEY,
         "Content-Type": "application/json"
     }
 

@@ -19,10 +19,10 @@ from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.requests.influencer_metric_request import InfluencerMetricRequest
-from app.requests.influencer_request import InfluencerRequest
-from app.requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
-from app.requests.update_influencer_request import UpdateInfluencerRequest
+from app.api_requests.influencer_metric_request import InfluencerMetricRequest
+from app.api_requests.influencer_request import InfluencerRequest
+from app.api_requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
+from app.api_requests.update_influencer_request import UpdateInfluencerRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()

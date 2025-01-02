@@ -238,13 +238,13 @@ aio = ["aiohttp (>=3.0)"]
 
 [[package]]
 name = "azure-storage-blob"
-version = "12.24.0"
+version = "12.23.0"
 description = "Microsoft Azure Blob Storage Client Library for Python"
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "azure_storage_blob-12.24.0-py3-none-any.whl", hash = "sha256:4f0bb4592ea79a2d986063696514c781c9e62be240f09f6397986e01755bc071"},
-    {file = "azure_storage_blob-12.24.0.tar.gz", hash = "sha256:eaaaa1507c8c363d6e1d1342bd549938fdf1adec9b1ada8658c8f5bf3aea844e"},
+    {file = "azure_storage_blob-12.23.0-py3-none-any.whl", hash = "sha256:8ac4b34624ed075eda1e38f0c6dadb601e1b199e27a09aa63edc429bf4a23329"},
+    {file = "azure_storage_blob-12.23.0.tar.gz", hash = "sha256:2fadbceda1d99c4a72dfd32e0122d7bca8b5e8d2563f5c624d634aeaff49c9df"},
 ]
 
 [package.dependencies]
@@ -1795,13 +1795,13 @@ files = [
 
 [[package]]
 name = "requests"
-version = "2.32.3"
+version = "2.31.0"
 description = "Python HTTP for Humans."
 optional = false
-python-versions = ">=3.8"
+python-versions = ">=3.7"
 files = [
-    {file = "requests-2.32.3-py3-none-any.whl", hash = "sha256:70761cfe03c773ceb22aa2f671b4757976145175cdfca038c02654d061d6dcc6"},
-    {file = "requests-2.32.3.tar.gz", hash = "sha256:55365417734eb18255590a9ff9eb97e9e1da868d4ccd6402399eaf68af20a760"},
+    {file = "requests-2.31.0-py3-none-any.whl", hash = "sha256:58cd2187c01e70e6e26505bca751777aa9f2ee0b7f4300988b709f44e013003f"},
+    {file = "requests-2.31.0.tar.gz", hash = "sha256:942c5a758f98d790eaed1a29cb6eefc7ffb0d1cf7af05c3d2791656dbd6ad1e1"},
 ]
 
 [package.dependencies]
@@ -2230,5 +2230,5 @@ type = ["pytest-mypy"]
 
 [metadata]
 lock-version = "2.0"
-python-versions = "^3.11"
-content-hash = "8bf6cd0b542a798fd1fa2cc1cff02fd15ced416faac00c28f32ae0558945877a"
+python-versions = "3.11.11"
+content-hash = "68afd366846a6264e7f65d5b9567addd6c9df1bcf6e47c4f12763de579c25ba3"
