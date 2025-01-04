@@ -1,11 +1,11 @@
 from __future__ import print_function
 
-from app.clients.azure_client import upload_influencer_image
-from app.repository.influencer_repository import InfluencerRepository
 from app.api_requests.influencer_metric_request import InfluencerMetricRequest
 from app.api_requests.influencer_request import InfluencerRequest
 from app.api_requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
 from app.api_requests.update_influencer_request import UpdateInfluencerRequest
+from app.clients.azure_client import upload_influencer_image
+from app.repository.influencer_repository import InfluencerRepository
 from app.response.generic_response import GenericResponse
 from app.utils.logger import configure_logger
 
@@ -19,14 +19,14 @@ class InfluencerService:
     def create_influencer(self, request: InfluencerRequest) -> GenericResponse:
         try:
             new_influencer = self.influencer_repository.create_influencer(request)
-            return GenericResponse(success=True, button_text=None,
+            return GenericResponse(success=True,
                                    message="Influencer created successfully, with influencer_id {}".format(
                                        new_influencer.id))
 
         except Exception as e:
             _log.error(
                 f"Error occurred while creating new Influencer. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="Something went wrong while creating new Influencer")
 
     def upload_image(self, influencer_id: int, image_file) -> GenericResponse:
@@ -36,16 +36,16 @@ class InfluencerService:
                 influencer_id=influencer_id,
                 profile_picture_path=image_url)
             if influencer_found:
-                return GenericResponse(success=True, button_text=None,
+                return GenericResponse(success=True,
                                        message="Successfully updated profile picture for influencer having influencer_id: {}".format(
                                            influencer_id))
             else:
-                return GenericResponse(success=False, button_text=None,
+                return GenericResponse(success=False,
                                        message="No influencer found for given influencer_id")
         except Exception as e:
             _log.error(
                 f"Error occurred while creating new Influencer, influencer_id. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="Something went wrong while creating new Influencer")
 
     def update_influencer(self, influencer_id: int, request: UpdateInfluencerRequest) -> GenericResponse:
@@ -53,12 +53,12 @@ class InfluencerService:
                                                                       influencer_request=request)
 
         if new_influencer:
-            return GenericResponse(success=True, button_text=None,
+            return GenericResponse(success=True,
                                    message="Successfully updated details for influencer having influencer_id: {}".format(
                                        influencer_id))
         else:
             _log.info("No record found for influencer with id {}".format(influencer_id))
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="No influencer found for given influencer_id")
 
     def create_influencer_metric(self, request: InfluencerMetricRequest) -> GenericResponse:
@@ -66,16 +66,16 @@ class InfluencerService:
             new_influencer_metric = self.influencer_repository.create_influencer_metric(request)
 
             if new_influencer_metric:
-                return GenericResponse(success=True, button_text=None,
+                return GenericResponse(success=True,
                                        message="Influencer metrics created successfully, with influencer_metric_id {}".format(
                                            new_influencer_metric.id))
             else:
-                return GenericResponse(success=False, button_text=None,
+                return GenericResponse(success=False,
                                        message="Unable to create new influencer_metric")
         except Exception as e:
             _log.error(
                 f"Error occurred while creating new influencer_metric. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message=f"Something went wrong while creating new influencer_metric")
 
     def update_influencer_metric(self, influencer_metric_id: int,
@@ -86,10 +86,10 @@ class InfluencerService:
             influencer_metric_request=request)
 
         if new_influencer_metric:
-            return GenericResponse(success=True, button_text=None,
+            return GenericResponse(success=True,
                                    message="Successfully updated influencer_metrics having influencer_metric_id: {}".format(
                                        influencer_metric_id))
         else:
             _log.info("No record found for influencer_metric with id {}".format(influencer_metric_id))
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="No influencer_metric found for given influencer_metric_id")

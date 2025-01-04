@@ -52,7 +52,7 @@ class CampaignService:
 
         except Exception as e:
             _log.error(f"Error occurred while fetching campaigns for user_id: {user_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False, 
                                    message="Something went wrong while fetching your campaigns, please report the issue")
 
     def get_user_campaign_detail(self, campaign_id: int) -> CampaignDetail | GenericResponse:
@@ -132,7 +132,7 @@ class CampaignService:
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching campaigns details for campaign_id: {campaign_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False, 
                                    message="Something went wrong while rating the campaign, campaign_id {}".format(
                                        campaign_id))
 
@@ -141,47 +141,47 @@ class CampaignService:
             existing_campaign = self.campaign_repository.create_campaign_rating(request)
 
             if not existing_campaign:
-                return GenericResponse(success=False, button_text=None,
+                return GenericResponse(success=False, 
                                        message="No Campaign found for campaign_id {}".format(request.campaign_id))
             else:
                 if existing_campaign.status != Status.COMPLETED:
-                    return GenericResponse(success=False, button_text=None,
+                    return GenericResponse(success=False, 
                                            message="You can only rate once campaign is completed")
                 elif existing_campaign.user.id != request.user_id:
-                    return GenericResponse(success=False, button_text=None,
+                    return GenericResponse(success=False, 
                                            message="You can only rate the campaigns started by you")
                 else:
-                    return GenericResponse(success=True, button_text=None,
+                    return GenericResponse(success=True, 
                                            message="Campaign rated successfully, campaign_id {}".format(
                                                request.campaign_id))
 
         except Exception as e:
             _log.error(
                 f"Error occurred while rating campaign, campaign_id: {request.campaign_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False, 
                                    message="Something went wrong while rating the campaign, campaign_id {}".format(
                                        request.campaign_id))
 
     def create_campaign(self, request: CampaignRequest) -> GenericResponse:
         try:
             db_campaign = self.campaign_repository.create_campaign(request)
-            return GenericResponse(success=True, button_text=None,
+            return GenericResponse(success=True, 
                                    message="Campaign created successfully, with campaign_id {}".format(
                                        db_campaign.id))
         except Exception as e:
             _log.error(
                 f"Error occurred while creating campaign. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False, 
                                    message="Campaign creation failed")
 
     def update_campaign(self, campaign_id: int, request: CampaignRequest) -> GenericResponse:
         db_campaign = self.campaign_repository.update_campaign(campaign_id, request)
 
         if db_campaign:
-            return GenericResponse(success=True, button_text=None,
+            return GenericResponse(success=True, 
                                    message="Campaign updated successfully, campaign_id {}".format(
                                        db_campaign.id))
         else:
             _log.info("No record found for campaign_id {}".format(campaign_id))
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False, 
                                    message="No campaign found for given campaign_id")

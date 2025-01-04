@@ -1,11 +1,11 @@
 from datetime import datetime
 from typing import List
 
+from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.user_login_repository import UserLoginRepository
 from app.repository.user_repository import UserRepository
-from app.api_requests.profile_update import ProfileUpdate
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
 from app.response.login_response import LoginResponse
@@ -42,27 +42,27 @@ class UserService:
                     fb_username=user_profile.fb_username)
             else:
                 _log.info("No record found for user_profile with user_id {}".format(user_id))
-                return GenericResponse(success=False, button_text=None,
+                return GenericResponse(success=False,
                                        message="No user profile found for given user_id")
         except Exception as e:
             _log.error(f"Error occurred while fetching profile for user_id: {user_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="Something went wrong while fetching user profile")
 
     def update_user_profile(self, user_id: int, profile: ProfileUpdate) -> GenericResponse:
         try:
             user_profile = self.user_repository.update_user_from_user(user_id=user_id, request=profile)
             if user_profile:
-                return GenericResponse(success=True, button_text=None,
+                return GenericResponse(success=True,
                                        message="User profile updated successfully")
             else:
                 _log.info("No record found for user_profile with user_id {}".format(user_id))
-                return GenericResponse(success=False, button_text=None,
+                return GenericResponse(success=False,
                                        message="No user profile found for given user_id")
 
         except Exception as e:
             _log.error(f"Error occurred while updating profile for user_id: {user_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
@@ -119,10 +119,10 @@ class UserService:
         try:
             db_collab = self.campaign_repository.create_collab_campaign(user_id=user_id,
                                                                         influencer_id=influencer_id)
-            return GenericResponse(success=True, button_text=None,
+            return GenericResponse(success=True,
                                    message="Collab created successfully, Our team will get back to you soon")
         except Exception as e:
             _log.error(
                 f"Error occurred while creating collaboration request for user_id: {user_id}, influencer_id: {influencer_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text=None,
+            return GenericResponse(success=False,
                                    message="Collaboration request failed, please retry")
