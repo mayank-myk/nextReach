@@ -47,7 +47,7 @@ class AdminService:
         new_admin_user = self.admin_user_repository.create_admin(request=new_user)
 
         if new_admin_user:
-            return GenericResponse(success=True, message="Successfully created new admin")
+            return GenericResponse(success=True, header="Success", message="Successfully created new admin")
         else:
             return GenericResponse(success=False, message="Unable to create new admin")
 
@@ -55,7 +55,7 @@ class AdminService:
         new_admin_user = self.admin_user_repository.update_admin(request=user)
 
         if new_admin_user:
-            return GenericResponse(success=True, message="Update successful")
+            return GenericResponse(success=True, header="Success", message="Update successful")
         else:
             _log.info("No record found for admin with admin_id {}".format(user.admin_id))
             return GenericResponse(success=False, message="No admin found for given admin_id")
@@ -64,7 +64,7 @@ class AdminService:
         admin_user = self.admin_user_repository.delete_admin(admin_id=admin_id)
 
         if admin_user:
-            return GenericResponse(success=True, message="Successfully deleted the admin")
+            return GenericResponse(success=True, header="Success", message="Successfully deleted the admin")
         else:
             _log.info("No record found for admin with admin_id {}".format(admin_id))
             return GenericResponse(success=False, message="No admin found for given admin_id")
@@ -73,7 +73,7 @@ class AdminService:
         new_revenue = self.revenue_repository.create_revenue(request=request)
 
         if new_revenue:
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message=f"Successfully created new revenue with revenue_id: {new_revenue.id}")
         else:
             return GenericResponse(success=False, message="Unable to create new revenue")
@@ -82,7 +82,7 @@ class AdminService:
         new_revenue = self.revenue_repository.update_revenue(revenue_id=revenue_id, request=request)
 
         if new_revenue:
-            return GenericResponse(success=True, message="Successfully updated revenue")
+            return GenericResponse(success=True, header="Success", message="Successfully updated revenue")
         else:
             _log.info("No record found for revenue with revenue_id {}".format(revenue_id))
             return GenericResponse(success=False,
@@ -102,7 +102,7 @@ class AdminService:
         new_expense = self.expense_repository.create_expense(request=request)
 
         if new_expense:
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message=f"Successfully created new expense with expense_id: {new_expense.id}")
         else:
             return GenericResponse(success=False, message="Unable to create new expense")
@@ -111,7 +111,7 @@ class AdminService:
         new_expense = self.expense_repository.update_expense(expense_id=expense_id, request=request)
 
         if new_expense:
-            return GenericResponse(success=True, message="Successfully updated expense")
+            return GenericResponse(success=True, header="Success", message="Successfully updated expense")
         else:
             _log.info("No record found for expense with expense_id {}".format(expense_id))
             return GenericResponse(success=False,
@@ -131,7 +131,7 @@ class AdminService:
         new_user = self.user_repository.create_user_from_admin(request=request)
 
         if new_user:
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message=f"Successfully created new business user with user_id: {new_user.id}")
         else:
             _log.info("Unable to create new business user with phone_number {}".format(request.phone_number))
@@ -141,7 +141,7 @@ class AdminService:
         new_user = self.user_repository.update_user_from_admin(user_id=user_id, request=request)
 
         if new_user:
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message=f"Successfully updated business user with user_id: {user_id}")
         else:
             _log.info("No record found for user with user_id {}".format(user_id))
@@ -152,7 +152,7 @@ class AdminService:
         wait_list = self.wait_list_user_repository.update_wait_list_status(wait_list_id=wait_list_id, status=status)
 
         if wait_list:
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message=f"Successfully updated lead status for wait_list_id: {wait_list_id}")
         else:
             _log.info("No record found for wait_list with wait_list_id {}".format(wait_list_id))

@@ -284,13 +284,16 @@ class WebService:
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching influencer details for influencer_id: {request.influencer_id}. Error: {str(e)}")
-            return GenericResponse(success=False, button_text="RETRY",
+            return GenericResponse(success=False, button_text="Retry",
                                    message="Something went wrong while fetching influencer details")
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
 
         if wait_list:
-            return GenericResponse(success=True, message=None)
+            return GenericResponse(success=True,
+                                   message="Our team will be in touch with you shortly. Thank you for your patience",
+                                   header="Congratulations!", button_text="Continue")
         else:
-            return GenericResponse(success=False, message="Unable to create new wait_list")
+            return GenericResponse(success=False, message="Something went wrong while create your wait_list",
+                                   button_text="Retry")

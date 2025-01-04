@@ -16,8 +16,6 @@ class CampaignDetail(BaseModel):
     campaign_managed_by: Optional[str] = None
     influencer_basic_detail: InfluencerBasicDetail
     stage: CampaignStage
-    content_charge: Optional[int] = None
-    views_charge: Optional[int] = None
     type_of_content: Optional[ContentType] = None
     rating: Optional[int] = None
     review: Optional[str] = None

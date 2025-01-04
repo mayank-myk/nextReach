@@ -46,7 +46,7 @@ class InfluencerService:
             _log.error(
                 f"Error occurred while creating new Influencer, influencer_id. Error: {str(e)}")
             return GenericResponse(success=False,
-                                   message="Something went wrong while creating new Influencer")
+                                   message="Something went wrong while uploading Influencer Image")
 
     def update_influencer(self, influencer_id: int, request: UpdateInfluencerRequest) -> GenericResponse:
         new_influencer = self.influencer_repository.update_influencer(influencer_id=influencer_id,

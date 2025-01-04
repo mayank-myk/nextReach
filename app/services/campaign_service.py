@@ -2,11 +2,12 @@ from __future__ import print_function
 
 from typing import List
 
+from app.api_requests.campaign_request import CampaignRequest
+from app.api_requests.rate_campaign import RateCampaign
+from app.enums.campaign_stage import CampaignStage
 from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.influencer_repository import InfluencerRepository
-from app.api_requests.campaign_request import CampaignRequest
-from app.api_requests.rate_campaign import RateCampaign
 from app.response.campaign.billing_info import BillingInfo
 from app.response.campaign.campaign_billing import CampaignBilling
 from app.response.campaign.campaign_metrics import CampaignMetrics
@@ -44,7 +45,6 @@ class CampaignService:
                                                                 city=influencer_basic_detail.city,
                                                                 profile_visited=True
                                                             ),
-                                                            stage=campaign.stage,
                                                             status=campaign_stage_to_status(campaign.stage))
                 campaign_basic_details.append(campaign_basic_detail)
 
@@ -52,8 +52,8 @@ class CampaignService:
 
         except Exception as e:
             _log.error(f"Error occurred while fetching campaigns for user_id: {user_id}. Error: {str(e)}")
-            return GenericResponse(success=False, 
-                                   message="Something went wrong while fetching your campaigns, please report the issue")
+            return GenericResponse(success=False, button_text="Try Again",
+                                   message="Something went wrong while retrieving your campaigns")
 
     def get_user_campaign_detail(self, campaign_id: int) -> CampaignDetail | GenericResponse:
         try:
@@ -82,6 +82,7 @@ class CampaignService:
                     billing_payment_status=existing_campaign.content_billing_payment_status
                 )
             )
+
             first_billing = CampaignBilling(
                 campaign_metrics=CampaignMetrics(
                     views=existing_campaign.first_billing_views,
@@ -95,6 +96,7 @@ class CampaignService:
                     billing_payment_status=existing_campaign.first_billing_payment_status
                 )
             )
+
             second_billing = CampaignBilling(
                 campaign_metrics=CampaignMetrics(
                     views=existing_campaign.second_billing_views,
@@ -108,80 +110,165 @@ class CampaignService:
                     billing_payment_status=existing_campaign.second_billing_payment_status
                 )
             )
-
-            return CampaignDetail(
-                id=existing_campaign.id,
-                last_updated_at=existing_campaign.last_updated_at,
-                campaign_managed_by=existing_campaign.campaign_managed_by,
-                influencer_basic_detail=influencer_basic_detail,
-                stage=existing_campaign.stage,
-                content_charge=existing_campaign.content_charge,
-                views_charge=existing_campaign.views_charge,
-                type_of_content=existing_campaign.type_of_content,
-                campaign_notes=existing_campaign.campaign_notes,
-                rating=existing_campaign.rating,
-                review=existing_campaign.review,
-                influencer_finalization_date=existing_campaign.influencer_finalization_date,
-                content_shoot_date=existing_campaign.content_shoot_date,
-                content_post=content_post,
-                first_billing=first_billing,
-                second_billing=second_billing,
-                post_insights=existing_campaign.post_insights,
-                pending_deliverables=existing_campaign.pending_deliverables
-            )
+            if existing_campaign.stage == CampaignStage.CREATED:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    pending_deliverables=existing_campaign.pending_deliverables
+                )
+            elif existing_campaign.stage == CampaignStage.INFLUENCER_FINALIZATION:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    pending_deliverables=existing_campaign.pending_deliverables
+                )
+            elif existing_campaign.stage == CampaignStage.SHOOT:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    content_shoot_date=existing_campaign.content_shoot_date,
+                    pending_deliverables=existing_campaign.pending_deliverables
+                )
+            elif existing_campaign.stage == CampaignStage.POST:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    content_shoot_date=existing_campaign.content_shoot_date,
+                    content_post=content_post,
+                    pending_deliverables=existing_campaign.pending_deliverables
+                )
+            elif existing_campaign.stage == CampaignStage.FIRST_BILLING:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    content_shoot_date=existing_campaign.content_shoot_date,
+                    content_post=content_post,
+                    first_billing=first_billing,
+                    pending_deliverables=existing_campaign.pending_deliverables
+                )
+            elif existing_campaign.stage == CampaignStage.SECOND_BILLING:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    content_shoot_date=existing_campaign.content_shoot_date,
+                    content_post=content_post,
+                    second_billing=second_billing,
+                    pending_deliverables=existing_campaign.pending_deliverables,
+                    post_insights=existing_campaign.post_insights
+                )
+            elif existing_campaign.stage == CampaignStage.COMPLETED:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    content_shoot_date=existing_campaign.content_shoot_date,
+                    content_post=content_post,
+                    second_billing=second_billing,
+                    pending_deliverables=existing_campaign.pending_deliverables,
+                    post_insights=existing_campaign.post_insights,
+                    rating=existing_campaign.rating,
+                    review=existing_campaign.review,
+                )
+            else:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes
+                )
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching campaigns details for campaign_id: {campaign_id}. Error: {str(e)}")
-            return GenericResponse(success=False, 
-                                   message="Something went wrong while rating the campaign, campaign_id {}".format(
-                                       campaign_id))
+            return GenericResponse(success=False, button_text="Try Again",
+                                   message="Something went wrong while retrieving campaign details")
 
     def rate_campaign(self, request: RateCampaign) -> GenericResponse:
         try:
             existing_campaign = self.campaign_repository.create_campaign_rating(request)
 
             if not existing_campaign:
-                return GenericResponse(success=False, 
-                                       message="No Campaign found for campaign_id {}".format(request.campaign_id))
+                return GenericResponse(success=False, button_text="Understood",
+                                       message="No campaign found with the provided details")
             else:
                 if existing_campaign.status != Status.COMPLETED:
-                    return GenericResponse(success=False, 
-                                           message="You can only rate once campaign is completed")
+                    return GenericResponse(success=False, button_text="Understood",
+                                           message="You can only submit a rating once the campaign has been completed")
                 elif existing_campaign.user.id != request.user_id:
-                    return GenericResponse(success=False, 
-                                           message="You can only rate the campaigns started by you")
+                    return GenericResponse(success=False, button_text="Understood",
+                                           message="You can only rate campaigns that you have initiated")
                 else:
-                    return GenericResponse(success=True, 
-                                           message="Campaign rated successfully, campaign_id {}".format(
-                                               request.campaign_id))
+                    return GenericResponse(success=True, header="Thanks!", button_text="Go Back",
+                                           message="Your feedback helps us improve the platform and provide better experiences for all users.")
 
         except Exception as e:
             _log.error(
                 f"Error occurred while rating campaign, campaign_id: {request.campaign_id}. Error: {str(e)}")
-            return GenericResponse(success=False, 
-                                   message="Something went wrong while rating the campaign, campaign_id {}".format(
-                                       request.campaign_id))
+            return GenericResponse(success=False, button_text="Retry",
+                                   message="Something went wrong while rating the campaign")
 
     def create_campaign(self, request: CampaignRequest) -> GenericResponse:
         try:
             db_campaign = self.campaign_repository.create_campaign(request)
-            return GenericResponse(success=True, 
+            return GenericResponse(success=True,
                                    message="Campaign created successfully, with campaign_id {}".format(
                                        db_campaign.id))
         except Exception as e:
             _log.error(
                 f"Error occurred while creating campaign. Error: {str(e)}")
-            return GenericResponse(success=False, 
+            return GenericResponse(success=False,
                                    message="Campaign creation failed")
 
     def update_campaign(self, campaign_id: int, request: CampaignRequest) -> GenericResponse:
         db_campaign = self.campaign_repository.update_campaign(campaign_id, request)
 
         if db_campaign:
-            return GenericResponse(success=True, 
+            return GenericResponse(success=True,
                                    message="Campaign updated successfully, campaign_id {}".format(
                                        db_campaign.id))
         else:
             _log.info("No record found for campaign_id {}".format(campaign_id))
-            return GenericResponse(success=False, 
+            return GenericResponse(success=False,
                                    message="No campaign found for given campaign_id")

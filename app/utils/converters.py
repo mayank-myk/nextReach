@@ -3,7 +3,9 @@ from app.enums.status import Status
 
 
 def campaign_stage_to_status(stage: CampaignStage) -> Status:
-    if stage == CampaignStage.INFLUENCER_FINALIZATION:
+    if stage == CampaignStage.CREATED:
+        return Status.PROCESSING
+    elif stage == CampaignStage.INFLUENCER_FINALIZATION:
         return Status.PROCESSING
     elif stage == CampaignStage.SHOOT:
         return Status.IN_PROGRESS

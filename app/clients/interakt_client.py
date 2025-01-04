@@ -51,7 +51,7 @@ def send_text_via_whatsapp(phone_number: str, otp: str):
     API_URL = "https://api.interakt.ai/v1/public/message/"
 
     headers = {
-        "Authorization": f"Basic {API_KEY}",
+        "Authorization": f"Basic {INTERAKT_API_KEY}",
         "Content-Type": "application/json"
     }
 
