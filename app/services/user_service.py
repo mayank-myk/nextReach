@@ -5,6 +5,7 @@ from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp
 from app.enums.campaign_stage import CampaignStage
 from app.repository.campaign_repository import CampaignRepository
+from app.repository.influencer_repository import InfluencerRepository
 from app.repository.user_login_repository import UserLoginRepository
 from app.repository.user_repository import UserRepository
 from app.response.generic_response import GenericResponse
@@ -22,6 +23,7 @@ class UserService:
         self.user_login_repository = UserLoginRepository(session)
         self.user_repository = UserRepository(session)
         self.campaign_repository = CampaignRepository(session)
+        self.influencer_repository = InfluencerRepository(session)
 
     def get_user_profile(self, user_id: int) -> UserProfile | GenericResponse:
         try:
@@ -131,8 +133,8 @@ class UserService:
                     return GenericResponse(success=False, button_text="Understood",
                                            message="You already have an ongoing campaign with this influencer")
 
-            db_collab = self.campaign_repository.create_collab_campaign(user_id=user_id,
-                                                                        influencer_id=influencer_id)
+            influencer = self.influencer_repository.get_influencer_by_id(influencer_id=influencer_id)
+            db_collab = self.campaign_repository.create_collab_campaign(user_id=user_id, influencer=influencer)
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
                                    message="Collaboration created successfully! Our team will reach out to you shortly")
@@ -140,4 +142,4 @@ class UserService:
             _log.error(
                 f"Error occurred while creating collaboration request for user_id: {user_id}, influencer_id: {influencer_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text="Try Again",
-                                   message="Something went wrong with your collaboration request")
+                                   message="Something went wrong while requesting collaboration")

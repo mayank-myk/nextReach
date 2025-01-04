@@ -2,11 +2,12 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
-from app.database.campaign_table import Campaign
-from app.enums.campaign_stage import CampaignStage
-from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
+from app.database.campaign_table import Campaign
+from app.database.influencer_table import Influencer
+from app.enums.campaign_stage import CampaignStage
+from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -65,13 +66,15 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def create_collab_campaign(self, user_id: int, influencer_id: int) -> Campaign:
+    def create_collab_campaign(self, user_id: int, influencer: Influencer) -> Campaign:
 
         new_campaign = Campaign(
             created_by="user_id_" + str(user_id),
             campaign_managed_by="user_id_" + str(user_id),
             last_updated_by=user_id,
-            influencer_id=influencer_id,
+            influencer_id=influencer.id,
+            content_charge=influencer.content_charge,
+            views_charge=influencer.views_charge,
             user_id=user_id,
             stage=CampaignStage.CREATED
         )

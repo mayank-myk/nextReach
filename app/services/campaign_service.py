@@ -58,6 +58,10 @@ class CampaignService:
     def get_user_campaign_detail(self, campaign_id: int) -> CampaignDetail | GenericResponse:
         try:
             existing_campaign = self.campaign_repository.get_campaign_by_id(campaign_id)
+            if not existing_campaign:
+                return GenericResponse(success=False, button_text="Understood",
+                                       message="No campaign details found")
+
             influencer = existing_campaign.influencer
 
             influencer_basic_detail = InfluencerBasicDetail(
