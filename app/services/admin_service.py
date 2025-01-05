@@ -128,6 +128,10 @@ class AdminService:
                                    message="No record found for expense at all")
 
     def create_user(self, request: UserRequest) -> GenericResponse:
+        existing_user = self.user_repository.get_user_by_phone_number(phone_number=request.phone_number)
+        if existing_user:
+            return GenericResponse(success=True, header="Success",
+                                   message=f"Business user with phone_number: {request.phone_number} already exists")
         new_user = self.user_repository.create_user_from_admin(request=request)
 
         if new_user:

@@ -29,7 +29,7 @@ class CampaignService:
 
     def get_user_campaign_all(self, user_id: int) -> List[CampaignBasicDetail] | GenericResponse:
         try:
-            all_campaigns = self.campaign_repository.get_all_campaign_for_a_user(user_id)
+            all_campaigns = self.campaign_repository.get_all_campaign_by_an_user(user_id)
             campaign_basic_details = []
             for campaign in all_campaigns:
                 influencer_basic_detail = self.influencer_repository.get_influencer_by_id(

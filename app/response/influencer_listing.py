@@ -10,7 +10,8 @@ from app.response.search_filter import SearchFilter
 class InfluencerListing(BaseModel):
     user_id: int
     coin_balance: int
-    influencer_list: List[InfluencerBasicDetail]
+    matched_influencer_list: List[InfluencerBasicDetail]
+    unmatched_influencer_list: List[InfluencerBasicDetail]
     filters_applied: SearchFilter
     sorting_applied: Optional[SortApplied]
     page_number: int

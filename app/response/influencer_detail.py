@@ -1,4 +1,3 @@
-import datetime
 from typing import List, Optional
 
 from pydantic import BaseModel
@@ -11,17 +10,19 @@ from app.enums.niche import Niche
 from app.enums.platform import Platform
 from app.response.influencer_collab_charge import InfluencerCollabCharge
 from app.response.influencer_metric_detail import InfluencerMetricDetail
+from app.response.influencer_review import InfluencerReview
 
 
 class InfluencerDetail(BaseModel):
     id: int
-    last_updated_at: datetime.datetime
-    collaboration_request_raised: bool
+    last_updated_at: str
+    collaboration_ongoing: bool
     primary_platform: Platform
     name: str
-    gender: Gender
+    gender: Optional[Gender] = None
     profile_picture: str
     languages: List[Language] = None
+    age: int
     next_reach_score: int
     niche: Niche
     city: City
@@ -29,5 +30,6 @@ class InfluencerDetail(BaseModel):
     deliverables: Optional[List[str]] = None
     content_charge: int
     views_charge: int
-    collab_charge: InfluencerCollabCharge
+    collab_charge: Optional[InfluencerCollabCharge] = None
     platform_details: InfluencerMetricDetail
+    influencer_review: Optional[InfluencerReview] = None

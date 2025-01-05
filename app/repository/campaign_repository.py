@@ -239,9 +239,13 @@ class CampaignRepository:
     def get_campaign_by_id(self, campaign_id: int) -> Campaign:
         return self.db.query(Campaign).filter(Campaign.id == campaign_id).first()
 
-    def get_all_campaign_for_a_user(self, user_id: int) -> List[Campaign]:
+    def get_all_campaign_by_an_user(self, user_id: int) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.user_id == user_id).all()
 
     def get_all_running_campaign_with_an_influencer(self, user_id: int, influencer_id: int) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.user_id == user_id).filter(
             Campaign.influencer_id == influencer_id).all()
+
+    def get_all_completed_campaign_for_an_influencer(self, influencer_id: int) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.influencer_id == influencer_id).filter(
+            Campaign.stage == CampaignStage.COMPLETED).all()

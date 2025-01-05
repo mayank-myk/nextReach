@@ -5,6 +5,8 @@ from app.api_requests.influencer_request import InfluencerRequest
 from app.api_requests.update_influencer_metric_request import UpdateInfluencerMetricRequest
 from app.api_requests.update_influencer_request import UpdateInfluencerRequest
 from app.clients.azure_client import upload_influencer_image
+from app.database.influencer_metric_table import InfluencerMetric
+from app.database.influencer_table import Influencer
 from app.repository.influencer_repository import InfluencerRepository
 from app.response.generic_response import GenericResponse
 from app.utils.logger import configure_logger
@@ -93,3 +95,23 @@ class InfluencerService:
             _log.info("No record found for influencer_metric with id {}".format(influencer_metric_id))
             return GenericResponse(success=False,
                                    message="No influencer_metric found for given influencer_metric_id")
+
+    def get_influencer_detail(self, influencer_id: int) -> Influencer | GenericResponse:
+        influencer = self.influencer_repository.get_influencer_by_id(influencer_id=influencer_id)
+
+        if not influencer:
+            _log.info("No record found for influencer with id {}".format(influencer_id))
+            return GenericResponse(success=False,
+                                   message="No influencer found for given influencer_id")
+
+        return influencer
+
+    def get_influencer_metric_detail(self, influencer_id: int) -> InfluencerMetric | GenericResponse:
+        influencer_metric = self.influencer_repository.get_latest_influencer_metric(influencer_id=influencer_id)
+
+        if not influencer_metric:
+            _log.info("No record found for influencer_metric with id {}".format(influencer_id))
+            return GenericResponse(success=False,
+                                   message="No influencer_metric found for given influencer_id")
+
+        return influencer_metric

@@ -180,6 +180,9 @@ class UserRepository:
     def get_user_by_id(self, user_id: int) -> Optional[User]:
         return self.db.query(User).filter(User.id == user_id).first()
 
+    def get_user_by_phone_number(self, phone_number: str) -> Optional[User]:
+        return self.db.query(User).filter(User.phone_number == phone_number).first()
+
     def get_or_create_user_by_phone_number(self, phone_number: str) -> Optional[User]:
         user_optional = self.db.query(User).filter(User.phone_number == phone_number).first()
         if user_optional:

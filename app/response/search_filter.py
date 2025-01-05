@@ -5,6 +5,7 @@ from pydantic import BaseModel
 from app.enums.average_view import AverageView
 from app.enums.city import City
 from app.enums.collab_type import CollabType
+from app.enums.content_price import ContentPrice
 from app.enums.engagement_rate import EngagementRate
 from app.enums.follower_count import FollowerCount
 from app.enums.gender import Gender
@@ -24,7 +25,7 @@ class SearchFilter(BaseModel):
     avg_views: Optional[List[AverageView]] = None
     engagement: Optional[EngagementRate] = None
     platform: Optional[Platform] = None
-    content_price: Optional[List[int]] = None
+    content_price: Optional[ContentPrice] = None
     gender: Optional[List[Gender]] = None
     collab_type: Optional[CollabType] = None
     age: Optional[List[InfluencerAge]] = None
