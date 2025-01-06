@@ -19,7 +19,7 @@ COPY poetry.lock pyproject.toml ./
 RUN pip install --upgrade pip \
     && pip install poetry \
     && poetry config virtualenvs.create false \
-    && poetry install --no-dev --no-interaction --no-ansi
+    && poetry install --no-interaction --no-ansi
 
 # Copy the application code (change this path as needed based on your repo structure)
 COPY . .
