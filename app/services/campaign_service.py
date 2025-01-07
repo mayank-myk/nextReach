@@ -74,9 +74,11 @@ class CampaignService:
                 content_charge=existing_campaign.content_charge,
                 profile_visited=True
             )
+            influencer_finalization_date = existing_campaign.influencer_finalization_date.strftime("%d %b %Y"),
+            content_shoot_date = existing_campaign.content_shoot_date.strftime("%d %b %Y"),
 
             content_post = ContentPost(
-                date=existing_campaign.content_post_date,
+                date=existing_campaign.content_post_date.strftime("%d %b %Y"),
                 insta_post_link=existing_campaign.insta_post_link,
                 youtube_post_link=existing_campaign.youtube_post_link,
                 fb_post_link=existing_campaign.fb_post_link,
@@ -88,7 +90,7 @@ class CampaignService:
             )
 
             first_billing = CampaignBilling(
-                date=existing_campaign.first_billing_date,
+                date=existing_campaign.first_billing_date.strftime("%d %b %Y"),
                 campaign_metrics=CampaignMetrics(
                     views=int_to_str_k(existing_campaign.first_billing_views),
                     likes=int_to_str_k(existing_campaign.first_billing_likes),
@@ -103,7 +105,7 @@ class CampaignService:
             )
 
             second_billing = CampaignBilling(
-                date=existing_campaign.second_billing_date,
+                date=existing_campaign.second_billing_date.strftime("%d %b %Y"),
                 campaign_metrics=CampaignMetrics(
                     views=int_to_str_k(existing_campaign.second_billing_views),
                     likes=int_to_str_k(existing_campaign.second_billing_likes),
@@ -136,7 +138,7 @@ class CampaignService:
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
                     campaign_notes=existing_campaign.campaign_notes,
-                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
+                    influencer_finalization_date=influencer_finalization_date,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
             elif existing_campaign.stage == CampaignStage.SHOOT:
@@ -148,8 +150,8 @@ class CampaignService:
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
                     campaign_notes=existing_campaign.campaign_notes,
-                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
-                    content_shoot_date=existing_campaign.content_shoot_date,
+                    influencer_finalization_date=influencer_finalization_date,
+                    content_shoot_date=content_shoot_date,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
             elif existing_campaign.stage == CampaignStage.POST:
@@ -161,8 +163,8 @@ class CampaignService:
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
                     campaign_notes=existing_campaign.campaign_notes,
-                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
-                    content_shoot_date=existing_campaign.content_shoot_date,
+                    influencer_finalization_date=influencer_finalization_date,
+                    content_shoot_date=content_shoot_date,
                     content_post=content_post,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
@@ -175,8 +177,8 @@ class CampaignService:
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
                     campaign_notes=existing_campaign.campaign_notes,
-                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
-                    content_shoot_date=existing_campaign.content_shoot_date,
+                    influencer_finalization_date=influencer_finalization_date,
+                    content_shoot_date=content_shoot_date,
                     content_post=content_post,
                     first_billing=first_billing,
                     pending_deliverables=existing_campaign.pending_deliverables
@@ -190,8 +192,8 @@ class CampaignService:
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
                     campaign_notes=existing_campaign.campaign_notes,
-                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
-                    content_shoot_date=existing_campaign.content_shoot_date,
+                    influencer_finalization_date=influencer_finalization_date,
+                    content_shoot_date=content_shoot_date,
                     content_post=content_post,
                     first_billing=first_billing,
                     second_billing=second_billing,
@@ -207,8 +209,8 @@ class CampaignService:
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
                     campaign_notes=existing_campaign.campaign_notes,
-                    influencer_finalization_date=existing_campaign.influencer_finalization_date,
-                    content_shoot_date=existing_campaign.content_shoot_date,
+                    influencer_finalization_date=influencer_finalization_date,
+                    content_shoot_date=content_shoot_date,
                     content_post=content_post,
                     first_billing=first_billing,
                     second_billing=second_billing,

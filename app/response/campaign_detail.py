@@ -19,8 +19,8 @@ class CampaignDetail(BaseModel):
     type_of_content: Optional[ContentType] = None
     rating: Optional[int] = None
     review: Optional[str] = None
-    influencer_finalization_date: Optional[datetime.date] = None
-    content_shoot_date: Optional[datetime.date] = None
+    influencer_finalization_date: Optional[str] = None
+    content_shoot_date: Optional[str] = None
     content_post: Optional[ContentPost] = None
     first_billing: Optional[CampaignBilling] = None
     second_billing: Optional[CampaignBilling] = None
