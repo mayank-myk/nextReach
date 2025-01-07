@@ -74,23 +74,29 @@ class CampaignService:
                 content_charge=existing_campaign.content_charge,
                 profile_visited=True
             )
-            influencer_finalization_date = existing_campaign.influencer_finalization_date.strftime("%d %b %Y"),
-            content_shoot_date = existing_campaign.content_shoot_date.strftime("%d %b %Y"),
+
+            influencer_finalization_date = existing_campaign.influencer_finalization_date.strftime(
+                "%d %b %Y") if existing_campaign.influencer_finalization_date else None
+            content_shoot_date = existing_campaign.content_shoot_date.strftime(
+                "%d %b %Y") if existing_campaign.content_shoot_date else None
 
             content_post = ContentPost(
-                date=existing_campaign.content_post_date.strftime("%d %b %Y"),
+                date=existing_campaign.content_post_date.strftime(
+                    "%d %b %Y") if existing_campaign.content_post_date else None,
                 insta_post_link=existing_campaign.insta_post_link,
                 youtube_post_link=existing_campaign.youtube_post_link,
                 fb_post_link=existing_campaign.fb_post_link,
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.content_billing_amount,
-                    billing_payment_at=existing_campaign.content_billing_payment_at,
+                    billing_payment_at=existing_campaign.content_billing_payment_at.strftime(
+                        "%d %b %Y %I:%M %p") if existing_campaign.content_billing_payment_at else None,
                     billing_payment_status=existing_campaign.content_billing_payment_status
                 )
             )
 
             first_billing = CampaignBilling(
-                date=existing_campaign.first_billing_date.strftime("%d %b %Y"),
+                date=existing_campaign.first_billing_date.strftime(
+                    "%d %b %Y") if existing_campaign.first_billing_date else None,
                 campaign_metrics=CampaignMetrics(
                     views=int_to_str_k(existing_campaign.first_billing_views),
                     likes=int_to_str_k(existing_campaign.first_billing_likes),
@@ -99,13 +105,15 @@ class CampaignService:
                 ),
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.first_billing_amount,
-                    billing_payment_at=existing_campaign.first_billing_payment_at,
+                    billing_payment_at=existing_campaign.first_billing_payment_at.strftime(
+                        "%d %b %Y %I:%M %p") if existing_campaign.first_billing_payment_at else None,
                     billing_payment_status=existing_campaign.first_billing_payment_status
                 )
             )
 
             second_billing = CampaignBilling(
-                date=existing_campaign.second_billing_date.strftime("%d %b %Y"),
+                date=existing_campaign.second_billing_date.strftime(
+                    "%d %b %Y") if existing_campaign.second_billing_date else None,
                 campaign_metrics=CampaignMetrics(
                     views=int_to_str_k(existing_campaign.second_billing_views),
                     likes=int_to_str_k(existing_campaign.second_billing_likes),
@@ -114,7 +122,8 @@ class CampaignService:
                 ),
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.second_billing_amount,
-                    billing_payment_at=existing_campaign.second_billing_payment_at,
+                    billing_payment_at=existing_campaign.second_billing_payment_at.strftime(
+                        "%d %b %Y %I:%M %p") if existing_campaign.second_billing_payment_at else None,
                     billing_payment_status=existing_campaign.second_billing_payment_status
                 )
             )

@@ -6,7 +6,7 @@ from sqlalchemy.orm import relationship
 from app.database.session import Base
 from app.enums.campaign_stage import CampaignStage
 from app.enums.content_type import ContentType
-from app.enums.status import Status
+from app.enums.payment_status import PaymentStatus
 
 
 class Campaign(Base):
@@ -51,7 +51,7 @@ class Campaign(Base):
     content_post_date = Column(Date, nullable=True)
     content_billing_amount = Column(Integer, CheckConstraint('content_billing_amount >= 0'), nullable=True)
     content_billing_payment_at = Column(DateTime, nullable=True)
-    content_billing_payment_status = Column(Enum(Status), nullable=True)
+    content_billing_payment_status = Column(Enum(PaymentStatus), nullable=True)
 
     # First billing
     first_billing_date = Column(Date, nullable=True)
@@ -61,7 +61,7 @@ class Campaign(Base):
     first_billing_shares = Column(Integer, CheckConstraint('first_billing_shares >= 0'), nullable=True)
     first_billing_amount = Column(Integer, CheckConstraint('first_billing_amount >= 0'), nullable=True)
     first_billing_payment_at = Column(DateTime, nullable=True)
-    first_billing_payment_status = Column(Enum(Status), nullable=True)
+    first_billing_payment_status = Column(Enum(PaymentStatus), nullable=True)
 
     # Second billing
     second_billing_date = Column(Date, nullable=True)
@@ -71,7 +71,7 @@ class Campaign(Base):
     second_billing_shares = Column(Integer, CheckConstraint('second_billing_shares >= 0'), nullable=True)
     second_billing_amount = Column(Integer, CheckConstraint('second_billing_amount >= 0'), nullable=True)
     second_billing_payment_at = Column(DateTime, nullable=True)
-    second_billing_payment_status = Column(Enum(Status), nullable=True)
+    second_billing_payment_status = Column(Enum(PaymentStatus), nullable=True)
 
     post_insights = Column(ARRAY(String), nullable=True)
     pending_deliverables = Column(ARRAY(String), nullable=True)
@@ -79,4 +79,3 @@ class Campaign(Base):
     influencer = relationship("Influencer", back_populates="campaign")
     user = relationship("User", back_populates="campaign")
     revenue = relationship("Revenue", back_populates="campaign")
-

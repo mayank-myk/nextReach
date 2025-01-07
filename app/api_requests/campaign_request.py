@@ -5,7 +5,7 @@ from pydantic import BaseModel, Field
 
 from app.enums.campaign_stage import CampaignStage
 from app.enums.content_type import ContentType
-from app.enums.status import Status
+from app.enums.payment_status import PaymentStatus
 
 
 class CampaignRequest(BaseModel):
@@ -28,7 +28,7 @@ class CampaignRequest(BaseModel):
     content_post_date: Optional[datetime] = None  # Optional datetime
     content_billing_amount: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     content_billing_payment_at: Optional[datetime] = None  # Optional datetime
-    content_billing_payment_status: Optional[Status] = None  # Optional enum
+    content_billing_payment_status: Optional[PaymentStatus] = None  # Optional enum
     first_billing_date: Optional[datetime] = None  # Optional datetime
     first_billing_views: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     first_billing_likes: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
@@ -36,7 +36,7 @@ class CampaignRequest(BaseModel):
     first_billing_shares: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     first_billing_amount: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     first_billing_payment_at: Optional[datetime] = None  # Optional datetime
-    first_billing_payment_status: Optional[Status] = None  # Optional enum
+    first_billing_payment_status: Optional[PaymentStatus] = None  # Optional enum
     second_billing_date: Optional[datetime] = None  # Optional datetime
     second_billing_views: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     second_billing_likes: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
@@ -44,6 +44,6 @@ class CampaignRequest(BaseModel):
     second_billing_shares: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     second_billing_amount: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     second_billing_payment_at: Optional[datetime] = None  # Optional datetime
-    second_billing_payment_status: Optional[Status] = None  # Optional enum
+    second_billing_payment_status: Optional[PaymentStatus] = None  # Optional enum
     post_insights: Optional[List[str]] = None  # Optional list of strings
     pending_deliverables: Optional[List[str]] = None  # Optional list of strings

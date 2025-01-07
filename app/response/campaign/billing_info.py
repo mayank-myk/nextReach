@@ -1,12 +1,11 @@
-import datetime
 from typing import Optional
 
 from pydantic import BaseModel
 
-from app.enums.status import Status
+from app.enums.payment_status import PaymentStatus
 
 
 class BillingInfo(BaseModel):
     billing_amount: Optional[int] = None
-    billing_payment_at: Optional[datetime.datetime] = None
-    billing_payment_status: Optional[Status] = None
+    billing_payment_at: Optional[str] = None
+    billing_payment_status: Optional[PaymentStatus] = None
