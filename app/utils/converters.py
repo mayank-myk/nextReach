@@ -21,9 +21,13 @@ def campaign_stage_to_status(stage: CampaignStage) -> Status:
         return Status.CANCELLED
 
 
-def int_to_str_k(count: int) -> str:
-    if count >= 1000:
-        return f"{count // 1000}k"  # Converts to "k" for thousands
+def int_to_str_k(count) -> str:
+    if count and count >= 10000:
+        value = count / 1000
+        if value % 1 == 0:  # If the number is an integer
+            return f"{int(value)}k"
+        else:
+            return f"{value:.2f}k"  # Converts to "k" for thousands
     return str(count)  # For values less than 1000, just return the number as a string
 
 

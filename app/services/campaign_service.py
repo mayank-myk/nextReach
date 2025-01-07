@@ -6,7 +6,6 @@ from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
 from app.api_requests.update_campaign_request import UpdateCampaignRequest
 from app.enums.campaign_stage import CampaignStage
-from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.response.campaign.billing_info import BillingInfo
@@ -17,7 +16,7 @@ from app.response.campaign_basic_detail import CampaignBasicDetail
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
 from app.response.influencer_basic_detail import InfluencerBasicDetail
-from app.utils.converters import campaign_stage_to_status
+from app.utils.converters import campaign_stage_to_status, int_to_str_k
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -89,11 +88,12 @@ class CampaignService:
             )
 
             first_billing = CampaignBilling(
+                date=existing_campaign.first_billing_date,
                 campaign_metrics=CampaignMetrics(
-                    views=existing_campaign.first_billing_views,
-                    likes=existing_campaign.first_billing_likes,
-                    comments=existing_campaign.first_billing_comments,
-                    shares=existing_campaign.first_billing_shares
+                    views=int_to_str_k(existing_campaign.first_billing_views),
+                    likes=int_to_str_k(existing_campaign.first_billing_likes),
+                    comments=int_to_str_k(existing_campaign.first_billing_comments),
+                    shares=int_to_str_k(existing_campaign.first_billing_shares)
                 ),
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.first_billing_amount,
@@ -103,11 +103,12 @@ class CampaignService:
             )
 
             second_billing = CampaignBilling(
+                date=existing_campaign.second_billing_date,
                 campaign_metrics=CampaignMetrics(
-                    views=existing_campaign.second_billing_views,
-                    likes=existing_campaign.second_billing_likes,
-                    comments=existing_campaign.second_billing_comments,
-                    shares=existing_campaign.second_billing_shares
+                    views=int_to_str_k(existing_campaign.second_billing_views),
+                    likes=int_to_str_k(existing_campaign.second_billing_likes),
+                    comments=int_to_str_k(existing_campaign.second_billing_comments),
+                    shares=int_to_str_k(existing_campaign.second_billing_shares)
                 ),
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.second_billing_amount,
@@ -192,6 +193,7 @@ class CampaignService:
                     influencer_finalization_date=existing_campaign.influencer_finalization_date,
                     content_shoot_date=existing_campaign.content_shoot_date,
                     content_post=content_post,
+                    first_billing=first_billing,
                     second_billing=second_billing,
                     pending_deliverables=existing_campaign.pending_deliverables,
                     post_insights=existing_campaign.post_insights
@@ -208,6 +210,7 @@ class CampaignService:
                     influencer_finalization_date=existing_campaign.influencer_finalization_date,
                     content_shoot_date=existing_campaign.content_shoot_date,
                     content_post=content_post,
+                    first_billing=first_billing,
                     second_billing=second_billing,
                     pending_deliverables=existing_campaign.pending_deliverables,
                     post_insights=existing_campaign.post_insights,
@@ -238,10 +241,10 @@ class CampaignService:
                 return GenericResponse(success=False, button_text="Understood",
                                        message="No campaign found with the provided details")
             else:
-                if existing_campaign.status != Status.COMPLETED:
+                if existing_campaign.stage != CampaignStage.COMPLETED:
                     return GenericResponse(success=False, button_text="Understood",
                                            message="You can only submit a rating once the campaign has been completed")
-                elif existing_campaign.user.id != request.user_id:
+                elif existing_campaign.user_id != request.user_id:
                     return GenericResponse(success=False, button_text="Understood",
                                            message="You can only rate campaigns that you have initiated")
                 else:

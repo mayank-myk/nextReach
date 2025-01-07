@@ -4,7 +4,7 @@ from pydantic import BaseModel
 
 
 class CampaignMetrics(BaseModel):
-    views: Optional[int] = None
-    likes: Optional[int] = None
-    comments: Optional[int] = None
-    shares: Optional[int] = None
+    views: Optional[str] = None
+    likes: Optional[str] = None
+    comments: Optional[str] = None
+    shares: Optional[str] = None
