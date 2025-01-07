@@ -4,6 +4,7 @@ from sqlalchemy.orm import Session
 
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
+from app.api_requests.update_campaign_request import UpdateCampaignRequest
 from app.database.campaign_table import Campaign
 from app.database.influencer_table import Influencer
 from app.enums.campaign_stage import CampaignStage
@@ -84,15 +85,15 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def update_campaign(self, campaign_id: int, campaign_request: CampaignRequest) -> Optional[Campaign]:
+    def update_campaign(self, campaign_id: int, campaign_request: UpdateCampaignRequest) -> Optional[Campaign]:
         try:
             existing_campaign = self.db.get(Campaign, campaign_id)
 
             if not existing_campaign:
                 return None
 
-            if hasattr(campaign_request, 'created_by') and campaign_request.created_by is not None:
-                setattr(existing_campaign, 'last_updated_by', campaign_request.created_by)
+            if hasattr(campaign_request, 'updated_by') and campaign_request.updated_by is not None:
+                setattr(existing_campaign, 'last_updated_by', campaign_request.updated_by)
 
             if hasattr(campaign_request, 'campaign_managed_by') and campaign_request.campaign_managed_by is not None:
                 setattr(existing_campaign, 'campaign_managed_by', campaign_request.campaign_managed_by)
@@ -100,11 +101,11 @@ class CampaignRepository:
             if hasattr(campaign_request, 'stage') and campaign_request.stage is not None:
                 setattr(existing_campaign, 'stage', campaign_request.stage)
 
-            if hasattr(campaign_request, 'content_charge') and campaign_request.content_charge is not None:
-                setattr(existing_campaign, 'content_charge', campaign_request.content_charge)
-
-            if hasattr(campaign_request, 'views_charge') and campaign_request.views_charge is not None:
-                setattr(existing_campaign, 'views_charge', campaign_request.views_charge)
+            # if hasattr(campaign_request, 'content_charge') and campaign_request.content_charge is not None:
+            #     setattr(existing_campaign, 'content_charge', campaign_request.content_charge)
+            #
+            # if hasattr(campaign_request, 'views_charge') and campaign_request.views_charge is not None:
+            #     setattr(existing_campaign, 'views_charge', campaign_request.views_charge)
 
             if hasattr(campaign_request, 'type_of_content') and campaign_request.type_of_content is not None:
                 setattr(existing_campaign, 'type_of_content', campaign_request.type_of_content)

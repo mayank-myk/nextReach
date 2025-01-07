@@ -21,8 +21,8 @@ class InfluencerService:
     def create_influencer(self, request: InfluencerRequest) -> GenericResponse:
         try:
             new_influencer = self.influencer_repository.create_influencer(request)
-            return GenericResponse(success=True,
-                                   message="Influencer created successfully, with influencer_id {}".format(
+            return GenericResponse(success=True, header="Success",
+                                   message="Influencer created successfully, with influencer_id: {}".format(
                                        new_influencer.id))
 
         except Exception as e:

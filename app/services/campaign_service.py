@@ -4,6 +4,7 @@ from typing import List
 
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
+from app.api_requests.update_campaign_request import UpdateCampaignRequest
 from app.enums.campaign_stage import CampaignStage
 from app.enums.status import Status
 from app.repository.campaign_repository import CampaignRepository
@@ -265,7 +266,7 @@ class CampaignService:
             return GenericResponse(success=False,
                                    message="Campaign creation failed")
 
-    def update_campaign(self, campaign_id: int, request: CampaignRequest) -> GenericResponse:
+    def update_campaign(self, campaign_id: int, request: UpdateCampaignRequest) -> GenericResponse:
         db_campaign = self.campaign_repository.update_campaign(campaign_id, request)
 
         if db_campaign:

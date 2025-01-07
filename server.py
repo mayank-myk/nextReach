@@ -102,4 +102,4 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 if __name__ == "__main__":
     load_dotenv(dotenv_path='/Users/mayank.agrawal/PycharmProjects/nextReach/.env')
-    uvicorn.run(server, host="0.0.0.0", port=8000)
+    uvicorn.run(server, host="0.0.0.0", port=8010)

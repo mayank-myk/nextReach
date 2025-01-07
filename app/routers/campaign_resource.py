@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 
 from app.api_requests.campaign_request import CampaignRequest
+from app.api_requests.update_campaign_request import UpdateCampaignRequest
 from app.database.session import DatabaseSessionManager
 from app.response.campaign_detail import CampaignDetail
 from app.response.generic_response import GenericResponse
@@ -24,7 +25,7 @@ def create_campaign(request: CampaignRequest, db=Depends(db_manager.get_db)) -> 
 
 
 @router.post("/update/{campaign_id}")
-def update_campaign(campaign_id: int, request: CampaignRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_campaign(campaign_id: int, request: UpdateCampaignRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.update_campaign(campaign_id=campaign_id, request=request)
 
