@@ -20,7 +20,7 @@ class UpdateCampaignRequest(BaseModel):
     influencer_finalization_date: Optional[date] = None  # Optional datetime
     content_shoot_date: Optional[date] = None  # Optional datetime
     insta_post_link: Optional[str] = Field(None, max_length=255)  # Optional string
-    youtube_post_link: Optional[str] = Field(None, max_length=255)  # Optional string
+    yt_post_link: Optional[str] = Field(None, max_length=255)  # Optional string
     fb_post_link: Optional[str] = Field(None, max_length=255)  # Optional string
     content_post_date: Optional[date] = None  # Optional datetime
     content_billing_amount: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided

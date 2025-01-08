@@ -4,6 +4,8 @@ from typing import List, Optional
 from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp
+from app.database.influencer_metric_table import InfluencerMetric
+from app.database.influencer_table import Influencer
 from app.enums.average_view import AverageView
 from app.enums.campaign_stage import CampaignStage
 from app.enums.city import City
@@ -58,8 +60,8 @@ def influencer_to_influencer_basic_detail(influencers):
             profile_visited=False,
             views_charge=influencer.views_charge,
             content_charge=influencer.content_charge,
-            instagram_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
-            youtube_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
+            insta_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
+            yt_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
         )
         influencer_basic_detail_list.append(influencer_basic_detail)
     return influencer_basic_detail_list
@@ -315,6 +317,14 @@ class UserService:
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
         try:
 
+            influencer = self.influencer_repository.get_influencer_by_id(influencer_id=request.influencer_id)
+            influencer_metric = self.influencer_repository.get_latest_influencer_metric(
+                influencer_id=request.influencer_id)
+
+            if not influencer or not influencer_metric:
+                return GenericResponse(success=False, button_text="Understood", header="Failed",
+                                       message="Something went wrong, unable to fetch complete details for the influencer")
+
             profile_visit_success = self.track_profile_visit(user_id=request.user_id,
                                                              influencer_id=request.influencer_id)
 
@@ -322,24 +332,11 @@ class UserService:
                 return GenericResponse(success=False, button_text="Request Coins", header="Oops",
                                        message="Your coin balance is currently zero. Please recharge to view more profiles")
 
-            influencer = self.influencer_repository.get_influencer_by_id(influencer_id=request.influencer_id)
-            influencer_metric = self.influencer_repository.get_latest_influencer_metric(
-                influencer_id=request.influencer_id)
-
-            if influencer.content_charge == 0 or influencer.views_charge == 0 or influencer_metric.insta_avg_views == 0 or influencer_metric.insta_max_views == 0:
-                collab_charge = None
-            else:
-                collab_charge = InfluencerCollabCharge(
-                    min=influencer.content_charge,
-                    avg=(influencer_metric.insta_avg_views // 1000) * influencer.views_charge,
-                    max=(influencer_metric.insta_max_views // 1000) * influencer.views_charge,
-                )
-
             instagram_detail = None
             if influencer.insta_username:
                 instagram_detail = InstagramDetail(
                     username=influencer.insta_username,
-                    followers=influencer_metric.insta_followers,
+                    followers=int_to_str_k(influencer_metric.insta_followers),
                     city_1=influencer_metric.insta_city_1,
                     city_pc_1=influencer_metric.insta_city_pc_1,
                     city_2=influencer_metric.insta_city_2,
@@ -354,13 +351,13 @@ class UserService:
                     age_55=influencer_metric.insta_age_55,
                     men_follower_pc=influencer_metric.insta_men_follower_pc,
                     women_follower_pc=influencer_metric.insta_women_follower_pc,
-                    avg_views=influencer_metric.insta_avg_views,
-                    max_views=influencer_metric.insta_max_views,
-                    min_views=influencer_metric.insta_min_views,
-                    spread=influencer_metric.insta_consistency_score,
-                    avg_likes=influencer_metric.insta_avg_likes,
-                    avg_comments=influencer_metric.insta_avg_comments,
-                    avg_shares=influencer_metric.insta_avg_shares,
+                    avg_views=int_to_str_k(influencer_metric.insta_avg_views),
+                    max_views=int_to_str_k(influencer_metric.insta_max_views),
+                    min_views=int_to_str_k(influencer_metric.insta_min_views),
+                    consistency_score=influencer_metric.insta_consistency_score,
+                    avg_likes=int_to_str_k(influencer_metric.insta_avg_likes),
+                    avg_comments=int_to_str_k(influencer_metric.insta_avg_comments),
+                    avg_shares=int_to_str_k(influencer_metric.insta_avg_shares),
                     engagement_rate=influencer_metric.insta_engagement_rate
                 )
 
@@ -368,20 +365,20 @@ class UserService:
             if influencer.yt_username:
                 youtube_detail = YouTubeDetail(
                     username=influencer.yt_username,
-                    followers=influencer_metric.yt_followers,
+                    followers=int_to_str_k(influencer_metric.yt_followers),
                     city_1=influencer_metric.yt_city_1,
                     city_pc_1=influencer_metric.yt_city_pc_1,
                     city_2=influencer_metric.yt_city_2,
                     city_pc_2=influencer_metric.yt_city_pc_2,
                     city_3=influencer_metric.yt_city_3,
                     city_pc_3=influencer_metric.yt_city_pc_3,
-                    avg_views=influencer_metric.yt_avg_views,
-                    max_views=influencer_metric.yt_max_views,
-                    min_views=influencer_metric.yt_min_views,
-                    spread=influencer_metric.yt_consistency_score,
-                    avg_likes=influencer_metric.yt_avg_likes,
-                    avg_comments=influencer_metric.yt_avg_comments,
-                    avg_shares=influencer_metric.yt_avg_shares,
+                    avg_views=int_to_str_k(influencer_metric.yt_avg_views),
+                    max_views=int_to_str_k(influencer_metric.yt_max_views),
+                    min_views=int_to_str_k(influencer_metric.yt_min_views),
+                    consistency_score=influencer_metric.yt_consistency_score,
+                    avg_likes=int_to_str_k(influencer_metric.yt_avg_likes),
+                    avg_comments=int_to_str_k(influencer_metric.yt_avg_comments),
+                    avg_shares=int_to_str_k(influencer_metric.yt_avg_shares),
                     engagement_rate=influencer_metric.yt_engagement_rate
                 )
 
@@ -389,26 +386,26 @@ class UserService:
             if influencer.fb_username:
                 facebook_detail = FacebookDetail(
                     username=influencer.fb_username,
-                    followers=influencer_metric.fb_followers,
+                    followers=int_to_str_k(influencer_metric.fb_followers),
                     city_1=influencer_metric.fb_city_1,
                     city_pc_1=influencer_metric.fb_city_pc_1,
                     city_2=influencer_metric.fb_city_2,
                     city_pc_2=influencer_metric.fb_city_pc_2,
                     city_3=influencer_metric.fb_city_3,
                     city_pc_3=influencer_metric.fb_city_pc_3,
-                    avg_views=influencer_metric.fb_avg_views,
-                    max_views=influencer_metric.fb_max_views,
-                    min_views=influencer_metric.fb_min_views,
-                    spread=influencer_metric.fb_consistency_score,
-                    avg_likes=influencer_metric.fb_avg_likes,
-                    avg_comments=influencer_metric.fb_avg_comments,
-                    avg_shares=influencer_metric.fb_avg_shares,
+                    avg_views=int_to_str_k(influencer_metric.fb_avg_views),
+                    max_views=int_to_str_k(influencer_metric.fb_max_views),
+                    min_views=int_to_str_k(influencer_metric.fb_min_views),
+                    consistency_score=influencer_metric.fb_consistency_score,
+                    avg_likes=int_to_str_k(influencer_metric.fb_avg_likes),
+                    avg_comments=int_to_str_k(influencer_metric.fb_avg_comments),
+                    avg_shares=int_to_str_k(influencer_metric.fb_avg_shares),
                     engagement_rate=influencer_metric.fb_engagement_rate
                 )
 
-            platform_details = InfluencerMetricDetail(instagram_detail=instagram_detail,
-                                                      youtube_detail=youtube_detail,
-                                                      facebook_detail=facebook_detail)
+            platform_details = InfluencerMetricDetail(insta_detail=instagram_detail,
+                                                      yt_detail=youtube_detail,
+                                                      fb_detail=facebook_detail)
 
             collaboration_request_raised = False
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
@@ -434,7 +431,7 @@ class UserService:
                             "%d %b %Y") if campaign.second_billing_date else None))
 
             if len(campaign_review_list) > 0:
-                avg_rating = total_rating / len(campaign_review_list),
+                avg_rating = total_rating / len(campaign_review_list)
                 influencer_review = InfluencerReview(count=len(campaign_review_list),
                                                      avg_rating=f"{avg_rating:.1f}",
                                                      campaign_reviews=campaign_review_list)
@@ -450,15 +447,15 @@ class UserService:
                 gender=influencer.gender,
                 profile_picture=influencer.profile_picture,
                 languages=influencer.languages,
-                next_reach_score=0,
                 age=influencer.age,
+                next_reach_score=influencer.next_reach_score,
                 niche=influencer.niche,
                 city=influencer.city,
                 collab_type=influencer.collab_type,
                 deliverables=influencer.deliverables,
                 content_charge=influencer.content_charge,
                 views_charge=influencer.views_charge,
-                collab_charge=collab_charge,
+                collab_charge=get_collab_charge(influencer, influencer_metric),
                 platform_details=platform_details,
                 influencer_review=influencer_review)
 
@@ -467,3 +464,39 @@ class UserService:
                 f"Error occurred while fetching influencer details for influencer_id: {request.influencer_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text="Retry",
                                    message="Something went wrong while fetching influencer details")
+
+
+def get_collab_charge(influencer: Influencer, influencer_metric: InfluencerMetric) -> Optional[InfluencerCollabCharge]:
+    if influencer.content_charge == 0 or influencer.views_charge == 0:
+        return None
+
+    if influencer.primary_platform == Platform.INSTAGRAM:
+        if influencer_metric.insta_avg_views == 0 or influencer_metric.insta_max_views == 0:
+            return None
+        else:
+            return InfluencerCollabCharge(
+                min=influencer.content_charge,
+                avg=(influencer_metric.insta_avg_views // 1000) * influencer.views_charge,
+                max=(influencer_metric.insta_max_views // 1000) * influencer.views_charge,
+            )
+
+    if influencer.primary_platform == Platform.YOUTUBE:
+        if influencer_metric.yt_avg_views == 0 or influencer_metric.yt_max_views == 0:
+            return None
+        else:
+            return InfluencerCollabCharge(
+                min=influencer.content_charge,
+                avg=(influencer_metric.yt_avg_views // 1000) * influencer.views_charge,
+                max=(influencer_metric.yt_max_views // 1000) * influencer.views_charge,
+            )
+
+    if influencer.primary_platform == Platform.FACEBOOK:
+        if influencer_metric.fb_avg_views == 0 or influencer_metric.fb_max_views == 0:
+            return None
+        else:
+            return InfluencerCollabCharge(
+                min=influencer.content_charge,
+                avg=(influencer_metric.fb_avg_views // 1000) * influencer.views_charge,
+                max=(influencer_metric.fb_max_views // 1000) * influencer.views_charge,
+            )
+    return None

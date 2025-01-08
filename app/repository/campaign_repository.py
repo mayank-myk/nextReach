@@ -37,7 +37,7 @@ class CampaignRepository:
             content_shoot_date=campaign_request.content_shoot_date,
             content_post_date=campaign_request.content_post_date,
             insta_post_link=campaign_request.insta_post_link,
-            youtube_post_link=campaign_request.youtube_post_link,
+            youtube_post_link=campaign_request.yt_post_link,
             fb_post_link=campaign_request.fb_post_link,
             content_billing_amount=campaign_request.content_billing_amount,
             content_billing_payment_at=campaign_request.content_billing_payment_at,
@@ -130,8 +130,8 @@ class CampaignRepository:
             if hasattr(campaign_request, 'insta_post_link') and campaign_request.insta_post_link is not None:
                 setattr(existing_campaign, 'insta_post_link', campaign_request.insta_post_link)
 
-            if hasattr(campaign_request, 'youtube_post_link') and campaign_request.youtube_post_link is not None:
-                setattr(existing_campaign, 'youtube_post_link', campaign_request.youtube_post_link)
+            if hasattr(campaign_request, 'yt_post_link') and campaign_request.yt_post_link is not None:
+                setattr(existing_campaign, 'youtube_post_link', campaign_request.yt_post_link)
 
             if hasattr(campaign_request, 'fb_post_link') and campaign_request.fb_post_link is not None:
                 setattr(existing_campaign, 'fb_post_link', campaign_request.fb_post_link)

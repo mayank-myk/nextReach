@@ -28,7 +28,10 @@ def int_to_str_k(count) -> str:
             return f"{int(value)}k"
         else:
             return f"{value:.2f}k"  # Converts to "k" for thousands
-    return str(count)  # For values less than 1000, just return the number as a string
+    elif count:
+        return str(count)  # For values less than 1000, just return the number as a string
+    else:
+        return ""
 
 
 def engagement_rate_to_quality(engagement_rate: float) -> str:

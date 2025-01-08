@@ -137,6 +137,7 @@ def get_influencer_listings(
 
 
 @router.post('/influencer/insight')
-def get_influencer_insight(request: InfluencerInsights, db=Depends(db_manager.get_db)) -> InfluencerDetail:
+def get_influencer_insight(request: InfluencerInsights,
+                           db=Depends(db_manager.get_db)) -> InfluencerDetail | GenericResponse:
     user_service = UserService(db)
     return user_service.get_influencer_insight(request=request)

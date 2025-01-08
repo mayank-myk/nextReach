@@ -84,7 +84,7 @@ class CampaignService:
                 date=existing_campaign.content_post_date.strftime(
                     "%d %b %Y") if existing_campaign.content_post_date else None,
                 insta_post_link=existing_campaign.insta_post_link,
-                youtube_post_link=existing_campaign.youtube_post_link,
+                yt_post_link=existing_campaign.youtube_post_link,
                 fb_post_link=existing_campaign.fb_post_link,
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.content_billing_amount,
@@ -271,7 +271,7 @@ class CampaignService:
     def create_campaign(self, request: CampaignRequest) -> GenericResponse:
         try:
             db_campaign = self.campaign_repository.create_campaign(request)
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message="Campaign created successfully, with campaign_id {}".format(
                                        db_campaign.id))
         except Exception as e:
@@ -284,7 +284,7 @@ class CampaignService:
         db_campaign = self.campaign_repository.update_campaign(campaign_id, request)
 
         if db_campaign:
-            return GenericResponse(success=True,
+            return GenericResponse(success=True, header="Success",
                                    message="Campaign updated successfully, campaign_id {}".format(
                                        db_campaign.id))
         else:

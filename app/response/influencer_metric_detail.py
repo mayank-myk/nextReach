@@ -8,6 +8,6 @@ from app.response.youtube_detail import YouTubeDetail
 
 
 class InfluencerMetricDetail(BaseModel):
-    instagram_detail: Optional[InstagramDetail]
-    youtube_detail: Optional[YouTubeDetail]
-    facebook_detail: Optional[FacebookDetail]
+    insta_detail: Optional[InstagramDetail]
+    yt_detail: Optional[YouTubeDetail]
+    fb_detail: Optional[FacebookDetail]

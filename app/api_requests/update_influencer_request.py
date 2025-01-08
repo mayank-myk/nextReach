@@ -24,8 +24,8 @@ class UpdateInfluencerRequest(BaseModel):
     age: Optional[int] = Field(None, ge=0)
     insta_username: Optional[str] = Field(None, max_length=255)
     insta_profile_link: Optional[str] = Field(None, max_length=255)
-    youtube_username: Optional[str] = Field(None, max_length=255)
-    youtube_profile_link: Optional[str] = Field(None, max_length=255)
+    yt_username: Optional[str] = Field(None, max_length=255)
+    yt_profile_link: Optional[str] = Field(None, max_length=255)
     fb_username: Optional[str] = Field(None, max_length=255)
     fb_profile_link: Optional[str] = Field(None, max_length=255)
     niche: Optional[Niche] = None

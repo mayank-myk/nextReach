@@ -15,5 +15,5 @@ class InfluencerBasicDetail(BaseModel):
     profile_visited: bool
     views_charge: Optional[int] = None
     content_charge: Optional[int] = None
-    instagram_followers: Optional[str] = None
-    youtube_followers: Optional[str] = None
+    insta_followers: Optional[str] = None
+    yt_followers: Optional[str] = None
