@@ -47,26 +47,6 @@ from app.utils.logger import configure_logger
 _log = configure_logger()
 
 
-def influencer_to_influencer_basic_detail(influencers):
-    influencer_basic_detail_list = []
-    for influencer in influencers:
-        latest_metric = max(influencer.influencer_metric, key=lambda m: m.created_at, default=None)
-        influencer_basic_detail = InfluencerBasicDetail(
-            id=influencer.id,
-            name=influencer.name,
-            profile_picture=influencer.profile_picture,
-            niche=influencer.niche,
-            city=influencer.city,
-            profile_visited=False,
-            views_charge=influencer.views_charge,
-            content_charge=influencer.content_charge,
-            insta_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
-            yt_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
-        )
-        influencer_basic_detail_list.append(influencer_basic_detail)
-    return influencer_basic_detail_list
-
-
 class UserService:
     def __init__(self, session):
         self.user_login_repository = UserLoginRepository(session)
@@ -194,6 +174,14 @@ class UserService:
             return GenericResponse(success=False, button_text="Try Again",
                                    message="Something went wrong while requesting collaboration")
 
+    def check_if_profile_visited(self, user_id: int, influencer_id: int) -> bool:
+        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(user_id,
+                                                                                                        influencer_id)
+        if influencery_already_visited > 0:
+            return True
+        else:
+            return False
+
     def track_profile_visit(self, user_id: int, influencer_id: int) -> bool:
         """
         Track a profile visit. If the user has reached the maximum number of visits allowed,
@@ -219,6 +207,26 @@ class UserService:
             _log.info(
                 f"user_id {user_id} has no balance left to visit influencer_id: {influencer_id}.")
             return False
+
+    def influencer_to_influencer_basic_detail(self, influencers, user_id):
+
+        influencer_basic_detail_list = []
+        for influencer in influencers:
+            latest_metric = max(influencer.influencer_metric, key=lambda m: m.created_at, default=None)
+            influencer_basic_detail = InfluencerBasicDetail(
+                id=influencer.id,
+                name=influencer.name,
+                profile_picture=influencer.profile_picture,
+                niche=influencer.niche,
+                city=influencer.city,
+                profile_visited=self.check_if_profile_visited(user_id=user_id, influencer_id=influencer.id),
+                views_charge=influencer.views_charge,
+                content_charge=influencer.content_charge,
+                insta_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
+                yt_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
+            )
+            influencer_basic_detail_list.append(influencer_basic_detail)
+        return influencer_basic_detail_list
 
     def get_influencer_listing(self, user_id: int,
                                page_number: int,
@@ -282,8 +290,9 @@ class UserService:
                 language_list=languages
             )
 
-        matched_influencer_basic_detail_list = influencer_to_influencer_basic_detail(matched_influencers)
-        unmatched_influencer_basic_detail_list = influencer_to_influencer_basic_detail(unmatched_influencers)
+        matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(matched_influencers, user_id)
+        unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(unmatched_influencers,
+                                                                                            user_id)
 
         user = self.user_repository.get_user_by_id(user_id)
         balance_profile_visit_count = user.balance_profile_visits
