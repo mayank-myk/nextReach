@@ -38,7 +38,7 @@ class InfluencerService:
                 influencer_id=influencer_id,
                 profile_picture_path=image_url)
             if influencer_found:
-                return GenericResponse(success=True,header="Success",
+                return GenericResponse(success=True, header="Success",
                                        message="Successfully updated profile picture for influencer having influencer_id: {}".format(
                                            influencer_id))
             else:
@@ -55,7 +55,7 @@ class InfluencerService:
                                                                       influencer_request=request)
 
         if new_influencer:
-            return GenericResponse(success=True,header="Success",
+            return GenericResponse(success=True, header="Success",
                                    message="Successfully updated details for influencer having influencer_id: {}".format(
                                        influencer_id))
         else:
@@ -68,7 +68,7 @@ class InfluencerService:
             new_influencer_metric = self.influencer_repository.create_influencer_metric(request)
 
             if new_influencer_metric:
-                return GenericResponse(success=True,header="Success",
+                return GenericResponse(success=True, header="Success",
                                        message="Influencer metrics created successfully, with influencer_metric_id {}".format(
                                            new_influencer_metric.id))
             else:
@@ -88,7 +88,7 @@ class InfluencerService:
             influencer_metric_request=request)
 
         if new_influencer_metric:
-            return GenericResponse(success=True,header="Success",
+            return GenericResponse(success=True, header="Success",
                                    message="Successfully updated influencer_metrics having influencer_metric_id: {}".format(
                                        influencer_metric_id))
         else:

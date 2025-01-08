@@ -2,16 +2,13 @@ from typing import Optional
 
 from pydantic import BaseModel
 
+from app.response.influencer.city_distribution_graph import CityDistributionGraph
+
 
 class YouTubeDetail(BaseModel):
     username: str
     followers: Optional[str]
-    city_1: Optional[int]
-    city_pc_1: Optional[int]
-    city_2: Optional[int]
-    city_pc_2: Optional[int]
-    city_3: Optional[int]
-    city_pc_3: Optional[int]
+    city_graph: Optional[CityDistributionGraph]
     avg_views: Optional[str]
     max_views: Optional[str]
     min_views: Optional[str]

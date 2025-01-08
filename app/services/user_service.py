@@ -27,19 +27,22 @@ from app.repository.profile_visit_repository import ProfileVisitRepository
 from app.repository.user_login_repository import UserLoginRepository
 from app.repository.user_repository import UserRepository
 from app.response.campaign_review import CampaignReview
-from app.response.facebook_detail import FacebookDetail
 from app.response.generic_response import GenericResponse
+from app.response.influencer.age_distribution_graph import AgeDistributionGraph
+from app.response.influencer.city_distribution_graph import CityDistributionGraph
+from app.response.influencer.facebook_detail import FacebookDetail
+from app.response.influencer.influencer_collab_charge import InfluencerCollabCharge
+from app.response.influencer.influencer_metric_detail import InfluencerMetricDetail
+from app.response.influencer.influencer_review import InfluencerReview
+from app.response.influencer.instagram_detail import InstagramDetail
+from app.response.influencer.sex_distribution_graph import SexDistributionGraph
+from app.response.influencer.youtube_detail import YouTubeDetail
 from app.response.influencer_basic_detail import InfluencerBasicDetail
-from app.response.influencer_collab_charge import InfluencerCollabCharge
 from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing
-from app.response.influencer_metric_detail import InfluencerMetricDetail
-from app.response.influencer_review import InfluencerReview
-from app.response.instagram_detail import InstagramDetail
 from app.response.login_response import LoginResponse
 from app.response.search_filter import SearchFilter
 from app.response.user_profile import UserProfile
-from app.response.youtube_detail import YouTubeDetail
 from app.utils import id_utils
 from app.utils.converters import int_to_str_k, combine_names
 from app.utils.logger import configure_logger
@@ -104,14 +107,14 @@ class UserService:
             # if login_record:
             #     if (datetime.now() - login_record.created_at).total_seconds() < 600:
             #         return GenericResponse(success=True,
-            #                                message="OTP has already been send to this number, it's valid for 10minutes")
+            #                                message="OTP has already been sent to this number, it's valid for 10minutes")
             otp = id_utils.generate_otp()
             otp_sent_successfully = send_otp_via_whatsapp(phone_number=phone_number, otp=otp)
             if not otp_sent_successfully:
                 return GenericResponse(success=False, button_text="Retry",
                                        message="Failed to send OTP. Please ensure the number is a valid 10-digit WhatsApp number")
 
-            login_record = self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
+            self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
 
             return GenericResponse(success=True, button_text="Okay", header="Success!",
                                    message="OTP has been successfully sent. Please check your WhatsApp")
@@ -164,7 +167,7 @@ class UserService:
                                            message="You already have an ongoing campaign with this influencer")
 
             influencer = self.influencer_repository.get_influencer_by_id(influencer_id=influencer_id)
-            db_collab = self.campaign_repository.create_collab_campaign(user_id=user_id, influencer=influencer)
+            self.campaign_repository.create_collab_campaign(user_id=user_id, influencer=influencer)
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
                                    message="Collaboration created successfully! Our team will reach out to you shortly")
@@ -343,23 +346,39 @@ class UserService:
 
             instagram_detail = None
             if influencer.insta_username:
+                insta_city_graph = None
+                if influencer_metric.insta_city_1 and influencer_metric.insta_city_2 and influencer_metric.insta_city_3:
+                    insta_city_graph = CityDistributionGraph(
+                        city_1=influencer_metric.insta_city_1,
+                        city_pc_1=influencer_metric.insta_city_pc_1,
+                        city_2=influencer_metric.insta_city_2,
+                        city_pc_2=influencer_metric.insta_city_pc_2,
+                        city_3=influencer_metric.insta_city_3,
+                        city_pc_3=influencer_metric.insta_city_pc_3
+                    )
+
+                insta_age_graph = None
+                if influencer_metric.insta_age_13_to_17 > 0 or influencer_metric.insta_age_18_to_24 > 0 or influencer_metric.insta_age_25_to_34 > 0 or influencer_metric.insta_age_35_to_44 > 0 or influencer_metric.insta_age_45_to_54 > 0 or influencer_metric.insta_age_55 > 0:
+                    insta_age_graph = AgeDistributionGraph(
+                        age_13_to_17=influencer_metric.insta_age_13_to_17,
+                        age_18_to_24=influencer_metric.insta_age_18_to_24,
+                        age_25_to_34=influencer_metric.insta_age_25_to_34,
+                        age_35_to_44=influencer_metric.insta_age_35_to_44,
+                        age_45_to_54=influencer_metric.insta_age_45_to_54,
+                        age_55=influencer_metric.insta_age_55
+                    )
+
+                insta_sex_graph = SexDistributionGraph(
+                    men_follower_pc=influencer_metric.insta_men_follower_pc,
+                    women_follower_pc=influencer_metric.insta_women_follower_pc
+                )
+
                 instagram_detail = InstagramDetail(
                     username=influencer.insta_username,
                     followers=int_to_str_k(influencer_metric.insta_followers),
-                    city_1=influencer_metric.insta_city_1,
-                    city_pc_1=influencer_metric.insta_city_pc_1,
-                    city_2=influencer_metric.insta_city_2,
-                    city_pc_2=influencer_metric.insta_city_pc_2,
-                    city_3=influencer_metric.insta_city_3,
-                    city_pc_3=influencer_metric.insta_city_pc_3,
-                    age_13_to_17=influencer_metric.insta_age_13_to_17,
-                    age_18_to_24=influencer_metric.insta_age_18_to_24,
-                    age_25_to_34=influencer_metric.insta_age_25_to_34,
-                    age_35_to_44=influencer_metric.insta_age_35_to_44,
-                    age_45_to_54=influencer_metric.insta_age_45_to_54,
-                    age_55=influencer_metric.insta_age_55,
-                    men_follower_pc=influencer_metric.insta_men_follower_pc,
-                    women_follower_pc=influencer_metric.insta_women_follower_pc,
+                    city_graph=insta_city_graph,
+                    age_graph=insta_age_graph,
+                    sex_graph=insta_sex_graph,
                     avg_views=int_to_str_k(influencer_metric.insta_avg_views),
                     max_views=int_to_str_k(influencer_metric.insta_max_views),
                     min_views=int_to_str_k(influencer_metric.insta_min_views),
@@ -372,15 +391,22 @@ class UserService:
 
             youtube_detail = None
             if influencer.yt_username:
+
+                yt_city_graph = None
+                if influencer_metric.yt_city_1 and influencer_metric.yt_city_2 and influencer_metric.yt_city_3:
+                    yt_city_graph = CityDistributionGraph(
+                        city_1=influencer_metric.yt_city_1,
+                        city_pc_1=influencer_metric.yt_city_pc_1,
+                        city_2=influencer_metric.yt_city_2,
+                        city_pc_2=influencer_metric.yt_city_pc_2,
+                        city_3=influencer_metric.yt_city_3,
+                        city_pc_3=influencer_metric.yt_city_pc_3
+                    )
+
                 youtube_detail = YouTubeDetail(
                     username=influencer.yt_username,
                     followers=int_to_str_k(influencer_metric.yt_followers),
-                    city_1=influencer_metric.yt_city_1,
-                    city_pc_1=influencer_metric.yt_city_pc_1,
-                    city_2=influencer_metric.yt_city_2,
-                    city_pc_2=influencer_metric.yt_city_pc_2,
-                    city_3=influencer_metric.yt_city_3,
-                    city_pc_3=influencer_metric.yt_city_pc_3,
+                    city_graph=yt_city_graph,
                     avg_views=int_to_str_k(influencer_metric.yt_avg_views),
                     max_views=int_to_str_k(influencer_metric.yt_max_views),
                     min_views=int_to_str_k(influencer_metric.yt_min_views),
@@ -393,15 +419,22 @@ class UserService:
 
             facebook_detail = None
             if influencer.fb_username:
+
+                fb_city_graph = None
+                if influencer_metric.fb_city_1 and influencer_metric.fb_city_2 and influencer_metric.fb_city_3:
+                    fb_city_graph = CityDistributionGraph(
+                        city_1=influencer_metric.fb_city_1,
+                        city_pc_1=influencer_metric.fb_city_pc_1,
+                        city_2=influencer_metric.fb_city_2,
+                        city_pc_2=influencer_metric.fb_city_pc_2,
+                        city_3=influencer_metric.fb_city_3,
+                        city_pc_3=influencer_metric.fb_city_pc_3
+                    )
+
                 facebook_detail = FacebookDetail(
                     username=influencer.fb_username,
                     followers=int_to_str_k(influencer_metric.fb_followers),
-                    city_1=influencer_metric.fb_city_1,
-                    city_pc_1=influencer_metric.fb_city_pc_1,
-                    city_2=influencer_metric.fb_city_2,
-                    city_pc_2=influencer_metric.fb_city_pc_2,
-                    city_3=influencer_metric.fb_city_3,
-                    city_pc_3=influencer_metric.fb_city_pc_3,
+                    city_graph=fb_city_graph,
                     avg_views=int_to_str_k(influencer_metric.fb_avg_views),
                     max_views=int_to_str_k(influencer_metric.fb_max_views),
                     min_views=int_to_str_k(influencer_metric.fb_min_views),

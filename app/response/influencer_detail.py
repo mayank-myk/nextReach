@@ -8,9 +8,9 @@ from app.enums.gender import Gender
 from app.enums.language import Language
 from app.enums.niche import Niche
 from app.enums.platform import Platform
-from app.response.influencer_collab_charge import InfluencerCollabCharge
-from app.response.influencer_metric_detail import InfluencerMetricDetail
-from app.response.influencer_review import InfluencerReview
+from app.response.influencer.influencer_collab_charge import InfluencerCollabCharge
+from app.response.influencer.influencer_metric_detail import InfluencerMetricDetail
+from app.response.influencer.influencer_review import InfluencerReview
 
 
 class InfluencerDetail(BaseModel):

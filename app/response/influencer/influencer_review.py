@@ -7,6 +7,6 @@ from app.response.campaign_review import CampaignReview
 
 class InfluencerReview(BaseModel):
     count: int
-    avg_rating: int
+    avg_rating: str
     campaign_reviews: List[CampaignReview]
 
