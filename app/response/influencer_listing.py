@@ -16,5 +16,7 @@ class InfluencerListing(BaseModel):
     sorting_applied: Optional[SortApplied]
     page_number: int
     page_size: int
-    total_count_current_page: int
-    total_count_further_page: int
+    result_start_number: int
+    result_end_number: int
+    result_total_count: int
+    result_count_further_page: int

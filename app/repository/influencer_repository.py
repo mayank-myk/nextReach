@@ -656,7 +656,7 @@ class InfluencerRepository:
 
         # Pagination
         all_unmatched_influencers = query.all()
-        if page_size < 0:
+        if page_size - len(matched_influencers) < 0:
             unmatched_influencers = []
         else:
             matched_pages = len(all_matched_influencer_ids) // page_size

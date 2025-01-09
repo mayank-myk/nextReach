@@ -274,8 +274,8 @@ class UserService:
         unmatched_influencers, all_unmatched_influencers = self.influencer_repository.filter_unmatched_influencers(
             matched_influencers,
             all_matched_influencers,
-            page_number=page_number - len(all_matched_influencers) // page_size,
-            page_size=page_size - len(matched_influencers),
+            page_number=page_number,
+            page_size=page_size,
             sort_applied=sort_applied,
             niche=niche,
             city=city,
@@ -304,32 +304,39 @@ class UserService:
         else:
             total_count_further_page = 0
 
+        total_count_current_page = len(matched_influencers) + len(unmatched_influencers)
+
+        filters_applied = SearchFilter(
+            niche=niche,
+            city=city,
+            reach_price=reach_price,
+            follower_count=follower_count,
+            avg_views=avg_views,
+            engagement=engagement,
+            platform=platform,
+            content_price=content_price,
+            gender=gender,
+            collab_type=collab_type,
+            age=age,
+            rating=rating,
+            languages=languages
+        )
+
         return InfluencerListing(
             user_id=user_id,
             coin_balance=balance_profile_visit_count,
             matched_influencer_list=matched_influencer_basic_detail_list,
             unmatched_influencer_list=unmatched_influencer_basic_detail_list,
-            filters_applied=SearchFilter(
-                niche=niche,
-                city=city,
-                reach_price=reach_price,
-                follower_count=follower_count,
-                avg_views=avg_views,
-                engagement=engagement,
-                platform=platform,
-                content_price=content_price,
-                gender=gender,
-                collab_type=collab_type,
-                age=age,
-                rating=rating,
-                languages=languages
-            ),
+            filters_applied=filters_applied,
             sorting_applied=sort_applied,
             page_number=page_number,
             page_size=page_size,
-            total_count_current_page=len(matched_influencer_basic_detail_list) + len(
-                unmatched_influencer_basic_detail_list),
-            total_count_further_page=total_count_further_page
+            result_start_number=(page_number - 1) * page_size + 1 if total_count_current_page > 0 else 0,
+            result_end_number=(page_number - 1) * page_size + len(matched_influencer_basic_detail_list) + len(
+                unmatched_influencer_basic_detail_list) if total_count_current_page > 0 else 0,
+            result_total_count=len(all_matched_influencers) + len(
+                all_unmatched_influencers) if total_count_current_page > 0 else 0,
+            result_count_further_page=total_count_further_page
         )
 
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
