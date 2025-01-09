@@ -271,27 +271,26 @@ class UserService:
             language_list=languages
         )
 
-        unmatched_influencers = []
-        if len(matched_influencers) < page_size:
-            unmatched_influencers = self.influencer_repository.filter_unmatched_influencers(
-                all_matched_influencers,
-                page_number=page_number - len(all_matched_influencers) // page_size,
-                page_size=page_size - len(matched_influencers),
-                sort_applied=sort_applied,
-                niche=niche,
-                city=city,
-                reach_price=reach_price,
-                follower_count=follower_count,
-                avg_views=avg_views,
-                engagement=engagement,
-                platform=platform,
-                content_price=content_price,
-                collab_type=collab_type,
-                gender=gender,
-                influencer_age=age,
-                rating=rating,
-                language_list=languages
-            )
+        unmatched_influencers, all_unmatched_influencers = self.influencer_repository.filter_unmatched_influencers(
+            matched_influencers,
+            all_matched_influencers,
+            page_number=page_number - len(all_matched_influencers) // page_size,
+            page_size=page_size - len(matched_influencers),
+            sort_applied=sort_applied,
+            niche=niche,
+            city=city,
+            reach_price=reach_price,
+            follower_count=follower_count,
+            avg_views=avg_views,
+            engagement=engagement,
+            platform=platform,
+            content_price=content_price,
+            collab_type=collab_type,
+            gender=gender,
+            influencer_age=age,
+            rating=rating,
+            language_list=languages
+        )
 
         matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(matched_influencers, user_id)
         unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(unmatched_influencers,
@@ -299,6 +298,11 @@ class UserService:
 
         user = self.user_repository.get_user_by_id(user_id)
         balance_profile_visit_count = user.balance_profile_visits
+        if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
+            total_count_further_page = len(all_matched_influencers) + len(
+                all_unmatched_influencers) - page_number * page_size
+        else:
+            total_count_further_page = 0
 
         return InfluencerListing(
             user_id=user_id,
@@ -323,7 +327,9 @@ class UserService:
             sorting_applied=sort_applied,
             page_number=page_number,
             page_size=page_size,
-            total_match_number=len(matched_influencer_basic_detail_list) + len(unmatched_influencer_basic_detail_list)
+            total_count_current_page=len(matched_influencer_basic_detail_list) + len(
+                unmatched_influencer_basic_detail_list),
+            total_count_further_page=total_count_further_page
         )
 
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:

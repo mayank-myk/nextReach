@@ -592,6 +592,7 @@ class InfluencerRepository:
 
     def filter_unmatched_influencers(
             self,
+            matched_influencers,
             all_matched_influencers,
             page_number: int,
             page_size: int,
@@ -654,6 +655,13 @@ class InfluencerRepository:
                 desc(Influencer.next_reach_score))  # Sort by next_reach_score in descending order
 
         # Pagination
-        unmatched_influencers = query.limit(page_size).offset((page_number - 1) * page_size).all()
+        all_unmatched_influencers = query.all()
+        if page_size < 0:
+            unmatched_influencers = []
+        else:
+            matched_pages = len(all_matched_influencer_ids) // page_size
+            remaining_matched = len(all_matched_influencer_ids) % page_size
+            offset = max(0, (page_number - matched_pages - 1) * page_size - remaining_matched)
+            unmatched_influencers = query.limit(page_size - len(matched_influencers)).offset(offset).all()
 
-        return unmatched_influencers
+        return unmatched_influencers, all_unmatched_influencers
