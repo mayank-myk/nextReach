@@ -7,4 +7,4 @@ class CalculateEarningRequest(BaseModel):
     niche: Niche
     follower_count: int = Field(...)
     avg_views: int = Field(...)
-    engagement_rate: int = Field(...)
+    engagement_rate: float = Field(...)
