@@ -81,7 +81,7 @@ def calculate_influencer_earning(request: CalculateEarningRequest) -> str:
     return str(int(content_price + earnings_per_post)) + " per post"
 
 
-def calculate_engagement_rate1(username: str) -> EnagementMetric | GenericResponse:
+def calculate_engagement_rate(username: str) -> EnagementMetric | GenericResponse:
     if username == "success":
         return EnagementMetric(
             engagement_rate=3.5,
@@ -96,7 +96,7 @@ def calculate_engagement_rate1(username: str) -> EnagementMetric | GenericRespon
                                button_text="Retry", header="Error")
 
 
-def calculate_engagement_rate(username: str) -> EnagementMetric | GenericResponse:
+def calculate_engagement_rate1(username: str) -> EnagementMetric | GenericResponse:
     L = instaloader.Instaloader()
 
     try:
