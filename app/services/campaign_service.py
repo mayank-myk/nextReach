@@ -1,6 +1,10 @@
 from __future__ import print_function
 
+from datetime import datetime
+from io import BytesIO
 from typing import List
+
+import pandas as pd
 
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
@@ -11,9 +15,11 @@ from app.repository.influencer_repository import InfluencerRepository
 from app.response.campaign.billing_info import BillingInfo
 from app.response.campaign.campaign_billing import CampaignBilling
 from app.response.campaign.campaign_metrics import CampaignMetrics
+from app.response.campaign.content_draft import ContentDraft
 from app.response.campaign.content_post import ContentPost
 from app.response.campaign_basic_detail import CampaignBasicDetail
 from app.response.campaign_detail import CampaignDetail
+from app.response.campaign_detail_dump import CampaignDetailDump
 from app.response.generic_response import GenericResponse
 from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.utils.converters import campaign_stage_to_status, int_to_str_k
@@ -27,9 +33,9 @@ class CampaignService:
         self.campaign_repository = CampaignRepository(session)
         self.influencer_repository = InfluencerRepository(session)
 
-    def get_user_campaign_all(self, user_id: int) -> List[CampaignBasicDetail] | GenericResponse:
+    def get_client_campaign_all(self, client_id: int) -> List[CampaignBasicDetail] | GenericResponse:
         try:
-            all_campaigns = self.campaign_repository.get_all_campaign_by_an_user(user_id)
+            all_campaigns = self.campaign_repository.get_all_campaign_by_client(client_id)
             campaign_basic_details = []
             for campaign in all_campaigns:
                 influencer_basic_detail = self.influencer_repository.get_influencer_by_id(
@@ -51,11 +57,11 @@ class CampaignService:
             return campaign_basic_details
 
         except Exception as e:
-            _log.error(f"Error occurred while fetching campaigns for user_id: {user_id}. Error: {str(e)}")
+            _log.error(f"Error occurred while fetching campaigns for client_id: {client_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text="Try Again",
                                    message="Something went wrong while retrieving your campaigns")
 
-    def get_user_campaign_detail(self, campaign_id: int) -> CampaignDetail | GenericResponse:
+    def get_client_campaign_detail(self, campaign_id: int) -> CampaignDetail | GenericResponse:
         try:
             existing_campaign = self.campaign_repository.get_campaign_by_id(campaign_id)
             if not existing_campaign:
@@ -80,18 +86,23 @@ class CampaignService:
             content_shoot_date = existing_campaign.content_shoot_date.strftime(
                 "%d %b %Y") if existing_campaign.content_shoot_date else None
 
-            content_post = ContentPost(
-                date=existing_campaign.content_post_date.strftime(
+            content_draft = ContentDraft(
+                date=existing_campaign.content_draft_date.strftime(
                     "%d %b %Y") if existing_campaign.content_post_date else None,
-                insta_post_link=existing_campaign.insta_post_link,
-                yt_post_link=existing_campaign.youtube_post_link,
-                fb_post_link=existing_campaign.fb_post_link,
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.content_billing_amount,
                     billing_payment_at=existing_campaign.content_billing_payment_at.strftime(
-                        "%d %b %Y %I:%M %p") if existing_campaign.content_billing_payment_at else None,
+                        "%d %b %Y") if existing_campaign.content_billing_payment_at else None,
                     billing_payment_status=existing_campaign.content_billing_payment_status
                 )
+            )
+
+            content_post = ContentPost(
+                date=existing_campaign.content_post_date.strftime(
+                    "%d %b %Y %I:%M %p") if existing_campaign.content_post_date else None,
+                insta_post_link=existing_campaign.insta_post_link,
+                yt_post_link=existing_campaign.yt_post_link,
+                fb_post_link=existing_campaign.fb_post_link
             )
 
             first_billing = CampaignBilling(
@@ -106,7 +117,7 @@ class CampaignService:
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.first_billing_amount,
                     billing_payment_at=existing_campaign.first_billing_payment_at.strftime(
-                        "%d %b %Y %I:%M %p") if existing_campaign.first_billing_payment_at else None,
+                        "%d %b %Y") if existing_campaign.first_billing_payment_at else None,
                     billing_payment_status=existing_campaign.first_billing_payment_status
                 )
             )
@@ -123,7 +134,7 @@ class CampaignService:
                 billing_info=BillingInfo(
                     billing_amount=existing_campaign.second_billing_amount,
                     billing_payment_at=existing_campaign.second_billing_payment_at.strftime(
-                        "%d %b %Y %I:%M %p") if existing_campaign.second_billing_payment_at else None,
+                        "%d %b %Y") if existing_campaign.second_billing_payment_at else None,
                     billing_payment_status=existing_campaign.second_billing_payment_status
                 )
             )
@@ -163,6 +174,20 @@ class CampaignService:
                     content_shoot_date=content_shoot_date,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
+            elif existing_campaign.stage == CampaignStage.DRAFT:
+                return CampaignDetail(
+                    id=existing_campaign.id,
+                    last_updated_at=existing_campaign.last_updated_at,
+                    campaign_managed_by=existing_campaign.campaign_managed_by,
+                    influencer_basic_detail=influencer_basic_detail,
+                    stage=existing_campaign.stage,
+                    type_of_content=existing_campaign.type_of_content,
+                    campaign_notes=existing_campaign.campaign_notes,
+                    influencer_finalization_date=influencer_finalization_date,
+                    content_shoot_date=content_shoot_date,
+                    content_draft=content_draft,
+                    pending_deliverables=existing_campaign.pending_deliverables
+                )
             elif existing_campaign.stage == CampaignStage.POST:
                 return CampaignDetail(
                     id=existing_campaign.id,
@@ -175,6 +200,7 @@ class CampaignService:
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
                     content_post=content_post,
+                    content_draft=content_draft,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
             elif existing_campaign.stage == CampaignStage.FIRST_BILLING:
@@ -188,6 +214,7 @@ class CampaignService:
                     campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
+                    content_draft=content_draft,
                     content_post=content_post,
                     first_billing=first_billing,
                     pending_deliverables=existing_campaign.pending_deliverables
@@ -203,6 +230,7 @@ class CampaignService:
                     campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
+                    content_draft=content_draft,
                     content_post=content_post,
                     first_billing=first_billing,
                     second_billing=second_billing,
@@ -220,6 +248,7 @@ class CampaignService:
                     campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
+                    content_draft=content_draft,
                     content_post=content_post,
                     first_billing=first_billing,
                     second_billing=second_billing,
@@ -244,6 +273,90 @@ class CampaignService:
             return GenericResponse(success=False, button_text="Try Again",
                                    message="Something went wrong while retrieving campaign details")
 
+    def get_all_active_campaign_detail(self) -> BytesIO:
+        try:
+            active_campaigns = self.campaign_repository.get_all_active_campaigns()
+            campaign_detail_dump_list = []
+            for campaign in active_campaigns:
+                influencer = campaign.influencer
+                client = campaign.client
+
+                campaign_detail_dump = CampaignDetailDump(
+                    campaign_id=campaign.id,
+                    last_updated_at=campaign.last_updated_at.strftime(
+                        "%d %b %Y %I:%M %p"),
+                    campaign_notes=campaign.campaign_notes,
+                    client_id=client.id,
+                    client_phone_number=client.phone_number,
+                    content_charge=campaign.content_charge,
+                    views_charge=campaign.views_charge,
+                    influencer_id=influencer.id,
+                    influencer_name=influencer.name,
+                    insta_username=influencer.insta_username,
+                    stage=campaign.stage.value,
+                    ageing_day=(
+                            datetime.today() - campaign.content_post_date).days if campaign.content_post_date else None,
+                    influencer_finalization_date=campaign.influencer_finalization_date.strftime(
+                        "%d %b %Y") if campaign.influencer_finalization_date else None,
+                    content_shoot_date=campaign.content_shoot_date.strftime(
+                        "%d %b %Y") if campaign.content_shoot_date else None,
+
+                    content_draft_date=campaign.content_draft_date.strftime(
+                        "%d %b %Y") if campaign.content_draft_date else None,
+                    content_billing_amount=campaign.content_billing_amount,
+                    content_billing_payment_at=campaign.content_billing_payment_at.strftime(
+                        "%d %b %Y %I:%M %p") if campaign.content_billing_payment_at else None,
+                    content_billing_payment_status=campaign.content_billing_payment_status.value if campaign.content_billing_payment_status else None,
+
+                    content_post_date=campaign.content_post_date.strftime(
+                        "%d %b %Y %I:%M %p") if campaign.content_post_date else None,
+                    insta_post_link=campaign.insta_post_link,
+                    yt_post_link=campaign.yt_post_link,
+                    fb_post_link=campaign.fb_post_link,
+
+                    first_billing_date=campaign.first_billing_date.strftime(
+                        "%d %b %Y") if campaign.first_billing_date else None,
+                    first_billing_views=campaign.first_billing_views,
+                    first_billing_likes=campaign.first_billing_likes,
+                    first_billing_comments=campaign.first_billing_comments,
+                    first_billing_shares=campaign.first_billing_shares,
+                    first_billing_amount=campaign.first_billing_amount,
+                    first_billing_payment_at=campaign.first_billing_payment_at.strftime(
+                        "%d %b %Y %I:%M %p") if campaign.first_billing_payment_at else None,
+                    first_billing_payment_status=campaign.first_billing_payment_status.value if campaign.first_billing_payment_status else None,
+
+                    second_billing_date=campaign.second_billing_date.strftime(
+                        "%d %b %Y") if campaign.second_billing_date else None,
+                    second_billing_views=campaign.second_billing_views,
+                    second_billing_likes=campaign.second_billing_likes,
+                    second_billing_comments=campaign.second_billing_comments,
+                    second_billing_shares=campaign.second_billing_shares,
+                    second_billing_amount=campaign.second_billing_amount,
+                    second_billing_payment_at=campaign.second_billing_payment_at.strftime(
+                        "%d %b %Y %I:%M %p") if campaign.second_billing_payment_at else None,
+                    second_billing_payment_status=campaign.second_billing_payment_status.value if campaign.second_billing_payment_status else None,
+
+                    post_insights=campaign.post_insights,
+                    pending_deliverables=campaign.pending_deliverables
+                )
+                campaign_detail_dump_list.append(campaign_detail_dump)
+
+            campaigns_data = [campaign.dict() for campaign in campaign_detail_dump_list]
+
+            # Create a DataFrame from the list of dictionaries
+            df = pd.DataFrame(campaigns_data)
+
+            # Save the DataFrame to a BytesIO buffer
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name=f'Campaigns{datetime.today().strftime("%Y-%m-%d")}')
+            buffer.seek(0)
+            return buffer
+
+        except Exception as e:
+            _log.error(
+                f"Error occurred while fetching campaigns details dump. Error: {str(e)}")
+
     def rate_campaign(self, request: RateCampaign) -> GenericResponse:
         try:
             existing_campaign = self.campaign_repository.create_campaign_rating(request)
@@ -255,7 +368,7 @@ class CampaignService:
                 if existing_campaign.stage != CampaignStage.COMPLETED:
                     return GenericResponse(success=False, button_text="Understood",
                                            message="You can only submit a rating once the campaign has been completed")
-                elif existing_campaign.user_id != request.user_id:
+                elif existing_campaign.client_id != request.client_id:
                     return GenericResponse(success=False, button_text="Understood",
                                            message="You can only rate campaigns that you have initiated")
                 else:

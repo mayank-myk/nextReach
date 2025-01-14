@@ -9,8 +9,8 @@ from app.enums.city import City
 from app.enums.niche import Niche
 
 
-class User(Base):
-    __tablename__ = "user_table"
+class Client(Base):
+    __tablename__ = "client"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)
@@ -53,9 +53,9 @@ class User(Base):
     # The relationship
     profile_visit = relationship(
         "ProfileVisit",
-        back_populates="user"
+        back_populates="client"
     )
     campaign = relationship(
         "Campaign",
-        back_populates="user"
+        back_populates="client"
     )

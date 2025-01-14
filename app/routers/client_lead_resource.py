@@ -13,20 +13,20 @@ from app.utils.logger import configure_logger
 _log = configure_logger()
 
 router = APIRouter(
-    prefix='/v1/admin',
+    prefix='/v1/lead',
     tags=['Create/Update Leads (Only For Admins)']
 )
 
 db_manager = DatabaseSessionManager()
 
 
-@router.post("/update/lead/status/{wait_list_id}")
+@router.post("/update/status/{wait_list_id}")
 def create_lead(wait_list_id: int, status: Status, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.update_lead(wait_list_id=wait_list_id, status=status)
 
 
-@router.get("/get/lead/all", response_model=None)
+@router.get("/get/all", response_model=None)
 def get_all_leads(page_number: int = Query(0, description="Page number to fetch", ge=0),
                   page_size: int = Query(100, description="Number of leads per page", ge=1, le=1000),
                   db=Depends(db_manager.get_db)) -> List[WaitList] | GenericResponse:

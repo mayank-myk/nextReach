@@ -1,4 +1,7 @@
+from datetime import datetime
+
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.update_campaign_request import UpdateCampaignRequest
@@ -12,7 +15,7 @@ _log = configure_logger()
 
 router = APIRouter(
     prefix='/v1/campaign',
-    tags=['Create/Update Campaigns (Only For Admins)']
+    tags=['Campaign Resources (Only For Admins)']
 )
 
 db_manager = DatabaseSessionManager()
@@ -31,6 +34,22 @@ def update_campaign(campaign_id: int, request: UpdateCampaignRequest, db=Depends
 
 
 @router.get("/detail/{campaign_id}")
-def get_user_campaign_detail(campaign_id: int, db=Depends(db_manager.get_db)) -> CampaignDetail | GenericResponse:
+def get_client_campaign_detail(campaign_id: int, db=Depends(db_manager.get_db)) -> CampaignDetail | GenericResponse:
     campaign_service = CampaignService(db)
-    return campaign_service.get_user_campaign_detail(campaign_id=campaign_id)
+    return campaign_service.get_client_campaign_detail(campaign_id=campaign_id)
+
+
+@router.get("/get/all")
+def get_all_active_campaign_detail(db=Depends(db_manager.get_db)):
+    campaign_service = CampaignService(db)
+    excel_file = campaign_service.get_all_active_campaign_detail()
+
+    filename = f'Campaigns{datetime.today().strftime("%Y-%m-%d")}.xlsx'
+
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )

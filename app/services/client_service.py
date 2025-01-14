@@ -3,7 +3,7 @@ from typing import List, Optional
 
 from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.profile_update import ProfileUpdate
-from app.clients.interakt_client import send_otp_via_whatsapp
+from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp
 from app.database.influencer_metric_table import InfluencerMetric
 from app.database.influencer_table import Influencer
 from app.enums.average_view import AverageView
@@ -14,7 +14,6 @@ from app.enums.content_price import ContentPrice
 from app.enums.engagement_rate import EngagementRate
 from app.enums.follower_count import FollowerCount
 from app.enums.gender import Gender
-from app.enums.influencer_age import InfluencerAge
 from app.enums.language import Language
 from app.enums.niche import Niche
 from app.enums.platform import Platform
@@ -22,11 +21,12 @@ from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
 from app.enums.sort_applied import SortApplied
 from app.repository.campaign_repository import CampaignRepository
+from app.repository.client_login_repository import ClientLoginRepository
+from app.repository.client_repository import ClientRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.profile_visit_repository import ProfileVisitRepository
-from app.repository.user_login_repository import UserLoginRepository
-from app.repository.user_repository import UserRepository
 from app.response.campaign_review import CampaignReview
+from app.response.client_profile import ClientProfile
 from app.response.generic_response import GenericResponse
 from app.response.influencer.age_distribution_graph import AgeDistributionGraph
 from app.response.influencer.city_distribution_graph import CityDistributionGraph
@@ -42,7 +42,6 @@ from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing
 from app.response.login_response import LoginResponse
 from app.response.search_filter import SearchFilter
-from app.response.user_profile import UserProfile
 from app.utils import id_utils
 from app.utils.converters import int_to_str_k, combine_names
 from app.utils.logger import configure_logger
@@ -50,60 +49,87 @@ from app.utils.logger import configure_logger
 _log = configure_logger()
 
 
-class UserService:
+def get_profile_link(primary_platform: Platform, influencer: Influencer) -> str:
+    if primary_platform == Platform.INSTAGRAM:
+        return influencer.insta_profile_link
+    elif primary_platform == Platform.YOUTUBE:
+        return influencer.yt_profile_link
+    elif primary_platform == Platform.FACEBOOK:
+        return influencer.fb_profile_link
+
+
+def get_follower_count(primary_platform: Platform, influencer_metric: InfluencerMetric) -> int:
+    if primary_platform == Platform.INSTAGRAM:
+        return influencer_metric.insta_followers
+    elif primary_platform == Platform.YOUTUBE:
+        return influencer_metric.yt_followers
+    elif primary_platform == Platform.FACEBOOK:
+        return influencer_metric.fb_followers
+
+
+def get_avg_views(primary_platform: Platform, influencer_metric: InfluencerMetric) -> int:
+    if primary_platform == Platform.INSTAGRAM:
+        return influencer_metric.insta_avg_views
+    elif primary_platform == Platform.YOUTUBE:
+        return influencer_metric.yt_avg_views
+    elif primary_platform == Platform.FACEBOOK:
+        return influencer_metric.fb_avg_views
+
+
+class ClientService:
     def __init__(self, session):
-        self.user_login_repository = UserLoginRepository(session)
-        self.user_repository = UserRepository(session)
+        self.client_login_repository = ClientLoginRepository(session)
+        self.client_repository = ClientRepository(session)
         self.campaign_repository = CampaignRepository(session)
         self.influencer_repository = InfluencerRepository(session)
         self.profile_visit_repository = ProfileVisitRepository(session)
 
-    def get_user_profile(self, user_id: int) -> UserProfile | GenericResponse:
+    def get_client_profile(self, client_id: int) -> ClientProfile | GenericResponse:
         try:
-            user_profile = self.user_repository.get_user_by_id(user_id=user_id)
-            if user_profile:
-                return UserProfile(
-                    id=user_profile.id,
-                    phone_number=user_profile.phone_number,
-                    name=user_profile.name,
-                    business_name=user_profile.business_name,
-                    email=user_profile.email,
-                    city=user_profile.city,
-                    niche=user_profile.niche,
-                    category=user_profile.category,
-                    total_profile_visited=user_profile.total_profile_visited,
-                    balance_profile_visits=user_profile.balance_profile_visits,
-                    insta_username=user_profile.insta_username,
-                    yt_username=user_profile.yt_username,
-                    fb_username=user_profile.fb_username)
+            client_profile = self.client_repository.get_client_by_id(client_id=client_id)
+            if client_profile:
+                return ClientProfile(
+                    id=client_profile.id,
+                    phone_number=client_profile.phone_number,
+                    name=client_profile.name,
+                    business_name=client_profile.business_name,
+                    email=client_profile.email,
+                    city=client_profile.city,
+                    niche=client_profile.niche,
+                    category=client_profile.category,
+                    total_profile_visited=client_profile.total_profile_visited,
+                    balance_profile_visits=client_profile.balance_profile_visits,
+                    insta_username=client_profile.insta_username,
+                    yt_username=client_profile.yt_username,
+                    fb_username=client_profile.fb_username)
             else:
-                _log.info("No record found for user_profile with user_id: {}".format(user_id))
+                _log.info("No record found for client_profile with client_id: {}".format(client_id))
                 return GenericResponse(success=False, button_text="Understood",
-                                       message="No user profile found for given user_id")
+                                       message="No client profile found for given client_id")
         except Exception as e:
-            _log.error(f"Error occurred while fetching profile for user_id: {user_id}. Error: {str(e)}")
+            _log.error(f"Error occurred while fetching profile for client_id: {client_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text="Try Again Later",
-                                   message="Something went wrong while fetching user profile")
+                                   message="Something went wrong while fetching client profile")
 
-    def update_user_profile(self, user_id: int, profile: ProfileUpdate) -> GenericResponse:
+    def update_client_profile(self, client_id: int, profile: ProfileUpdate) -> GenericResponse:
         try:
-            user_profile = self.user_repository.update_user_from_user(user_id=user_id, request=profile)
-            if user_profile:
+            client_profile = self.client_repository.update_client_from_client(client_id=client_id, request=profile)
+            if client_profile:
                 return GenericResponse(success=True, button_text="Okay", header="Success!",
                                        message="User profile updated successfully")
             else:
-                _log.info("No record found for user_profile with user_id: {}".format(user_id))
+                _log.info("No record found for client_profile with client_id: {}".format(client_id))
                 return GenericResponse(success=False, button_text="Understood",
-                                       message="No user profile found for given user_id")
+                                       message="No client profile found for given client_id")
 
         except Exception as e:
-            _log.error(f"Error occurred while updating profile for user_id: {user_id}. Error: {str(e)}")
+            _log.error(f"Error occurred while updating profile for client_id: {client_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text="Retry",
                                    message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
         try:
-            # login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
+            # login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
             # if login_record:
             #     if (datetime.now() - login_record.created_at).total_seconds() < 600:
             #         return GenericResponse(success=True,
@@ -114,7 +140,7 @@ class UserService:
                 return GenericResponse(success=False, button_text="Retry",
                                        message="Failed to send OTP. Please ensure the number is a valid 10-digit WhatsApp number")
 
-            self.user_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
+            self.client_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
 
             return GenericResponse(success=True, button_text="Okay", header="Success!",
                                    message="OTP has been successfully sent. Please check your WhatsApp")
@@ -125,11 +151,11 @@ class UserService:
 
     def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
-        login_record = self.user_login_repository.get_otp_by_phone_number(phone_number=phone_number)
+        login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
         if login_record:
             if login_record.otp == otp:
-                user_record = self.user_repository.get_or_create_user_by_phone_number(phone_number=phone_number)
-                return LoginResponse(user_id=user_record.id, success=True, header="Success!",
+                client_record = self.client_repository.get_or_create_client_by_phone_number(phone_number=phone_number)
+                return LoginResponse(client_id=client_record.id, success=True, header="Success!",
                                      message="OTP has been successfully verified", button_text="Proceed")
             elif (datetime.now() - login_record.created_at).total_seconds() > 600:
                 return LoginResponse(success=False,
@@ -142,23 +168,23 @@ class UserService:
             return LoginResponse(success=False, message="No OTP record found for the provided phone number",
                                  button_text="Understood")
 
-    def get_watchlist(self, user_id: int) -> List[InfluencerDetail]:
+    def get_watchlist(self, client_id: int) -> List[InfluencerDetail]:
 
         pass
 
-    def add_to_watchlist(self, user_id: int, influencer_id: int) -> GenericResponse:
+    def add_to_watchlist(self, client_id: int, influencer_id: int) -> GenericResponse:
 
         pass
 
-    def remove_from_watchlist(self, user_id: int, influencer_id: int) -> GenericResponse:
+    def remove_from_watchlist(self, client_id: int, influencer_id: int) -> GenericResponse:
 
         pass
 
-    def request_collab(self, user_id: int, influencer_id: int) -> GenericResponse:
+    def request_collab(self, created_by: str, client_id: int, influencer_id: int) -> GenericResponse:
 
         try:
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
-                user_id=user_id, influencer_id=influencer_id)
+                client_id=client_id, influencer_id=influencer_id)
             for request in all_collaboration_request_raised:
                 if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION,
                                      CampaignStage.SHOOT,
@@ -167,51 +193,88 @@ class UserService:
                                            message="You already have an ongoing campaign with this influencer")
 
             influencer = self.influencer_repository.get_influencer_by_id(influencer_id=influencer_id)
-            self.campaign_repository.create_collab_campaign(user_id=user_id, influencer=influencer)
+            influencer_metric = self.influencer_repository.get_latest_influencer_metric(influencer_id=influencer_id)
+
+            new_campaign = self.campaign_repository.create_collab_campaign(created_by=created_by,
+                                                                           client_id=client_id, influencer=influencer)
+            collab_request_user_notification_via_whatsapp(client_phone_number=new_campaign.client.phone_number,
+                                                          date=datetime.today().strftime("%b %d, %Y"),
+                                                          influencer_name=influencer.name,
+                                                          primary_platform=influencer.primary_platform,
+                                                          profile_link=get_profile_link(
+                                                              primary_platform=influencer.primary_platform,
+                                                              influencer=influencer),
+                                                          content_price=new_campaign.content_charge,
+                                                          reach_price=new_campaign.views_charge,
+                                                          followers=get_follower_count(
+                                                              primary_platform=influencer.primary_platform,
+                                                              influencer_metric=influencer_metric),
+                                                          avg_views=get_avg_views(
+                                                              primary_platform=influencer.primary_platform,
+                                                              influencer_metric=influencer_metric)
+                                                          )
+
+            # collab_request_admin_notification_via_whatsapp(admin_phone_number="8011027300",
+            #                                                date=datetime.today().strftime("%b %d, %Y"),
+            #                                                campaign_id=new_campaign.id,
+            #                                                client_id=new_campaign.client.id,
+            #                                                influencer_id=influencer.id,
+            #                                                client_name=new_campaign.client.name,
+            #                                                client_phone_number=new_campaign.client.phone_number,
+            #                                                influencer_name=influencer.name,
+            #                                                influencer_phone_number=influencer.phone_number,
+            #                                                content_price=influencer.content_charge,
+            #                                                reach_price=influencer.views_charge,
+            #                                                followers=get_follower_count(
+            #                                                    primary_platform=influencer.primary_platform,
+            #                                                    influencer_metric=influencer_metric),
+            #                                                avg_views=get_avg_views(
+            #                                                    primary_platform=influencer.primary_platform,
+            #                                                    influencer_metric=influencer_metric))
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
                                    message="Collaboration created successfully! Our team will reach out to you shortly")
         except Exception as e:
             _log.error(
-                f"Error occurred while creating collaboration request for user_id: {user_id}, influencer_id: {influencer_id}. Error: {str(e)}")
+                f"Error occurred while creating collaboration request for client_id: {client_id}, influencer_id: {influencer_id}. Error: {str(e)}")
             return GenericResponse(success=False, button_text="Try Again",
                                    message="Something went wrong while requesting collaboration")
 
-    def check_if_profile_visited(self, user_id: int, influencer_id: int) -> bool:
-        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(user_id,
+    def check_if_profile_visited(self, client_id: int, influencer_id: int) -> bool:
+        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(client_id,
                                                                                                         influencer_id)
         if influencery_already_visited > 0:
             return True
         else:
             return False
 
-    def track_profile_visit(self, user_id: int, influencer_id: int) -> bool:
+    def track_profile_visit(self, client_id: int, influencer_id: int) -> bool:
         """
-        Track a profile visit. If the user has reached the maximum number of visits allowed,
+        Track a profile visit. If the client has reached the maximum number of visits allowed,
         the visit is not logged, and an error is raised.
         """
-        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(user_id,
+        influencery_already_visited = self.profile_visit_repository.check_if_influencer_already_visited(client_id,
                                                                                                         influencer_id)
         if influencery_already_visited > 0:
-            _log.info(f"Profile already unlocked by user_id: {user_id} for influencer_id: {influencer_id}.")
-            self.profile_visit_repository.log_already_visited_profile(user_id, influencer_id)
+            _log.info(f"Profile already unlocked by client_id: {client_id} for influencer_id: {influencer_id}.")
+            self.profile_visit_repository.log_already_visited_profile(client_id, influencer_id)
             return True
 
-        user = self.user_repository.get_user_by_id(user_id)
-        balance_profile_visit_count = user.balance_profile_visits
+        client = self.client_repository.get_client_by_id(client_id)
+        balance_profile_visit_count = client.balance_profile_visits
 
         if balance_profile_visit_count > 0:
             # Log the profile visit in the database
-            self.profile_visit_repository.log_profile_visit(user_id, influencer_id)
-            self.user_repository.update_profile_visit_count(user_id)
-            _log.info(f"Profile visit successfully logged for user_id {user_id} to influencer_id: {influencer_id}.")
+            self.profile_visit_repository.log_profile_visit(client_id, influencer_id)
+            self.client_repository.update_profile_visit_count(client_id)
+            _log.info(f"Profile visit successfully logged for client_id {client_id} to influencer_id: {influencer_id}.")
             return True
         else:
             _log.info(
-                f"user_id {user_id} has no balance left to visit influencer_id: {influencer_id}.")
+                f"client_id: {client_id} has no balance left to visit influencer_id: {influencer_id}.")
             return False
 
-    def influencer_to_influencer_basic_detail(self, influencers, user_id):
+    def influencer_to_influencer_basic_detail(self, influencers, client_id):
 
         influencer_basic_detail_list = []
         for influencer in influencers:
@@ -222,7 +285,7 @@ class UserService:
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                profile_visited=self.check_if_profile_visited(user_id=user_id, influencer_id=influencer.id),
+                profile_visited=self.check_if_profile_visited(client_id=client_id, influencer_id=influencer.id),
                 views_charge=influencer.views_charge,
                 content_charge=influencer.content_charge,
                 insta_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
@@ -231,7 +294,7 @@ class UserService:
             influencer_basic_detail_list.append(influencer_basic_detail)
         return influencer_basic_detail_list
 
-    def get_influencer_listing(self, user_id: int,
+    def get_influencer_listing(self, client_id: int,
                                page_number: int,
                                page_size: int,
                                sort_applied: SortApplied,
@@ -245,7 +308,6 @@ class UserService:
                                content_price: Optional[ContentPrice],
                                collab_type: Optional[CollabType],
                                gender: Optional[List[Gender]],
-                               age: Optional[List[InfluencerAge]],
                                rating: Optional[Rating],
                                languages: Optional[List[Language]]
                                ) -> InfluencerListing:
@@ -266,7 +328,6 @@ class UserService:
             content_price=content_price,
             collab_type=collab_type,
             gender=gender,
-            influencer_age=age,
             rating=rating,
             language_list=languages
         )
@@ -287,17 +348,17 @@ class UserService:
             content_price=content_price,
             collab_type=collab_type,
             gender=gender,
-            influencer_age=age,
             rating=rating,
             language_list=languages
         )
 
-        matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(matched_influencers, user_id)
+        matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(matched_influencers,
+                                                                                          client_id)
         unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(unmatched_influencers,
-                                                                                            user_id)
+                                                                                            client_id)
 
-        user = self.user_repository.get_user_by_id(user_id)
-        balance_profile_visit_count = user.balance_profile_visits
+        client = self.client_repository.get_client_by_id(client_id)
+        balance_profile_visit_count = client.balance_profile_visits
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
             total_count_further_page = len(all_matched_influencers) + len(
                 all_unmatched_influencers) - page_number * page_size
@@ -317,13 +378,12 @@ class UserService:
             content_price=content_price,
             gender=gender,
             collab_type=collab_type,
-            age=age,
             rating=rating,
             languages=languages
         )
 
         return InfluencerListing(
-            user_id=user_id,
+            client_id=client_id,
             coin_balance=balance_profile_visit_count,
             matched_influencer_list=matched_influencer_basic_detail_list,
             unmatched_influencer_list=unmatched_influencer_basic_detail_list,
@@ -350,7 +410,7 @@ class UserService:
                 return GenericResponse(success=False, button_text="Understood", header="Failed",
                                        message="Something went wrong, unable to fetch complete details for the influencer")
 
-            profile_visit_success = self.track_profile_visit(user_id=request.user_id,
+            profile_visit_success = self.track_profile_visit(client_id=request.client_id,
                                                              influencer_id=request.influencer_id)
 
             if not profile_visit_success:
@@ -464,7 +524,7 @@ class UserService:
 
             collaboration_request_raised = False
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
-                user_id=request.user_id, influencer_id=request.influencer_id)
+                client_id=request.client_id, influencer_id=request.influencer_id)
             for request in all_collaboration_request_raised:
                 if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT,
                                      CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING]:
@@ -479,7 +539,7 @@ class UserService:
                 if campaign.rating:
                     total_rating += campaign.rating
                     campaign_review_list.append(CampaignReview(
-                        user_name=combine_names(campaign.user.name, campaign.user.business_name),
+                        user_name=combine_names(campaign.client.name, campaign.client.business_name),
                         rating=campaign.rating,
                         comment=campaign.review,
                         review_date=campaign.second_billing_date.strftime(

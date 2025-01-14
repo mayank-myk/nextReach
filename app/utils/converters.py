@@ -5,15 +5,8 @@ from app.enums.status import Status
 def campaign_stage_to_status(stage: CampaignStage) -> Status:
     if stage == CampaignStage.CREATED:
         return Status.PROCESSING
-    elif stage == CampaignStage.INFLUENCER_FINALIZATION:
-        return Status.PROCESSING
-    elif stage == CampaignStage.SHOOT:
-        return Status.IN_PROGRESS
-    elif stage == CampaignStage.POST:
-        return Status.IN_PROGRESS
-    elif stage == CampaignStage.FIRST_BILLING:
-        return Status.IN_PROGRESS
-    elif stage == CampaignStage.SECOND_BILLING:
+    elif stage in [CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT, CampaignStage.DRAFT, CampaignStage.POST,
+                   CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING]:
         return Status.IN_PROGRESS
     elif stage == CampaignStage.COMPLETED:
         return Status.COMPLETED

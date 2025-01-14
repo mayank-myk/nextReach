@@ -5,8 +5,8 @@ from sqlalchemy import Column, String, DateTime, Integer
 from app.database.session import Base
 
 
-class UserLogin(Base):
-    __tablename__ = "user_login"
+class ClientLogin(Base):
+    __tablename__ = "client_login"
 
     # Primary Key
     id = Column(Integer, primary_key=True, autoincrement=True)

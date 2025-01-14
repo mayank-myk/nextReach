@@ -1,3 +1,4 @@
+from datetime import date
 from typing import List, Optional
 
 from pydantic import BaseModel, Field
@@ -21,14 +22,14 @@ class UpdateInfluencerRequest(BaseModel):
     profile_picture: Optional[str] = Field(None, min_length=5)
     languages: Optional[List[Language]] = None
     next_reach_score: Optional[int] = Field(None, ge=0)
-    age: Optional[int] = Field(None, ge=0)
+    dob: Optional[date]
     insta_username: Optional[str] = Field(None, max_length=255)
     insta_profile_link: Optional[str] = Field(None, max_length=255)
     yt_username: Optional[str] = Field(None, max_length=255)
     yt_profile_link: Optional[str] = Field(None, max_length=255)
     fb_username: Optional[str] = Field(None, max_length=255)
     fb_profile_link: Optional[str] = Field(None, max_length=255)
-    niche: Optional[Niche] = None
+    niche: Optional[List[Niche]] = None
     city: Optional[City] = None
     collab_type: Optional[CollabType] = None
     deliverables: Optional[List[str]] = None

@@ -25,7 +25,7 @@ class CampaignRepository:
             last_updated_by=campaign_request.created_by,
             campaign_managed_by=campaign_request.campaign_managed_by,
             influencer_id=campaign_request.influencer_id,
-            user_id=campaign_request.user_id,
+            client_id=campaign_request.client_id,
             stage=CampaignStage.CREATED,
             content_charge=campaign_request.content_charge,
             views_charge=campaign_request.views_charge,
@@ -37,7 +37,7 @@ class CampaignRepository:
             content_shoot_date=campaign_request.content_shoot_date,
             content_post_date=campaign_request.content_post_date,
             insta_post_link=campaign_request.insta_post_link,
-            youtube_post_link=campaign_request.yt_post_link,
+            yt_post_link=campaign_request.yt_post_link,
             fb_post_link=campaign_request.fb_post_link,
             content_billing_amount=campaign_request.content_billing_amount,
             content_billing_payment_at=campaign_request.content_billing_payment_at,
@@ -67,16 +67,16 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def create_collab_campaign(self, user_id: int, influencer: Influencer) -> Campaign:
+    def create_collab_campaign(self, created_by: str, client_id: int, influencer: Influencer) -> Campaign:
 
         new_campaign = Campaign(
-            created_by="user_id_" + str(user_id),
-            campaign_managed_by="user_id_" + str(user_id),
-            last_updated_by=user_id,
+            created_by=created_by,
+            last_updated_by=created_by,
+            campaign_managed_by=created_by,
             influencer_id=influencer.id,
             content_charge=influencer.content_charge,
             views_charge=influencer.views_charge,
-            user_id=user_id,
+            client_id=client_id,
             stage=CampaignStage.CREATED
         )
 
@@ -100,12 +100,6 @@ class CampaignRepository:
 
             if hasattr(campaign_request, 'stage') and campaign_request.stage is not None:
                 setattr(existing_campaign, 'stage', campaign_request.stage)
-
-            # if hasattr(campaign_request, 'content_charge') and campaign_request.content_charge is not None:
-            #     setattr(existing_campaign, 'content_charge', campaign_request.content_charge)
-            #
-            # if hasattr(campaign_request, 'views_charge') and campaign_request.views_charge is not None:
-            #     setattr(existing_campaign, 'views_charge', campaign_request.views_charge)
 
             if hasattr(campaign_request, 'type_of_content') and campaign_request.type_of_content is not None:
                 setattr(existing_campaign, 'type_of_content', campaign_request.type_of_content)
@@ -131,7 +125,7 @@ class CampaignRepository:
                 setattr(existing_campaign, 'insta_post_link', campaign_request.insta_post_link)
 
             if hasattr(campaign_request, 'yt_post_link') and campaign_request.yt_post_link is not None:
-                setattr(existing_campaign, 'youtube_post_link', campaign_request.yt_post_link)
+                setattr(existing_campaign, 'yt_post_link', campaign_request.yt_post_link)
 
             if hasattr(campaign_request, 'fb_post_link') and campaign_request.fb_post_link is not None:
                 setattr(existing_campaign, 'fb_post_link', campaign_request.fb_post_link)
@@ -240,13 +234,18 @@ class CampaignRepository:
     def get_campaign_by_id(self, campaign_id: int) -> Campaign:
         return self.db.query(Campaign).filter(Campaign.id == campaign_id).first()
 
-    def get_all_campaign_by_an_user(self, user_id: int) -> List[Campaign]:
-        return self.db.query(Campaign).filter(Campaign.user_id == user_id).all()
+    def get_all_campaign_by_client(self, client_id: int) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.client_id == client_id).all()
 
-    def get_all_running_campaign_with_an_influencer(self, user_id: int, influencer_id: int) -> List[Campaign]:
-        return self.db.query(Campaign).filter(Campaign.user_id == user_id).filter(
+    def get_all_running_campaign_with_an_influencer(self, client_id: int, influencer_id: int) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.client_id == client_id).filter(
             Campaign.influencer_id == influencer_id).all()
 
     def get_all_completed_campaign_for_an_influencer(self, influencer_id: int) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.influencer_id == influencer_id).filter(
             Campaign.stage == CampaignStage.COMPLETED).all()
+
+    def get_all_active_campaigns(self) -> List[Campaign]:
+        return self.db.query(Campaign).filter(Campaign.stage.in_(
+            [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT, CampaignStage.DRAFT,
+             CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING])).all()

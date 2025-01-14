@@ -12,7 +12,8 @@ from uvicorn.workers import UvicornWorker
 from app.exceptions import GenericException
 from app.exceptions.error_response import ErrorResponse
 from app.exceptions.validation_exceptions import MissingRequiredField
-from app.routers import admin_resource, campaign_resource, website_resource, user_resource, influencer_resource
+from app.routers import admin_resource, campaign_resource, website_resource, influencer_resource, client_lead_resource, \
+    client_resource, website_client_resource
 from app.utils.logger import configure_logger
 
 load_dotenv()
@@ -29,13 +30,15 @@ async def lifespan(app: FastAPI):
         log.info("Shutting down the application...")
 
 
-server = FastAPI(title="Scalable FastAPI Project", lifespan=lifespan)
+server = FastAPI(title="NextReach Admin Console", lifespan=lifespan)
 
 server.include_router(admin_resource.router)
 server.include_router(campaign_resource.router)
-server.include_router(user_resource.router)
-server.include_router(website_resource.router)
+server.include_router(client_lead_resource.router)
+server.include_router(client_resource.router)
 server.include_router(influencer_resource.router)
+server.include_router(website_client_resource.router)
+server.include_router(website_resource.router)
 
 
 class AsyncioUvicornWorker(UvicornWorker):
@@ -101,5 +104,4 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 if __name__ == "__main__":
-    load_dotenv(dotenv_path='/Users/mayank.agrawal/PycharmProjects/nextReach/.env')
     uvicorn.run(server, host="0.0.0.0", port=8010)

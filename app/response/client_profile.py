@@ -7,7 +7,7 @@ from app.enums.city import City
 from app.enums.niche import Niche
 
 
-class UserProfile(BaseModel):
+class ClientProfile(BaseModel):
     id: int
     name: Optional[str] = None
     phone_number: str

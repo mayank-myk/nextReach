@@ -12,7 +12,7 @@ _log = configure_logger()
 
 router = APIRouter(
     prefix='/v1/web',
-    tags=['Generic Resources (Only For Website)']
+    tags=['Website Resources (Only For Website)']
 )
 
 db_manager = DatabaseSessionManager()

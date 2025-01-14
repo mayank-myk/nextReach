@@ -1,18 +1,22 @@
 from typing import List
 
 from app.api_requests.admin_user_request import AdminUserRequest
+from app.api_requests.client_request import ClientRequest
 from app.api_requests.expense_request import ExpenseRequest
 from app.api_requests.login_request import LoginRequest
 from app.api_requests.revenue_request import RevenueRequest
-from app.api_requests.user_request import UserRequest
+from app.api_requests.update_client_request import UpdateClientRequest
+from app.database.client_table import Client
 from app.database.expense_table import Expense
 from app.database.revenue_table import Revenue
 from app.database.waitlist_table import WaitList
 from app.enums.status import Status
 from app.repository.admin_user_repository import AdminUserRepository
+from app.repository.campaign_repository import CampaignRepository
+from app.repository.client_repository import ClientRepository
 from app.repository.expense_repository import ExpenseRepository
+from app.repository.influencer_repository import InfluencerRepository
 from app.repository.revenue_repository import RevenueRepository
-from app.repository.user_repository import UserRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
@@ -26,8 +30,10 @@ class AdminService:
         self.admin_user_repository = AdminUserRepository(session)
         self.revenue_repository = RevenueRepository(session)
         self.expense_repository = ExpenseRepository(session)
-        self.user_repository = UserRepository(session)
-        self.wait_list_user_repository = WaitListRepository(session)
+        self.client_repository = ClientRepository(session)
+        self.wait_list_repository = WaitListRepository(session)
+        self.campaign_repository = CampaignRepository(session)
+        self.influencer_repository = InfluencerRepository(session)
 
     def admin_login(self, request: LoginRequest) -> LoginResponse:
         admin_user = self.admin_user_repository.get_admin_by_admin_id(admin_id=request.admin_id)
@@ -127,33 +133,51 @@ class AdminService:
             return GenericResponse(success=False,
                                    message="No record found for expense at all")
 
-    def create_user(self, request: UserRequest) -> GenericResponse:
-        existing_user = self.user_repository.get_user_by_phone_number(phone_number=request.phone_number)
-        if existing_user:
-            return GenericResponse(success=True, header="Success",
-                                   message=f"Business user with phone_number: {request.phone_number} already exists")
-        new_user = self.user_repository.create_user_from_admin(request=request)
-
-        if new_user:
-            return GenericResponse(success=True, header="Success",
-                                   message=f"Successfully created new business user with user_id: {new_user.id}")
-        else:
-            _log.info("Unable to create new business user with phone_number {}".format(request.phone_number))
-            return GenericResponse(success=False, message="Unable to create new user")
-
-    def update_user(self, user_id: int, request: UserRequest) -> GenericResponse:
-        new_user = self.user_repository.update_user_from_admin(user_id=user_id, request=request)
-
-        if new_user:
-            return GenericResponse(success=True, header="Success",
-                                   message=f"Successfully updated business user with user_id: {user_id}")
-        else:
-            _log.info("No record found for user with user_id {}".format(user_id))
+    def get_client_profile(self, phone_number: str) -> Client | GenericResponse:
+        existing_client = self.client_repository.get_client_by_phone_number(phone_number=phone_number)
+        if not existing_client:
             return GenericResponse(success=False,
-                                   message="No user found for given user_id")
+                                   message=f"Business client with phone_number: {phone_number} doesn't exists")
+        return existing_client
+
+    def create_client(self, request: ClientRequest) -> GenericResponse:
+        existing_client = self.client_repository.get_client_by_phone_number(phone_number=request.phone_number)
+        if existing_client:
+            return GenericResponse(success=True, header="Success",
+                                   message=f"Business client with phone_number: {request.phone_number} already exists")
+        new_client = self.client_repository.create_client_from_admin(request=request)
+
+        if new_client:
+            return GenericResponse(success=True, header="Success",
+                                   message=f"Successfully created new business client with client_id: {new_client.id}")
+        else:
+            _log.info("Unable to create new business client with phone_number {}".format(request.phone_number))
+            return GenericResponse(success=False, message="Unable to create new client")
+
+    def update_client(self, client_id: int, request: UpdateClientRequest) -> GenericResponse:
+        new_client = self.client_repository.update_client_from_admin(client_id=client_id, request=request)
+
+        if new_client:
+            return GenericResponse(success=True, header="Success",
+                                   message=f"Successfully updated business client with client_id: {client_id}")
+        else:
+            _log.info("No record found for client with client_id {}".format(client_id))
+            return GenericResponse(success=False,
+                                   message=f"No client found for client_id: {client_id}")
+
+    def recharge_coin(self, client_id: int, coin_count: int) -> GenericResponse:
+        new_client = self.client_repository.coin_recharge(client_id=client_id, coin_count=coin_count)
+
+        if new_client:
+            return GenericResponse(success=True, header="Success",
+                                   message=f"Successfully recharged business client with client_id: {client_id}, coin_count: {coin_count}")
+        else:
+            _log.info("No record found for client with client_id {}".format(client_id))
+            return GenericResponse(success=False,
+                                   message="No client found for given client_id")
 
     def update_lead(self, wait_list_id: int, status: Status) -> GenericResponse:
-        wait_list = self.wait_list_user_repository.update_wait_list_status(wait_list_id=wait_list_id, status=status)
+        wait_list = self.wait_list_repository.update_wait_list_status(wait_list_id=wait_list_id, status=status)
 
         if wait_list:
             return GenericResponse(success=True, header="Success",
@@ -164,7 +188,7 @@ class AdminService:
                                    message="No wait_list found for given wait_list_id")
 
     def get_all_leads(self, page_size: int, page_number: int) -> List[WaitList] | GenericResponse:
-        wait_list = self.wait_list_user_repository.get_wait_list(limit=page_size, offset=page_size * page_number)
+        wait_list = self.wait_list_repository.get_wait_list(limit=page_size, offset=page_size * page_number)
 
         if wait_list and len(wait_list) > 0:
             return wait_list

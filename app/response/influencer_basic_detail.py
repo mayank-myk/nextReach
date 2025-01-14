@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, List
 
 from pydantic import BaseModel
 
@@ -10,7 +10,7 @@ class InfluencerBasicDetail(BaseModel):
     id: int
     name: str
     profile_picture: str
-    niche: Niche
+    niche: List[Niche]
     city: City
     profile_visited: bool
     views_charge: Optional[int] = None

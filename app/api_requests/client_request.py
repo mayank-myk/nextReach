@@ -7,7 +7,7 @@ from app.enums.city import City
 from app.enums.niche import Niche
 
 
-class UserRequest(BaseModel):
+class ClientRequest(BaseModel):
     created_by: str = Field(..., min_length=1)  # Enforcing str type with a length constraint
     name: str = Field(..., min_length=3, max_length=255)  # Enforcing str type with length constraints
     phone_number: str = Field(..., min_length=10, max_length=10)  # Enforcing exact length for phone number

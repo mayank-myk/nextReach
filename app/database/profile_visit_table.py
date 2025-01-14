@@ -13,6 +13,6 @@ class ProfileVisit(Base):
     created_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     last_visited_at = Column(DateTime, default=datetime.datetime.utcnow, nullable=False)
     influencer_id = Column(Integer, ForeignKey('influencer.id'), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False, index=True)
+    client_id = Column(Integer, ForeignKey('client.id'), nullable=False, index=True)
     influencer = relationship("Influencer", back_populates="profile_visit")
-    user = relationship("User", back_populates="profile_visit")
+    client = relationship("Client", back_populates="profile_visit")

@@ -19,7 +19,7 @@ _log = configure_logger()
 
 router = APIRouter(
     prefix='/v1/admin',
-    tags=['Create/Update Expense, Revenue, Bills (Only For Admins)']
+    tags=['Expense, Revenue, Bills (Only For Admins)']
 )
 
 db_manager = DatabaseSessionManager()
@@ -38,19 +38,19 @@ def generate_bill(campaign_id: int, db=Depends(db_manager.get_db)) -> GenericRes
 
 
 @router.post("/create")
-def create_user(user: AdminUserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_admin(user: AdminUserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.create_admin(new_user=user)
 
 
 @router.post("/update")
-def update_user(user: AdminUserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_admin(user: AdminUserRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.update_admin(user=user)
 
 
 @router.put("/delete")
-def delete_user(admin_id: str, db=Depends(db_manager.get_db)) -> GenericResponse:
+def delete_admin(admin_id: str, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.delete_admin(admin_id=admin_id)
 

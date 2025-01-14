@@ -16,7 +16,6 @@ from app.enums.content_price import ContentPrice, CONTENT_PRICE_DICT
 from app.enums.engagement_rate import EngagementRate, ER_DICT
 from app.enums.follower_count import FollowerCount, FOLLOWER_COUNT_DICT
 from app.enums.gender import Gender
-from app.enums.influencer_age import InfluencerAge, AGE_DICT
 from app.enums.language import Language
 from app.enums.niche import Niche
 from app.enums.platform import Platform
@@ -47,7 +46,7 @@ class InfluencerRepository:
             address=influencer_request.address,
             languages=influencer_request.languages,
             next_reach_score=influencer_request.next_reach_score,
-            age=influencer_request.age,
+            dob=influencer_request.dob,
             insta_username=influencer_request.insta_username,
             insta_profile_link=influencer_request.insta_profile_link,
             yt_username=influencer_request.yt_username,
@@ -101,8 +100,8 @@ class InfluencerRepository:
             if hasattr(influencer_request, 'next_reach_score') and influencer_request.next_reach_score is not None:
                 setattr(existing_influencer, 'next_reach_score', influencer_request.next_reach_score)
 
-            if hasattr(influencer_request, 'age') and influencer_request.age is not None:
-                setattr(existing_influencer, 'age', influencer_request.age)
+            if hasattr(influencer_request, 'dob') and influencer_request.dob is not None:
+                setattr(existing_influencer, 'dob', influencer_request.dob)
 
             if hasattr(influencer_request, 'insta_username') and influencer_request.insta_username is not None:
                 setattr(existing_influencer, 'insta_username', influencer_request.insta_username)
@@ -504,7 +503,6 @@ class InfluencerRepository:
             content_price: Optional[ContentPrice],
             collab_type: Optional[CollabType],
             gender: Optional[List[Gender]],
-            influencer_age: Optional[List[InfluencerAge]],
             rating: Optional[Rating],
             language_list: Optional[List[Language]]
     ):
@@ -523,7 +521,11 @@ class InfluencerRepository:
 
         # Apply filters
         if niche:
-            query = query.filter(Influencer.niche.in_(niche))
+            query = query.filter(
+                (Influencer.niche.op("&&")(niche)) |  # Overlap operator for non-empty arrays
+                (Influencer.niche.is_(None)) |  # Check for None values
+                (func.cardinality(Influencer.niche) == 0)  # Check for empty array
+            )
         if city:
             query = query.filter(Influencer.city.in_(city))
         if reach_price:
@@ -558,12 +560,6 @@ class InfluencerRepository:
             query = query.filter(Influencer.collab_type.in_(COLLAB_TYPE_DICT[collab_type]))
         if gender:
             query = query.filter(Influencer.gender.in_(gender))
-        if influencer_age:
-            filters = [
-                Influencer.age.between(AGE_DICT[ia][0], AGE_DICT[ia][1])
-                for ia in influencer_age
-            ]
-            query = query.filter(or_(*filters))
         if language_list:
             query = query.filter(
                 (Influencer.languages.op("&&")(language_list)) |  # Overlap operator for non-empty arrays
@@ -607,7 +603,6 @@ class InfluencerRepository:
             content_price: Optional[ContentPrice],
             collab_type: Optional[CollabType],
             gender: Optional[List[Gender]],
-            influencer_age: Optional[List[InfluencerAge]],
             rating: Optional[Rating],
             language_list: Optional[List[Language]]
     ):
@@ -629,9 +624,11 @@ class InfluencerRepository:
 
         # Apply filters
         if niche:
-            query = query.filter(Influencer.niche.in_(niche))
-        if city:
-            query = query.filter(Influencer.city.in_(city))
+            query = query.filter(
+                (Influencer.niche.op("&&")(niche)) |  # Overlap operator for non-empty arrays
+                (Influencer.niche.is_(None)) |  # Check for None values
+                (func.cardinality(Influencer.niche) == 0)  # Check for empty array
+            )
         if platform:
             query = query.filter(Influencer.primary_platform == platform)
         if language_list:

@@ -12,7 +12,7 @@ class CampaignRequest(BaseModel):
     created_by: str = Field(..., min_length=3, max_length=255)  # Required field
     campaign_managed_by: str = Field(..., max_length=255)  # Required field
     influencer_id: int = Field(...)  # Required field
-    user_id: int = Field(...)  # Required field
+    client_id: int = Field(...)  # Required field
     stage: CampaignStage  # Required field (assuming it's an enum)
     content_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     views_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided

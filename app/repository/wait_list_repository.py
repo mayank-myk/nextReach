@@ -2,10 +2,10 @@ from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
+from app.api_requests.waitlist_request import WaitListRequest
 from app.database.waitlist_table import WaitList
 from app.enums.status import Status
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
-from app.api_requests.waitlist_request import WaitListRequest
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -55,7 +55,9 @@ class WaitListRepository:
 
     def get_wait_list(self, limit: int, offset: int) -> Optional[List[WaitList]]:
         try:
-            return self.db.query(WaitList).offset(offset).limit(limit).all()
+            return self.db.query(WaitList).filter(
+                WaitList.onboarding_status.in_([Status.PROCESSING, Status.IN_PROGRESS])).offset(offset).limit(
+                limit).all()
 
         except Exception as ex:
             _log.error(f"Unable to get wait_list record for page_number {offset}. Error: {str(ex)}")

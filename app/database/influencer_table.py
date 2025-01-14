@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, String, DateTime, Integer, Enum, ARRAY, CheckConstraint
+from sqlalchemy import Column, String, DateTime, Integer, Enum, ARRAY, CheckConstraint, Date
 from sqlalchemy.orm import relationship
 
 from app.database.session import Base
@@ -34,7 +34,7 @@ class Influencer(Base):
     profile_picture = Column(String(255), nullable=False)  # URL for profile picture
     languages = Column(ARRAY(Enum(Language, name="language_enum")), nullable=True)  # List of languages
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)
-    age = Column(Integer, CheckConstraint('age >= 0'), default=0)
+    dob = Column(Date, nullable=True)
 
     # Social profiles
     insta_username = Column(String(255), nullable=True)
@@ -45,7 +45,7 @@ class Influencer(Base):
     fb_profile_link = Column(String(1000), nullable=True)
 
     # Niche and business location
-    niche = Column(Enum(Niche), nullable=False)
+    niche = Column(ARRAY(Enum(Niche, name="niche_enum")), nullable=True)
     city = Column(Enum(City), nullable=False)
     collab_type = Column(Enum(CollabType), nullable=False)
     deliverables = Column(ARRAY(String), nullable=True)

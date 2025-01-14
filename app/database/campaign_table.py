@@ -24,7 +24,7 @@ class Campaign(Base):
 
     # Foreign Keys
     influencer_id = Column(Integer, ForeignKey('influencer.id'), nullable=False, index=True)
-    user_id = Column(Integer, ForeignKey('user_table.id'), nullable=False, index=True)
+    client_id = Column(Integer, ForeignKey('client.id'), nullable=False, index=True)
 
     # Campaign stage and content info
     stage = Column(Enum(CampaignStage), nullable=False)
@@ -44,14 +44,17 @@ class Campaign(Base):
     # Content creation information
     content_shoot_date = Column(Date, nullable=True)
 
-    # Content post information
-    insta_post_link = Column(String(255), nullable=True)
-    youtube_post_link = Column(String(255), nullable=True)
-    fb_post_link = Column(String(255), nullable=True)
-    content_post_date = Column(Date, nullable=True)
+    # Content draft approved information
+    content_draft_date = Column(Date, nullable=True)
     content_billing_amount = Column(Integer, CheckConstraint('content_billing_amount >= 0'), nullable=True)
     content_billing_payment_at = Column(DateTime, nullable=True)
     content_billing_payment_status = Column(Enum(PaymentStatus), nullable=True)
+
+    # Content post information
+    content_post_date = Column(DateTime, nullable=True)
+    insta_post_link = Column(String(255), nullable=True)
+    yt_post_link = Column(String(255), nullable=True)
+    fb_post_link = Column(String(255), nullable=True)
 
     # First billing
     first_billing_date = Column(Date, nullable=True)
@@ -77,5 +80,5 @@ class Campaign(Base):
     pending_deliverables = Column(ARRAY(String), nullable=True)
 
     influencer = relationship("Influencer", back_populates="campaign")
-    user = relationship("User", back_populates="campaign")
+    client = relationship("Client", back_populates="campaign")
     revenue = relationship("Revenue", back_populates="campaign")

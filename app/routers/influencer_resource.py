@@ -12,8 +12,8 @@ from app.database.influencer_table import Influencer
 from app.database.session import DatabaseSessionManager
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail import InfluencerDetail
+from app.services.client_service import ClientService
 from app.services.influencer_service import InfluencerService
-from app.services.user_service import UserService
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -22,7 +22,7 @@ ALLOWED_IMAGE_EXTENSIONS = [".jpg", ".jpeg", ".png"]
 
 router = APIRouter(
     prefix='/v1/influencer',
-    tags=['Create/Update Influencer (Only For Admins)']
+    tags=['Influencer Resource(Only For Admins)']
 )
 
 db_manager = DatabaseSessionManager()
@@ -85,5 +85,5 @@ def get_influencer_metric_detail(influencer_id: int,
 
 @router.post('/get/insight/{influencer_id}')
 def get_influencer_insight(influencer_id: int, db=Depends(db_manager.get_db)) -> InfluencerDetail | GenericResponse:
-    user_service = UserService(db)
-    return user_service.get_influencer_insight(request=InfluencerInsights(user_id=2, influencer_id=influencer_id))
+    client_service = ClientService(db)
+    return client_service.get_influencer_insight(request=InfluencerInsights(client_id=2, influencer_id=influencer_id))

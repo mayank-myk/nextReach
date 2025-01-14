@@ -6,6 +6,7 @@ from pydantic import BaseModel
 from app.enums.campaign_stage import CampaignStage
 from app.enums.content_type import ContentType
 from app.response.campaign.campaign_billing import CampaignBilling
+from app.response.campaign.content_draft import ContentDraft
 from app.response.campaign.content_post import ContentPost
 from app.response.influencer_basic_detail import InfluencerBasicDetail
 
@@ -21,6 +22,7 @@ class CampaignDetail(BaseModel):
     review: Optional[str] = None
     influencer_finalization_date: Optional[str] = None
     content_shoot_date: Optional[str] = None
+    content_draft: Optional[ContentDraft] = None
     content_post: Optional[ContentPost] = None
     first_billing: Optional[CampaignBilling] = None
     second_billing: Optional[CampaignBilling] = None

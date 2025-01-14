@@ -7,6 +7,7 @@ import requests
 
 from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
+from app.clients.interakt_client import contact_us_notification_via_whatsapp
 from app.repository.wait_list_repository import WaitListRepository
 from app.response.enagement_response import EnagementMetric
 from app.response.generic_response import GenericResponse
@@ -14,6 +15,8 @@ from app.utils.converters import engagement_rate_to_quality, int_to_str_k
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
+
+ADMIN_PHONE_NUMBERS = ["7008680032", "7676604090", "9731923797"]
 
 
 class WebService:
@@ -26,6 +29,10 @@ class WebService:
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
 
+        for admin_phone_number in ADMIN_PHONE_NUMBERS:
+            contact_us_notification_via_whatsapp(admin_phone_number=admin_phone_number, entity_type=request.entity_type,
+                                                 name=request.name,
+                                                 client_phone_number=request.phone_number, email=request.email)
         if wait_list:
             return GenericResponse(success=True,
                                    message="Our team will be in touch with you shortly. Thank you for your patience",
@@ -37,32 +44,32 @@ class WebService:
 
 def calculate_influencer_earning(request: CalculateEarningRequest) -> str:
     view_rate = {
-        'FOOD_COOKING': 30,
-        'BEAUTY_SKINCARE': 35,
-        'TRAVEL_TOURISM': 30,
-        'FASHION_LIFESTYLE': 35,
-        'HEALTH_FITNESS': 35,
-        'TECH_GADGETS': 40,
-        'WEALTH_FINANCE': 40,
-        'ENTERTAINMENT': 35,
-        'GAMING': 40,
-        'MOTIVATIONAL_SPIRITUAL': 30,
-        'PARENTING_FAMILY': 30,
-        'EDUCATION': 35
+        'FOOD_COOKING': 25,
+        'BEAUTY_SKINCARE': 30,
+        'TRAVEL_TOURISM': 25,
+        'FASHION_LIFESTYLE': 30,
+        'HEALTH_FITNESS': 30,
+        'TECH_GADGETS': 35,
+        'WEALTH_FINANCE': 35,
+        'ENTERTAINMENT': 30,
+        'GAMING': 30,
+        'MOTIVATIONAL_SPIRITUAL': 20,
+        'PARENTING_FAMILY': 25,
+        'EDUCATION': 25
     }
 
     content_rate_list = [
-        ([0, 10000], 0),
-        ([10000, 50000], 5000),
-        ([50000, 100000], 10000),
-        ([100000, 250000], 15000),
-        ([250000, 500000], 20000),
-        ([500000, 750000], 25000),
-        ([750000, 1000000], 30000),
-        ([1000000, 1500000], 35000),
-        ([1500000, 2000000], 40000),
-        ([2000000, 3000000], 45000),
-        ([3000000, 1000000000], 50000)
+        ([0, 10000], 1000),
+        ([10000, 50000], 2500),
+        ([50000, 100000], 5000),
+        ([100000, 250000], 10000),
+        ([250000, 500000], 15000),
+        ([500000, 750000], 20000),
+        ([750000, 1000000], 25000),
+        ([1000000, 1500000], 30000),
+        ([1500000, 2000000], 30000),
+        ([2000000, 3000000], 35000),
+        ([3000000, 1000000000], 35000)
     ]
 
     cpm = view_rate.get(request.niche.value, 35)
@@ -81,7 +88,7 @@ def calculate_influencer_earning(request: CalculateEarningRequest) -> str:
             continue
 
     # Calculate total monthly earnings
-    return str(int(content_price + earnings_per_post)) + " per post"
+    return str(int(content_price + earnings_per_post) * 10) + " per month"
 
 
 def calculate_engagement_rate2(username: str) -> EnagementMetric | GenericResponse:

@@ -2,5 +2,5 @@ from enum import Enum
 
 
 class EntityType(Enum):
-    BUSINESS = "BUSINESS"
+    CLIENT = "CLIENT"
     INFLUENCER = "INFLUENCER"
