@@ -1,4 +1,4 @@
-from datetime import datetime, timezone
+from datetime import datetime
 from typing import List, Optional
 
 from app.api_requests.influencer_insights import InfluencerInsights
@@ -151,25 +151,24 @@ class ClientService:
 
     def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
-        login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
-        utc_datetime = login_record.created_at.astimezone(timezone.utc)  # Convert to UTC
-        timezone_unaware_datetime = utc_datetime.replace(tzinfo=None)
+        login_records = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
 
-        if login_record:
-            if login_record.otp == otp and (datetime.now() - timezone_unaware_datetime).total_seconds() <= 600:
-                client_record = self.client_repository.get_or_create_client_by_phone_number(phone_number=phone_number)
-                return LoginResponse(client_id=client_record.id, success=True, header="Success!",
-                                     message="OTP has been successfully verified", button_text="Proceed")
-            elif login_record.otp == otp and (datetime.now() - timezone_unaware_datetime).total_seconds() > 600:
-                return LoginResponse(success=False,
-                                     message="OTP has expired. Please use the latest one or request a new OTP",
-                                     button_text="Retry")
-            else:
-                return LoginResponse(success=False, button_text="Try Again",
-                                     message="The OTP you entered doesn't match the latest one sent to your registered mobile number")
-        else:
+        if not login_records or len(login_records) == 0:
             return LoginResponse(success=False, message="No OTP record found for the provided phone number",
-                                 button_text="Understood")
+                                 button_text="Understood", header="Oops!")
+
+        otp_list = []
+        for login_record in login_records:
+            otp_list.append(login_record.otp)
+
+        if otp in otp_list:
+            client_record = self.client_repository.get_or_create_client_by_phone_number(phone_number=phone_number)
+            return LoginResponse(client_id=client_record.id, success=True, header="Success!",
+                                 message="OTP has been successfully verified", button_text="Proceed")
+        else:
+            return LoginResponse(success=False, header="Failed",
+                                 message="Invalid OTP. It may have expired or doesn't match the latest one.",
+                                 button_text="Get New OTP")
 
     def get_watchlist(self, client_id: int) -> List[InfluencerDetail]:
 

@@ -1,4 +1,5 @@
-from typing import Optional
+from datetime import datetime, timedelta
+from typing import Optional, List
 
 from sqlalchemy.orm import Session
 
@@ -14,11 +15,16 @@ class ClientLoginRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def get_otp_by_phone_number(self, phone_number: str) -> Optional[ClientLogin]:
+    def get_otp_by_phone_number(self, phone_number: str) -> Optional[List[ClientLogin]]:
 
         try:
-            db_otp = self.db.query(ClientLogin).filter(ClientLogin.phone_number == phone_number).order_by(
-                ClientLogin.created_at.desc()).first()
+            time_10_minutes_ago = datetime.utcnow() - timedelta(minutes=10)
+
+            # Query for OTPs created in the last 10 minutes
+            db_otp = self.db.query(ClientLogin).filter(
+                ClientLogin.phone_number == phone_number,
+                ClientLogin.created_at >= time_10_minutes_ago
+            ).order_by(ClientLogin.created_at.desc()).all()
 
             if not db_otp:
                 _log.info("No record found for otp with phone_number {}".format(phone_number))
