@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from typing import List, Optional
 
 from app.api_requests.influencer_insights import InfluencerInsights
@@ -152,12 +152,15 @@ class ClientService:
     def validate_otp(self, phone_number: str, otp: str) -> LoginResponse:
 
         login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
+        utc_datetime = login_record.created_at.astimezone(timezone.utc)  # Convert to UTC
+        timezone_unaware_datetime = utc_datetime.replace(tzinfo=None)
+
         if login_record:
-            if login_record.otp == otp:
+            if login_record.otp == otp and (datetime.now() - timezone_unaware_datetime).total_seconds() <= 600:
                 client_record = self.client_repository.get_or_create_client_by_phone_number(phone_number=phone_number)
                 return LoginResponse(client_id=client_record.id, success=True, header="Success!",
                                      message="OTP has been successfully verified", button_text="Proceed")
-            elif (datetime.now() - login_record.created_at).total_seconds() > 600:
+            elif login_record.otp == otp and (datetime.now() - timezone_unaware_datetime).total_seconds() > 600:
                 return LoginResponse(success=False,
                                      message="OTP has expired. Please use the latest one or request a new OTP",
                                      button_text="Retry")
