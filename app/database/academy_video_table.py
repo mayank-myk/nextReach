@@ -12,7 +12,7 @@ class AcademyVideo(Base):
     created_at = Column(Date, default=datetime.datetime.today, nullable=False)
     yt_link = Column(String(1000), nullable=False)
     title = Column(String(255), nullable=False)
-    group_name = Column(String(255), nullable=False)
+    category = Column(String(255), nullable=False)
     tag1 = Column(String(255), nullable=False)
     tag2 = Column(String(255), nullable=False)
     tag3 = Column(String(255), nullable=False)

@@ -13,12 +13,15 @@ from app.api_requests.waitlist_request import WaitListRequest
 from app.clients.interakt_client import contact_us_notification_via_whatsapp
 from app.repository.academy_video_repository import AcademyVideoRepository
 from app.repository.blog_repository import BlogRepository
+from app.repository.influencer_repository import InfluencerRepository
 from app.repository.success_story_repository import SuccessStoryRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.response.academy_video_response import AcademyVideoResponse
 from app.response.blog_response import BlogResponse
 from app.response.enagement_response import EnagementMetric
 from app.response.generic_response import GenericResponse
+from app.response.home_metadata import HomeMetadata
+from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.success_story_response import SuccessStoryResponse
 from app.utils.converters import engagement_rate_to_quality, int_to_str_k
 from app.utils.logger import configure_logger
@@ -312,9 +315,31 @@ class WebService:
         self.blog_repository = BlogRepository(session)
         self.success_story_repository = SuccessStoryRepository(session)
         self.academy_video_repository = AcademyVideoRepository(session)
+        self.influencer_repository = InfluencerRepository(session)
 
-    def get_web_metadata(self) -> GenericResponse:
-        pass
+    def get_web_metadata(self) -> HomeMetadata:
+        influencer_list = self.influencer_repository.get_top_rated_influencers()
+        influencer_basic_detail_list = []
+        for influencer in influencer_list:
+            latest_metric = max(influencer.influencer_metric, key=lambda m: m.created_at, default=None)
+            influencer_basic_detail = InfluencerBasicDetail(
+                id=influencer.id,
+                name=influencer.name,
+                profile_picture=influencer.profile_picture,
+                niche=influencer.niche,
+                city=influencer.city,
+                profile_visited=False,
+                insta_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
+                yt_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
+            )
+            influencer_basic_detail_list.append(influencer_basic_detail)
+
+        return HomeMetadata(
+            academy_video_list=self.get_all_nra(),
+            success_story_list=self.get_all_ss(),
+            blog_list=self.get_all_blogs(),
+            influencer_list=influencer_basic_detail_list
+        )
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
@@ -363,62 +388,80 @@ class WebService:
                 return ss_file.read()
         raise FileNotFoundError(f"Success story with url {url} not found.")
 
-    def get_all_blogs(self) -> Dict[str, List[BlogResponse]]:
-        blog_list = self.blog_repository.get_all_blogs()
-        if blog_list and len(blog_list) > 0:
+    def get_all_blogs_dict(self) -> Dict[str, List[BlogResponse]]:
+        blog_response_list = self.get_all_blogs()
+        if blog_response_list and len(blog_response_list) > 0:
             blog_dict = defaultdict(list)
+            for blog_response in blog_response_list:
+                blog_dict[blog_response.category].append(blog_response)
+            return blog_dict
+
+    def get_all_blogs(self) -> List[BlogResponse]:
+        blog_list = self.blog_repository.get_all_blogs()
+        blog_response_list = []
+        if blog_list and len(blog_list) > 0:
             for blog in blog_list:
                 blog_response = BlogResponse(
                     id=blog.id,
-                    created_at=blog.created_at.strftime(),
+                    created_at=blog.created_at.strftime("%B %d, %Y"),
                     author="By " + blog.author,
                     url=blog.url,
                     title=blog.title,
-                    category=blog.group_name
+                    category=blog.category
                 )
-                blog_dict[blog.group_name].append(blog_response)
-            return blog_dict
-        else:
-            return None
+                blog_response_list.append(blog_response)
+        return blog_response_list
 
-    def get_all_ss(self) -> Dict[str, List[SuccessStoryResponse]]:
-        ss_list = self.success_story_repository.get_all_ss()
-        if ss_list and len(ss_list) > 0:
+    def get_all_ss_dict(self) -> Dict[str, List[SuccessStoryResponse]]:
+        ss_response_list = self.get_all_ss()
+        if ss_response_list and len(ss_response_list) > 0:
             ss_dict = defaultdict(list)
+            for ss_response in ss_response_list:
+                ss_dict[ss_response.category].append(ss_response)
+            return ss_dict
+
+    def get_all_ss(self) -> List[SuccessStoryResponse]:
+        ss_list = self.success_story_repository.get_all_ss()
+        ss_response_list = []
+        if ss_list and len(ss_list) > 0:
             for ss in ss_list:
                 ss_response = SuccessStoryResponse(
                     id=ss.id,
-                    created_at=ss.created_at.strftime(),
+                    created_at=ss.created_at.strftime("%B %d, %Y"),
                     title=ss.title,
                     url=ss.url,
-                    category=ss.group_name,
+                    category=ss.category,
                     tag1=ss.tag1,
                     tag2=ss.tag2,
                     business_image=ss.business_image,
                     influencer_image=ss.influencer_image
                 )
-                ss_dict[ss.group_name].append(ss_response)
-            return ss_dict
-        else:
-            return None
+                ss_response_list.append(ss_response)
+        return ss_response_list
 
-    def get_all_nra(self) -> Dict[str, List[AcademyVideoResponse]]:
-        nra_list = self.academy_video_repository.get_all_nra()
-        if nra_list and len(nra_list) > 0:
+    def get_all_nra_dict(self) -> Dict[str, List[AcademyVideoResponse]]:
+        nra_response_list = self.get_all_nra()
+        if nra_response_list and len(nra_response_list) > 0:
             nra_dict = defaultdict(list)
+            for nra_response in nra_response_list:
+                nra_dict[nra_response.category].append(nra_response)
+            return nra_dict
+
+    def get_all_nra(self) -> List[AcademyVideoResponse]:
+        nra_list = self.academy_video_repository.get_all_nra()
+        nra_response_list = []
+        if nra_list and len(nra_list) > 0:
             for nra in nra_list:
                 nra_response = AcademyVideoResponse(
                     id=nra.id,
-                    created_at=nra.created_at.strftime(),
+                    created_at=nra.created_at.strftime("%B %d, %Y"),
                     title=nra.title,
                     yt_link=nra.yt_link,
-                    category=nra.group_name,
+                    category=nra.category,
                     tag1=nra.tag1,
                     tag2=nra.tag2,
                     tag3=nra.tag3,
                     tag4=nra.tag4
                 )
-                nra_dict[nra.group_name].append(nra_response)
-            return nra_dict
-        else:
-            return None
+                nra_response_list.append(nra_response)
+        return nra_response_list

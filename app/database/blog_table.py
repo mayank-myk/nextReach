@@ -13,4 +13,4 @@ class Blog(Base):
     author = Column(String(255), nullable=False)
     url = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
-    group_name = Column(String(255), nullable=False)
+    category = Column(String(255), nullable=False)

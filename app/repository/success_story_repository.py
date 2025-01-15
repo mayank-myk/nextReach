@@ -19,13 +19,12 @@ class SuccessStoryRepository:
         try:
             ss = SuccessStory(
                 title=request.title,
-                group_name=request.group_name,
+                category=request.category,
                 url=request.url,
                 tag1=request.tag1,
                 tag2=request.tag2,
                 business_image=request.business_image,
-                influencer_image=request.influencer_image,
-                content=request.content
+                influencer_image=request.influencer_image
             )
 
             self.db.add(ss)
@@ -55,17 +54,14 @@ class SuccessStoryRepository:
             if hasattr(request, 'title') and request.title is not None:
                 setattr(existing_ss, 'title', request.title)
 
-            if hasattr(request, 'group_name') and request.group_name is not None:
-                setattr(existing_ss, 'group_name', request.group_name)
+            if hasattr(request, 'category') and request.category is not None:
+                setattr(existing_ss, 'category', request.category)
 
             if hasattr(request, 'business_image') and request.business_image is not None:
                 setattr(existing_ss, 'business_image', request.business_image)
 
             if hasattr(request, 'influencer_image') and request.influencer_image is not None:
                 setattr(existing_ss, 'influencer_image', request.influencer_image)
-
-            if hasattr(request, 'content') and request.content is not None:
-                setattr(existing_ss, 'content', request.content)
 
             self.db.commit()
             self.db.refresh(existing_ss)

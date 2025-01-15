@@ -20,7 +20,7 @@ class AcademyVideoRepository:
             ss = AcademyVideo(
                 yt_link=request.yt_link,
                 title=request.title,
-                group_name=request.group_name,
+                category=request.category,
                 tag1=request.tag1,
                 tag2=request.tag2,
                 tag3=request.tag3,
@@ -54,8 +54,8 @@ class AcademyVideoRepository:
             if hasattr(request, 'tag4') and request.tag4 is not None:
                 setattr(existing_nra, 'tag4', request.tag4)
 
-            if hasattr(request, 'group_name') and request.group_name is not None:
-                setattr(existing_nra, 'group_name', request.group_name)
+            if hasattr(request, 'category') and request.category is not None:
+                setattr(existing_nra, 'category', request.category)
 
             if hasattr(request, 'yt_link') and request.yt_link is not None:
                 setattr(existing_nra, 'yt_link', request.yt_link)

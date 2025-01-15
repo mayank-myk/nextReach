@@ -662,3 +662,7 @@ class InfluencerRepository:
             unmatched_influencers = query.limit(page_size - len(matched_influencers)).offset(offset).all()
 
         return unmatched_influencers, all_unmatched_influencers
+
+    def get_top_rated_influencers(self) -> List[Influencer]:
+
+        return self.db.query(Influencer).order_by(desc(Influencer.next_reach_score)).limit(30).offset(0).all()

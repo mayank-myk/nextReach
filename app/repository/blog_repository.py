@@ -22,8 +22,7 @@ class BlogRepository:
                 author=request.author,
                 url=request.url,
                 title=request.title,
-                group_name=request.group_name,
-                content=request.content
+                category=request.category
             )
 
             self.db.add(new_blog)
@@ -53,11 +52,8 @@ class BlogRepository:
             if hasattr(request, 'title') and request.title is not None:
                 setattr(existing_blog, 'title', request.title)
 
-            if hasattr(request, 'group_name') and request.group_name is not None:
-                setattr(existing_blog, 'group_name', request.group_name)
-
-            if hasattr(request, 'content') and request.content is not None:
-                setattr(existing_blog, 'content', request.content)
+            if hasattr(request, 'category') and request.category is not None:
+                setattr(existing_blog, 'category', request.category)
 
             self.db.commit()
             self.db.refresh(existing_blog)

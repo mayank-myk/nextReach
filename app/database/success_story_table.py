@@ -12,7 +12,7 @@ class SuccessStory(Base):
     created_at = Column(Date, default=datetime.datetime.today, nullable=False)
     title = Column(String(255), nullable=False)
     url = Column(String(255), nullable=False)
-    group_name = Column(String(255), nullable=False)
+    category = Column(String(255), nullable=False)
     tag1 = Column(String(255), nullable=False)
     tag2 = Column(String(255), nullable=False)
     business_image = Column(String(255), nullable=False)

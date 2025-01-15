@@ -1,6 +1,7 @@
-from typing import Optional, Dict, List
+from typing import Dict, List
 
 from fastapi import APIRouter, Depends
+from fastapi.responses import HTMLResponse
 
 from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
@@ -9,6 +10,7 @@ from app.response.academy_video_response import AcademyVideoResponse
 from app.response.blog_response import BlogResponse
 from app.response.enagement_response import EnagementMetric
 from app.response.generic_response import GenericResponse
+from app.response.home_metadata import HomeMetadata
 from app.response.success_story_response import SuccessStoryResponse
 from app.services.web_service import WebService, calculate_influencer_earning, calculate_engagement_rate
 from app.utils.logger import configure_logger
@@ -24,7 +26,7 @@ db_manager = DatabaseSessionManager()
 
 
 @router.get('/home/metadata')
-def get_web_metadata(db=Depends(db_manager.get_db)) -> GenericResponse:
+def get_web_metadata(db=Depends(db_manager.get_db)) -> HomeMetadata:
     web_service = WebService(db)
     return web_service.get_web_metadata()
 
@@ -45,31 +47,33 @@ def engagement_rate(insta_username: str) -> EnagementMetric | GenericResponse:
     return calculate_engagement_rate(username=insta_username)
 
 
-@router.get("/get/blog/{url}", response_model=None)
-def get_blog_by_id(url: str, db=Depends(db_manager.get_db)) -> Optional[str]:
+@router.get("/get/blog/{url}", response_class=HTMLResponse)
+def get_blog_by_id(url: str, db=Depends(db_manager.get_db)) -> HTMLResponse:
     web_service = WebService(db)
-    return web_service.get_blog_by_url(url=url)
+    html_content = web_service.get_blog_by_url(url=url)
+    return HTMLResponse(content=html_content, status_code=200)
 
 
-@router.get('/get/blog/all', response_model=None)
+@router.get('/get/all/blog', response_model=None)
 def get_all_blogs(db=Depends(db_manager.get_db)) -> Dict[str, List[BlogResponse]]:
     web_service = WebService(db)
-    return web_service.get_all_blogs()
+    return web_service.get_all_blogs_dict()
 
 
-@router.get("/get/success-story/{url}", response_model=None)
-def get_blog_by_url(url: str, db=Depends(db_manager.get_db)) -> Optional[str]:
+@router.get("/get/success-story/{url}", response_class=HTMLResponse)
+def get_blog_by_url(url: str, db=Depends(db_manager.get_db)) -> HTMLResponse:
     web_service = WebService(db)
-    return web_service.get_ss_by_url(url=url)
+    html_content = web_service.get_ss_by_url(url=url)
+    return HTMLResponse(content=html_content, status_code=200)
 
 
-@router.get('/get/success-story/all')
+@router.get('/get/all/success-story')
 def get_all_ss(db=Depends(db_manager.get_db)) -> Dict[str, List[SuccessStoryResponse]]:
     web_service = WebService(db)
-    return web_service.get_all_ss()
+    return web_service.get_all_ss_dict()
 
 
-@router.get('/get/academy-video/all')
+@router.get('/get/all/academy-video')
 def get_all_nra(db=Depends(db_manager.get_db)) -> Dict[str, List[AcademyVideoResponse]]:
     web_service = WebService(db)
-    return web_service.get_all_nra()
+    return web_service.get_all_nra_dict()
