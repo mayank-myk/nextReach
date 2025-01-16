@@ -9,3 +9,4 @@ class BlogRequest(BaseModel):
     url: str = Field(..., max_length=255)
     category: str = Field(..., max_length=255, description="Category or group the blog belongs to")
     created_at: date = Field(..., description="Date when the blog is created. Defaults to today.")
+    blog_image: str = Field(..., max_length=255, description="Category or group the blog belongs to")

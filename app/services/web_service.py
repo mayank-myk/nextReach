@@ -407,7 +407,8 @@ class WebService:
                     author="By " + blog.author,
                     url=blog.url,
                     title=blog.title,
-                    category=blog.category
+                    category=blog.category,
+                    blog_image=blog.blog_image
                 )
                 blog_response_list.append(blog_response)
         return blog_response_list

@@ -14,3 +14,4 @@ class Blog(Base):
     url = Column(String(255), nullable=False)
     title = Column(String(255), nullable=False)
     category = Column(String(255), nullable=False)
+    blog_image = Column(String(255), nullable=False)

@@ -8,3 +8,4 @@ class BlogResponse(BaseModel):
     url: str
     title: str
     category: str
+    blog_image: str

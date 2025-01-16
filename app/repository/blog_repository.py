@@ -22,7 +22,8 @@ class BlogRepository:
                 author=request.author,
                 url=request.url,
                 title=request.title,
-                category=request.category
+                category=request.category,
+                blog_image=request.blog_image
             )
 
             self.db.add(new_blog)
@@ -54,6 +55,9 @@ class BlogRepository:
 
             if hasattr(request, 'category') and request.category is not None:
                 setattr(existing_blog, 'category', request.category)
+
+            if hasattr(request, 'blog_image') and request.blog_image is not None:
+                setattr(existing_blog, 'blog_image', request.blog_image)
 
             self.db.commit()
             self.db.refresh(existing_blog)
