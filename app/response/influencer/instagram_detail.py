@@ -8,11 +8,10 @@ from app.response.influencer.sex_distribution_graph import SexDistributionGraph
 
 
 class InstagramDetail(BaseModel):
+    id: int
     username: str
+    profile_link: str
     followers: Optional[str]
-    city_graph: Optional[CityDistributionGraph]
-    age_graph: Optional[AgeDistributionGraph]
-    sex_graph: Optional[SexDistributionGraph]
     avg_views: Optional[str]
     max_views: Optional[str]
     min_views: Optional[str]
@@ -21,3 +20,7 @@ class InstagramDetail(BaseModel):
     avg_comments: Optional[str]
     avg_shares: Optional[str]
     engagement_rate: Optional[int]
+
+    city_graph: Optional[CityDistributionGraph]
+    age_graph: Optional[AgeDistributionGraph]
+    sex_graph: Optional[SexDistributionGraph]

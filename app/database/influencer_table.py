@@ -36,14 +36,6 @@ class Influencer(Base):
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)
     dob = Column(Date, nullable=True)
 
-    # Social profiles
-    insta_username = Column(String(255), nullable=True)
-    insta_profile_link = Column(String(1000), nullable=True)
-    yt_username = Column(String(255), nullable=True)
-    yt_profile_link = Column(String(1000), nullable=True)
-    fb_username = Column(String(255), nullable=True)
-    fb_profile_link = Column(String(1000), nullable=True)
-
     # Niche and business location
     niche = Column(ARRAY(Enum(Niche, name="niche_enum")), nullable=True)
     city = Column(Enum(City), nullable=False)
@@ -53,8 +45,16 @@ class Influencer(Base):
     views_charge = Column(Integer, CheckConstraint('views_charge >= 0'), default=0)
 
     # The relationship to SocialMediaDetail (One-to-Many)
-    influencer_metric = relationship(
-        "InfluencerMetric",
+    influencer_insta_metric = relationship(
+        "InfluencerInstaMetric",
+        back_populates="influencer"
+    )
+    influencer_yt_metric = relationship(
+        "InfluencerYtMetric",
+        back_populates="influencer"
+    )
+    influencer_fb_metric = relationship(
+        "InfluencerFbMetric",
         back_populates="influencer"
     )
     campaign = relationship(

@@ -39,7 +39,7 @@ def get_client_campaign_detail(campaign_id: int, db=Depends(db_manager.get_db)) 
     return campaign_service.get_client_campaign_detail(campaign_id=campaign_id)
 
 
-@router.get("/get/all")
+@router.get("/get/dump")
 def get_all_active_campaign_detail(db=Depends(db_manager.get_db)):
     campaign_service = CampaignService(db)
     excel_file = campaign_service.get_all_active_campaign_detail()

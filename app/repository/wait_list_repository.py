@@ -53,12 +53,11 @@ class WaitListRepository:
             _log.error(f"Unable to update wait_list record for wait_list_id {wait_list_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, str(wait_list_id))
 
-    def get_wait_list(self, limit: int, offset: int) -> Optional[List[WaitList]]:
+    def get_wait_list(self) -> Optional[List[WaitList]]:
         try:
             return self.db.query(WaitList).filter(
-                WaitList.onboarding_status.in_([Status.PROCESSING, Status.IN_PROGRESS])).offset(offset).limit(
-                limit).all()
+                WaitList.onboarding_status.in_([Status.PROCESSING, Status.IN_PROGRESS])).all()
 
         except Exception as ex:
-            _log.error(f"Unable to get wait_list record for page_number {offset}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, str(offset))
+            _log.error(f"Unable to get wait_list record. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(1))

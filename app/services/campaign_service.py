@@ -292,7 +292,7 @@ class CampaignService:
                     views_charge=campaign.views_charge,
                     influencer_id=influencer.id,
                     influencer_name=influencer.name,
-                    insta_username=influencer.insta_username,
+                    insta_username=influencer.influencer_insta_metric.user_name if influencer.influencer_insta_metric else None,
                     stage=campaign.stage.value,
                     ageing_day=(
                             datetime.today() - campaign.content_post_date).days if campaign.content_post_date else None,

@@ -17,3 +17,4 @@ class InfluencerBasicDetail(BaseModel):
     content_charge: Optional[int] = None
     insta_followers: Optional[str] = None
     yt_followers: Optional[str] = None
+    fb_followers: Optional[str] = None

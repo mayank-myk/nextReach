@@ -22,9 +22,8 @@ class InfluencerDetail(BaseModel):
     gender: Optional[Gender] = None
     profile_picture: str
     languages: List[Language] = None
-    age: int
     next_reach_score: int
-    niche: Niche
+    niche: List[Niche]
     city: City
     collab_type: CollabType
     deliverables: Optional[List[str]] = None

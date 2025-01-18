@@ -1,4 +1,9 @@
+from datetime import datetime, timezone
+from io import BytesIO
 from typing import List
+from zoneinfo import ZoneInfo
+
+import pandas as pd
 
 from app.api_requests.admin_user_request import AdminUserRequest
 from app.api_requests.blog_request import BlogRequest
@@ -26,6 +31,7 @@ from app.repository.success_story_repository import SuccessStoryRepository
 from app.repository.wait_list_repository import WaitListRepository
 from app.response.generic_response import GenericResponse
 from app.response.login_response import LoginResponse
+from app.response.wait_list_dump import WaitListDump
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -196,15 +202,44 @@ class AdminService:
             return GenericResponse(success=False,
                                    message="No wait_list found for given wait_list_id")
 
-    def get_all_leads(self, page_size: int, page_number: int) -> List[WaitList] | GenericResponse:
-        wait_list = self.wait_list_repository.get_wait_list(limit=page_size, offset=page_size * page_number)
+    def get_all_active_leads(self) -> List[WaitList] | GenericResponse:
+        try:
+            active_wait_list = self.wait_list_repository.get_wait_list()
 
-        if wait_list and len(wait_list) > 0:
-            return wait_list
-        else:
-            _log.info("No record found for wait_list page_size {}, page_number {}".format(page_size, page_number))
-            return GenericResponse(success=False,
-                                   message="No wait_list found for at all")
+            wait_list_dump_list = []
+            for wait_list in active_wait_list:
+                wait_list_dump = WaitListDump(
+                    id=wait_list.id,
+                    status=wait_list.onboarding_status.value,
+                    ageing_day=(
+                            datetime.utcnow().replace(tzinfo=timezone.utc) - wait_list.created_at).days,
+                    entity_type=wait_list.entity_type.value,
+                    created_at=wait_list.created_at.replace(tzinfo=timezone.utc).astimezone(
+                        ZoneInfo('Asia/Kolkata')).strftime(
+                        "%d %b %Y %I:%M %p"),
+                    name=wait_list.name,
+                    phone_number=wait_list.phone_number,
+                    email=wait_list.email,
+                    social_media_handle=wait_list.social_media_handle,
+                    message=wait_list.message
+
+                )
+                wait_list_dump_list.append(wait_list_dump)
+
+            wait_list_data = [wait_list.dict() for wait_list in wait_list_dump_list]
+
+            # Create a DataFrame from the list of dictionaries
+            df = pd.DataFrame(wait_list_data)
+
+            # Save the DataFrame to a BytesIO buffer
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False, sheet_name=f'Leads{datetime.today().strftime("%Y-%m-%d")}')
+            buffer.seek(0)
+            return buffer
+
+        except Exception as e:
+            _log.info("Error occurred while fetching waitlist details dump. Error: {str(e)}")
 
     def create_blog(self, request: BlogRequest) -> GenericResponse:
         new_blog = self.blog_repository.create_blog(request=request)

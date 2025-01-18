@@ -321,7 +321,10 @@ class WebService:
         influencer_list = self.influencer_repository.get_top_rated_influencers()
         influencer_basic_detail_list = []
         for influencer in influencer_list:
-            latest_metric = max(influencer.influencer_metric, key=lambda m: m.created_at, default=None)
+            influencer_fb_metric = max(influencer.influencer_fb_metric, key=lambda m: m.created_at, default=None)
+            influencer_yt_metric = max(influencer.influencer_yt_metric, key=lambda m: m.created_at, default=None)
+            influencer_insta_metric = max(influencer.influencer_insta_metric, key=lambda m: m.created_at, default=None)
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
                 name=influencer.name,
@@ -329,8 +332,9 @@ class WebService:
                 niche=influencer.niche,
                 city=influencer.city,
                 profile_visited=False,
-                insta_followers=int_to_str_k(latest_metric.insta_followers) if latest_metric else 0,
-                yt_followers=int_to_str_k(latest_metric.yt_followers) if latest_metric else 0,
+                insta_followers=int_to_str_k(influencer_insta_metric.followers) if influencer_insta_metric else None,
+                yt_followers=int_to_str_k(influencer_yt_metric.followers) if influencer_yt_metric else None,
+                fb_followers=int_to_str_k(influencer_fb_metric.followers) if influencer_fb_metric else None
             )
             influencer_basic_detail_list.append(influencer_basic_detail)
 
