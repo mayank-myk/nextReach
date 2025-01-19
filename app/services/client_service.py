@@ -161,9 +161,10 @@ class ClientService:
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
                 client_id=client_id, influencer_id=influencer_id)
             for request in all_collaboration_request_raised:
-                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION,
-                                     CampaignStage.SHOOT,
-                                     CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING]:
+                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED,
+                                     CampaignStage.SHOOT_COMPLETED,
+                                     CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING,
+                                     CampaignStage.DAY8_BILLING]:
                     return GenericResponse(success=False, button_text="Understood",
                                            message="You already have an ongoing campaign with this influencer")
 
@@ -567,8 +568,10 @@ class ClientService:
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
                 client_id=request.client_id, influencer_id=request.influencer_id)
             for request in all_collaboration_request_raised:
-                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT,
-                                     CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING]:
+                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED,
+                                     CampaignStage.SHOOT_COMPLETED,
+                                     CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING,
+                                     CampaignStage.DAY8_BILLING]:
                     collaboration_request_raised = True
                     continue
 

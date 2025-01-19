@@ -1,7 +1,13 @@
+from datetime import date
 from typing import List, Optional
 
 from sqlalchemy.orm import Session
 
+from app.api_requests.campaign_content_post_request import CampaignContentPostRequest
+from app.api_requests.campaign_day2_billing_request import CampaignDay2BillingRequest
+from app.api_requests.campaign_day8_billing_request import CampaignDay8BillingRequest
+from app.api_requests.campaign_draft_approved_request import CampaignDraftApprovedRequest
+from app.api_requests.campaign_influencer_finalized_request import CampaignInfluencerFinalizedRequest
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
 from app.api_requests.update_campaign_request import UpdateCampaignRequest
@@ -215,7 +221,196 @@ class CampaignRepository:
 
         except Exception as ex:
             _log.error(f"Unable to update campaign for campaign_id {campaign_id}. Error: {str(ex)}")
-            raise FetchOneUserMetadataException(ex, campaign_id)
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_influencer_finalization(self, campaign_id: int,
+                                                   campaign_request: CampaignInfluencerFinalizedRequest) -> Optional[
+        Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'last_updated_by', campaign_request.campaign_managed_by)
+            setattr(existing_campaign, 'campaign_managed_by', campaign_request.campaign_managed_by)
+            setattr(existing_campaign, 'stage', CampaignStage.INFLUENCER_FINALIZED)
+            setattr(existing_campaign, 'influencer_finalization_date', campaign_request.influencer_finalization_date)
+            if hasattr(campaign_request, 'type_of_content') and campaign_request.type_of_content is not None:
+                setattr(existing_campaign, 'type_of_content', campaign_request.type_of_content)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to INFLUENCER_FINALIZED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_shoot_completed(self, campaign_id: int, content_shoot_date: date) -> Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'stage', CampaignStage.SHOOT_COMPLETED)
+            setattr(existing_campaign, 'content_shoot_date', content_shoot_date)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to SHOOT_COMPLETED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_draft_approved(self, campaign_id: int,
+                                          campaign_request: CampaignDraftApprovedRequest) -> Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'content_draft_date', campaign_request.content_draft_date)
+            setattr(existing_campaign, 'content_billing_amount', campaign_request.billed_amount)
+            setattr(existing_campaign, 'stage', CampaignStage.DRAFT_APPROVED)
+            setattr(existing_campaign, 'content_billing_payment_status', campaign_request.payment_status)
+            if hasattr(campaign_request, 'payment_time') and campaign_request.payment_time is not None:
+                setattr(existing_campaign, 'content_billing_payment_at', campaign_request.payment_time)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to DRAFT_APPROVED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_content_posted(self, campaign_id: int, campaign_request: CampaignContentPostRequest) -> \
+            Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'stage', CampaignStage.CONTENT_POSTED)
+            setattr(existing_campaign, 'content_post_date', campaign_request.content_post_time)
+
+            if hasattr(campaign_request, 'insta_post_link') and campaign_request.insta_post_link is not None:
+                setattr(existing_campaign, 'insta_post_link', campaign_request.insta_post_link)
+
+            if hasattr(campaign_request, 'yt_post_link') and campaign_request.yt_post_link is not None:
+                setattr(existing_campaign, 'yt_post_link', campaign_request.yt_post_link)
+
+            if hasattr(campaign_request, 'fb_post_link') and campaign_request.fb_post_link is not None:
+                setattr(existing_campaign, 'fb_post_link', campaign_request.fb_post_link)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to CONTENT_POSTED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_day2_billing(self, campaign_id: int,
+                                        campaign_request: CampaignDay2BillingRequest) -> Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'first_billing_date', campaign_request.day2_billing_date)
+            setattr(existing_campaign, 'first_billing_amount', campaign_request.billed_amount)
+            setattr(existing_campaign, 'stage', CampaignStage.DAY2_BILLING)
+            setattr(existing_campaign, 'first_billing_payment_status', campaign_request.payment_status)
+            setattr(existing_campaign, 'first_billing_views', campaign_request.views)
+
+            if hasattr(campaign_request, 'payment_time') and campaign_request.payment_time is not None:
+                setattr(existing_campaign, 'first_billing_payment_at', campaign_request.payment_time)
+
+            if hasattr(campaign_request, 'likes') and campaign_request.likes is not None:
+                setattr(existing_campaign, 'first_billing_likes', campaign_request.likes)
+
+            if hasattr(campaign_request, 'comments') and campaign_request.comments is not None:
+                setattr(existing_campaign, 'first_billing_comments', campaign_request.comments)
+
+            if hasattr(campaign_request, 'shares') and campaign_request.shares is not None:
+                setattr(existing_campaign, 'first_billing_shares', campaign_request.shares)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to DRAFT_APPROVED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_day8_billing(self, campaign_id: int,
+                                        campaign_request: CampaignDay8BillingRequest) -> Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'second_billing_date', campaign_request.day8_billing_date)
+            setattr(existing_campaign, 'second_billing_amount', campaign_request.billed_amount)
+            setattr(existing_campaign, 'stage', CampaignStage.DAY8_BILLING)
+            setattr(existing_campaign, 'second_billing_payment_status', campaign_request.payment_status)
+            setattr(existing_campaign, 'second_billing_views', campaign_request.views)
+
+            if hasattr(campaign_request, 'payment_time') and campaign_request.payment_time is not None:
+                setattr(existing_campaign, 'second_billing_payment_at', campaign_request.payment_time)
+
+            if hasattr(campaign_request, 'likes') and campaign_request.likes is not None:
+                setattr(existing_campaign, 'second_billing_likes', campaign_request.likes)
+
+            if hasattr(campaign_request, 'comments') and campaign_request.comments is not None:
+                setattr(existing_campaign, 'second_billing_comments', campaign_request.comments)
+
+            if hasattr(campaign_request, 'shares') and campaign_request.shares is not None:
+                setattr(existing_campaign, 'second_billing_shares', campaign_request.shares)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to DRAFT_APPROVED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_completed(self, campaign_id: int, post_insights: Optional[List[str]]) -> Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'stage', CampaignStage.COMPLETED)
+            if post_insights and len(post_insights) > 0:
+                setattr(existing_campaign, 'post_insights', post_insights)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to DRAFT_APPROVED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_to_cancelled(self, campaign_id: int) -> Optional[Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            setattr(existing_campaign, 'stage', CampaignStage.CANCELLED)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to DRAFT_APPROVED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
+
+    def update_campaign_pending_deliverables(self, campaign_id: int, pending_deliverables: List[str]) -> Optional[
+        Campaign]:
+        try:
+            existing_campaign = self.db.get(Campaign, campaign_id)
+            if pending_deliverables and len(pending_deliverables) > 0:
+                setattr(existing_campaign, 'pending_deliverables', pending_deliverables)
+
+            self.db.commit()
+            self.db.refresh(existing_campaign)
+            return existing_campaign
+
+        except Exception as ex:
+            _log.error(
+                f"Unable to update campaign to DRAFT_APPROVED for campaign_id {campaign_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(campaign_id))
 
     def create_campaign_rating(self, rate_campaign: RateCampaign) -> Optional[Campaign]:
 
@@ -235,7 +430,8 @@ class CampaignRepository:
         return self.db.query(Campaign).filter(Campaign.id == campaign_id).first()
 
     def get_all_campaign_by_client(self, client_id: int) -> List[Campaign]:
-        return self.db.query(Campaign).filter(Campaign.client_id == client_id).all()
+        return self.db.query(Campaign).filter(Campaign.client_id == client_id).order_by(
+            Campaign.last_updated_at.desc()).all()
 
     def get_all_running_campaign_with_an_influencer(self, client_id: int, influencer_id: int) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.client_id == client_id).filter(
@@ -247,5 +443,6 @@ class CampaignRepository:
 
     def get_all_active_campaigns(self) -> List[Campaign]:
         return self.db.query(Campaign).filter(Campaign.stage.in_(
-            [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZATION, CampaignStage.SHOOT, CampaignStage.DRAFT,
-             CampaignStage.POST, CampaignStage.FIRST_BILLING, CampaignStage.SECOND_BILLING])).all()
+            [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED, CampaignStage.SHOOT_COMPLETED,
+             CampaignStage.DRAFT_APPROVED,
+             CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING, CampaignStage.DAY8_BILLING])).all()

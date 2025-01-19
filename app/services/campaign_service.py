@@ -1,11 +1,18 @@
 from __future__ import print_function
 
-from datetime import datetime
+from datetime import datetime, date
 from io import BytesIO
-from typing import List
+from typing import List, Optional
 
 import pandas as pd
 
+from app.api_requests.campaign_completion_request import CampaignCompletionRequest
+from app.api_requests.campaign_content_post_request import CampaignContentPostRequest
+from app.api_requests.campaign_day2_billing_request import CampaignDay2BillingRequest
+from app.api_requests.campaign_day8_billing_request import CampaignDay8BillingRequest
+from app.api_requests.campaign_draft_approved_request import CampaignDraftApprovedRequest
+from app.api_requests.campaign_influencer_finalized_request import CampaignInfluencerFinalizedRequest
+from app.api_requests.campaign_pending_deliverables_request import CampaignPendingDeliverables
 from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
 from app.api_requests.update_campaign_request import UpdateCampaignRequest
@@ -149,7 +156,7 @@ class CampaignService:
                     campaign_notes=existing_campaign.campaign_notes,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
-            elif existing_campaign.stage == CampaignStage.INFLUENCER_FINALIZATION:
+            elif existing_campaign.stage == CampaignStage.INFLUENCER_FINALIZED:
                 return CampaignDetail(
                     id=existing_campaign.id,
                     last_updated_at=existing_campaign.last_updated_at,
@@ -161,7 +168,7 @@ class CampaignService:
                     influencer_finalization_date=influencer_finalization_date,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
-            elif existing_campaign.stage == CampaignStage.SHOOT:
+            elif existing_campaign.stage == CampaignStage.SHOOT_COMPLETED:
                 return CampaignDetail(
                     id=existing_campaign.id,
                     last_updated_at=existing_campaign.last_updated_at,
@@ -174,7 +181,7 @@ class CampaignService:
                     content_shoot_date=content_shoot_date,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
-            elif existing_campaign.stage == CampaignStage.DRAFT:
+            elif existing_campaign.stage == CampaignStage.DRAFT_APPROVED:
                 return CampaignDetail(
                     id=existing_campaign.id,
                     last_updated_at=existing_campaign.last_updated_at,
@@ -188,7 +195,7 @@ class CampaignService:
                     content_draft=content_draft,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
-            elif existing_campaign.stage == CampaignStage.POST:
+            elif existing_campaign.stage == CampaignStage.CONTENT_POSTED:
                 return CampaignDetail(
                     id=existing_campaign.id,
                     last_updated_at=existing_campaign.last_updated_at,
@@ -203,7 +210,7 @@ class CampaignService:
                     content_draft=content_draft,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
-            elif existing_campaign.stage == CampaignStage.FIRST_BILLING:
+            elif existing_campaign.stage == CampaignStage.DAY2_BILLING:
                 return CampaignDetail(
                     id=existing_campaign.id,
                     last_updated_at=existing_campaign.last_updated_at,
@@ -219,7 +226,7 @@ class CampaignService:
                     first_billing=first_billing,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
-            elif existing_campaign.stage == CampaignStage.SECOND_BILLING:
+            elif existing_campaign.stage == CampaignStage.DAY8_BILLING:
                 return CampaignDetail(
                     id=existing_campaign.id,
                     last_updated_at=existing_campaign.last_updated_at,
@@ -403,4 +410,173 @@ class CampaignService:
         else:
             _log.info("No record found for campaign_id {}".format(campaign_id))
             return GenericResponse(success=False,
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_influencer_finalization(self, campaign_id: int,
+                                                   request: CampaignInfluencerFinalizedRequest) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.CREATED:
+                updated_campaign = self.campaign_repository.update_campaign_to_influencer_finalization(
+                    campaign_id=campaign_id, campaign_request=request)
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from CREATED to INFLUENCER_FINALIZED".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_shoot_completed(self, campaign_id: int, content_shoot_date: date) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.INFLUENCER_FINALIZED:
+                updated_campaign = self.campaign_repository.update_campaign_to_shoot_completed(
+                    campaign_id=campaign_id, content_shoot_date=content_shoot_date)
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from INFLUENCER_FINALIZED to SHOOT_COMPLETED".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_draft_approved(self, campaign_id: int,
+                                          request: CampaignDraftApprovedRequest) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.SHOOT_COMPLETED:
+                updated_campaign = self.campaign_repository.update_campaign_to_draft_approved(
+                    campaign_id=campaign_id, campaign_request=request)
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from SHOOT_COMPLETED to DRAFT_APPROVED".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_content_posted(self, campaign_id: int,
+                                          request: CampaignContentPostRequest) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.DRAFT_APPROVED:
+                updated_campaign = self.campaign_repository.update_campaign_to_content_posted(
+                    campaign_id=campaign_id, campaign_request=request)
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from DRAFT_APPROVED to CONTENT_POSTED".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_day2_billing(self, campaign_id: int, request: CampaignDay2BillingRequest) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.CONTENT_POSTED:
+                updated_campaign = self.campaign_repository.update_campaign_to_day2_billing(
+                    campaign_id=campaign_id, campaign_request=request)
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from CONTENT_POSTED to DAY2_BILLING".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_day8_billing(self, campaign_id: int, request: CampaignDay8BillingRequest) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.DAY2_BILLING:
+                updated_campaign = self.campaign_repository.update_campaign_to_day8_billing(
+                    campaign_id=campaign_id, campaign_request=request)
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from DAY2_BILLING to DAY8_BILLING".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_completed(self, campaign_id: int,
+                                     request: Optional[CampaignCompletionRequest]) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            if db_campaign.stage == CampaignStage.DAY8_BILLING:
+                if request:
+                    post_insights = [
+                        value for key, value in request.dict().items() if value is not None
+                    ]
+                    updated_campaign = self.campaign_repository.update_campaign_to_completed(campaign_id=campaign_id,
+                                                                                             post_insights=post_insights)
+                else:
+                    updated_campaign = self.campaign_repository.update_campaign_to_completed(campaign_id=campaign_id,
+                                                                                             post_insights=None)
+
+                return GenericResponse(success=True, header="Success",
+                                       message="Campaign updated successfully, campaign_id {}".format(
+                                           updated_campaign.id))
+            else:
+                return GenericResponse(success=False, header="Failed",
+                                       message="Campaign with campaign_id: {} is already in state: {}, you can only update from DAY8_BILLING to COMPLETED".format(
+                                           db_campaign.id, db_campaign.stage))
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_to_cancelled(self, campaign_id: int) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            updated_campaign = self.campaign_repository.update_campaign_to_cancelled(campaign_id=campaign_id)
+            return GenericResponse(success=True, header="Success",
+                                   message="Campaign updated successfully, campaign_id {}".format(
+                                       updated_campaign.id))
+
+        else:
+            return GenericResponse(success=False, button_text="Check again",
+                                   message="No campaign found for given campaign_id")
+
+    def update_campaign_pending_deliverables(self, campaign_id: int,
+                                             request: CampaignPendingDeliverables) -> GenericResponse:
+        db_campaign = self.campaign_repository.get_campaign_by_id(campaign_id=campaign_id)
+
+        if db_campaign:
+            pending_deliverables = [
+                value for key, value in request.dict().items() if value is not None
+            ]
+            updated_campaign = self.campaign_repository.update_campaign_pending_deliverables(campaign_id=campaign_id,
+                                                                                             pending_deliverables=pending_deliverables)
+            return GenericResponse(success=True, header="Success",
+                                   message="Campaign updated successfully, campaign_id {}".format(
+                                       updated_campaign.id))
+
+        else:
+            return GenericResponse(success=False, button_text="Check again",
                                    message="No campaign found for given campaign_id")

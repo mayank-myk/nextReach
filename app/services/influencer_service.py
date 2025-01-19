@@ -1,5 +1,7 @@
 from __future__ import print_function
 
+from typing import Optional, List
+
 from app.api_requests.influencer_fb_metric_request import InfluencerFbMetricRequest
 from app.api_requests.influencer_insta_metric_request import InfluencerInstaMetricRequest
 from app.api_requests.influencer_request import InfluencerRequest
@@ -174,8 +176,14 @@ class InfluencerService:
             return GenericResponse(success=False,
                                    message="No influencer_fb_metric found for given influencer_fb_metric_id")
 
-    def get_influencer_detail(self, influencer_id: int) -> Influencer | GenericResponse:
-        influencer = self.influencer_repository.get_influencer_by_id(influencer_id=influencer_id)
+    def get_influencer_detail(self, influencer_id: Optional[int] = None, phone_number: Optional[str] = None,
+                              name: Optional[str] = None,
+                              insta_username: Optional[str] = None) -> List[Influencer] | GenericResponse:
+
+        influencer = self.influencer_repository.get_influencer_by_attribute(influencer_id=influencer_id,
+                                                                            phone_number=phone_number,
+                                                                            name=name,
+                                                                            insta_username=insta_username)
 
         if not influencer:
             _log.info("No record found for influencer with id {}".format(influencer_id))

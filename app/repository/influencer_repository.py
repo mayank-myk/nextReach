@@ -162,6 +162,37 @@ class InfluencerRepository:
             _log.error(f"Unable to fetch influencer record with id {influencer_id}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, str(influencer_id))
 
+    def get_influencer_by_attribute(self, influencer_id: Optional[int] = None,
+                                    phone_number: Optional[str] = None,
+                                    name: Optional[str] = None,
+                                    insta_username: Optional[str] = None) -> Optional[List[Influencer]]:
+
+        try:
+            query = self.db.query(Influencer)
+
+            # Dynamically add filters based on the provided parameters
+            if influencer_id:
+                query = query.filter(Influencer.id == influencer_id)
+            if phone_number:
+                query = query.filter(Influencer.phone_number == phone_number)
+            if name:
+                query = query.filter(Influencer.name.ilike(f"%{name}%"))  # Partial match, case-insensitive
+            if insta_username:
+                query = query.join(Influencer.influencer_insta_metric).filter(
+                    InfluencerInstaMetric.username.ilike(f"%{insta_username}%")
+                )
+
+            existing_influencer = query.all()
+
+            if not existing_influencer:
+                return None
+
+            return existing_influencer
+
+        except Exception as ex:
+            _log.error(f"Unable to fetch influencer record with id {influencer_id}. Error: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(influencer_id))
+
     def filter_matched_influencers(
             self,
             page_number: int,

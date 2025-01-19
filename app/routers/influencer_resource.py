@@ -1,4 +1,5 @@
 import os
+from typing import Optional, List
 
 from fastapi import APIRouter, Depends, UploadFile, File
 
@@ -54,10 +55,17 @@ def update_influencer(influencer_id: int, request: UpdateInfluencerRequest,
     return influencer_service.update_influencer(influencer_id=influencer_id, request=request)
 
 
-@router.get("/get/{influencer_id}", response_model=None)
-def get_influencer_detail(influencer_id: int, db=Depends(db_manager.get_db)) -> Influencer | GenericResponse:
+@router.get("/get", response_model=None)
+def get_influencer_detail(influencer_id: Optional[int] = None, phone_number: Optional[str] = None,
+                          name: Optional[str] = None, insta_username: Optional[str] = None,
+                          db=Depends(db_manager.get_db)) -> List[Influencer] | GenericResponse:
+    # Ensure at least one search parameter is provided
+    if not any([influencer_id, phone_number, name, insta_username]):
+        return GenericResponse(success=False, message="At least one search parameter is required.")
+
     influencer_service = InfluencerService(db)
-    return influencer_service.get_influencer_detail(influencer_id=influencer_id)
+    return influencer_service.get_influencer_detail(influencer_id=influencer_id, phone_number=phone_number, name=name,
+                                                    insta_username=insta_username)
 
 
 @router.post('/get/insight/{influencer_id}')
