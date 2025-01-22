@@ -271,7 +271,8 @@ class ClientService:
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                profile_visited=self.check_if_profile_visited(client_id=client_id, influencer_id=influencer.id),
+                profile_visited=self.check_if_profile_visited(client_id=client_id,
+                                                              influencer_id=influencer.id) if client_id != 1 else False,
                 views_charge=influencer.views_charge,
                 content_charge=influencer.content_charge,
                 insta_followers=int_to_str_k(influencer_insta_metric.followers) if influencer_insta_metric else None,
@@ -281,7 +282,7 @@ class ClientService:
             influencer_basic_detail_list.append(influencer_basic_detail)
         return influencer_basic_detail_list
 
-    def get_influencer_listing(self, client_id: Optional[int],
+    def get_influencer_listing(self, client_id: int,
                                page_number: int,
                                page_size: int,
                                sort_applied: SortApplied,
@@ -344,8 +345,11 @@ class ClientService:
         unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(unmatched_influencers,
                                                                                             client_id)
 
-        client = self.client_repository.get_client_by_id(client_id)
-        balance_profile_visit_count = client.balance_profile_visits
+        if client_id == 1:
+            balance_profile_visit_count = 0
+        else:
+            client = self.client_repository.get_client_by_id(client_id)
+            balance_profile_visit_count = client.balance_profile_visits
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
             total_count_further_page = len(all_matched_influencers) + len(
                 all_unmatched_influencers) - page_number * page_size
@@ -387,6 +391,11 @@ class ClientService:
         )
 
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
+
+        if request.client_id is None or request.client_id == 1:
+            return GenericResponse(success=False, button_text="Get Started Now", header="Login to Unlock Access",
+                                   message="Log in to unlock full influencer profiles and start collaborating, new users get 20 free coins!")
+
         try:
 
             influencer = self.influencer_repository.get_influencer_by_id(influencer_id=request.influencer_id)
