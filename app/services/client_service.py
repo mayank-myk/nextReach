@@ -7,6 +7,7 @@ from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_us
 from app.enums.average_view import AverageView
 from app.enums.campaign_stage import CampaignStage
 from app.enums.city import City
+from app.enums.collab_date import CollabDate
 from app.enums.collab_type import CollabType
 from app.enums.content_price import ContentPrice
 from app.enums.engagement_rate import EngagementRate
@@ -155,7 +156,8 @@ class ClientService:
 
         pass
 
-    def request_collab(self, created_by: str, client_id: int, influencer_id: int) -> GenericResponse:
+    def request_collab(self, created_by: str, client_id: int, influencer_id: int,
+                       collab_date: Optional[CollabDate]) -> GenericResponse:
 
         try:
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
@@ -181,7 +183,8 @@ class ClientService:
                     influencer_id=influencer_id)
 
             new_campaign = self.campaign_repository.create_collab_campaign(created_by=created_by,
-                                                                           client_id=client_id, influencer=influencer)
+                                                                           client_id=client_id, influencer=influencer,
+                                                                           collab_date=collab_date)
 
             collab_request_user_notification_via_whatsapp(client_phone_number=new_campaign.client.phone_number,
                                                           date=datetime.today().strftime("%b %d, %Y"),
@@ -278,7 +281,7 @@ class ClientService:
             influencer_basic_detail_list.append(influencer_basic_detail)
         return influencer_basic_detail_list
 
-    def get_influencer_listing(self, client_id: int,
+    def get_influencer_listing(self, client_id: Optional[int],
                                page_number: int,
                                page_size: int,
                                sort_applied: SortApplied,

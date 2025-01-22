@@ -14,6 +14,7 @@ from app.api_requests.update_campaign_request import UpdateCampaignRequest
 from app.database.campaign_table import Campaign
 from app.database.influencer_table import Influencer
 from app.enums.campaign_stage import CampaignStage
+from app.enums.collab_date import CollabDate, COLLAB_DATE_DICT
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.utils.logger import configure_logger
 
@@ -73,7 +74,8 @@ class CampaignRepository:
         self.db.refresh(new_campaign)
         return new_campaign
 
-    def create_collab_campaign(self, created_by: str, client_id: int, influencer: Influencer) -> Campaign:
+    def create_collab_campaign(self, created_by: str, client_id: int, influencer: Influencer,
+                               collab_date: Optional[CollabDate]) -> Campaign:
 
         new_campaign = Campaign(
             created_by=created_by,
@@ -83,7 +85,8 @@ class CampaignRepository:
             content_charge=influencer.content_charge,
             views_charge=influencer.views_charge,
             client_id=client_id,
-            stage=CampaignStage.CREATED
+            stage=CampaignStage.CREATED,
+            campaign_notes=COLLAB_DATE_DICT[collab_date] if collab_date else None
         )
 
         self.db.add(new_campaign)

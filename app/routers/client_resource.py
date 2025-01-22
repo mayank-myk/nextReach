@@ -48,4 +48,4 @@ def recharge_coin(client_id: int, coin_count: int, db=Depends(db_manager.get_db)
 def request_collab(request: CreateCollab, db=Depends(db_manager.get_db)) -> GenericResponse:
     client_service = ClientService(db)
     return client_service.request_collab(created_by=request.created_by, client_id=request.client_id,
-                                         influencer_id=request.influencer_id)
+                                         influencer_id=request.influencer_id, collab_date=None)
