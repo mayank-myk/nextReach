@@ -373,4 +373,4 @@ class InfluencerRepository:
 
     def get_top_rated_influencers(self) -> List[Influencer]:
 
-        return self.db.query(Influencer).order_by(desc(Influencer.next_reach_score)).limit(30).offset(0).all()
+        return self.db.query(Influencer).order_by(desc(Influencer.next_reach_score)).limit(12).offset(0).all()
