@@ -1,5 +1,7 @@
+from io import BytesIO
 from threading import Lock
 
+from PIL import Image
 from azure.storage.blob import BlobServiceClient
 
 from app.utils.logger import configure_logger
@@ -46,7 +48,7 @@ class AzureBlobClient:
 
 def upload_influencer_image(influencer_id: int, image_file) -> str:
     """
-    Uploads or updates an influencer's image in Azure Blob Storage.
+    Uploads or updates an influencer's image in Azure Blob Storage after cropping it to a square and compressing it.
     Args:
         influencer_id (int): Unique ID of the influencer.
         image_file (UploadFile): The image file uploaded by the user.
@@ -54,17 +56,45 @@ def upload_influencer_image(influencer_id: int, image_file) -> str:
         str: URL of the uploaded image in Azure Blob Storage.
     """
     try:
+        # Open the uploaded image
+        image = Image.open(image_file.file)
+
+        # Ensure the image is a square by cropping from the center
+        width, height = image.size
+        if width != height:
+            new_size = min(width, height)  # Use the smaller dimension
+            left = (width - new_size) / 2
+            top = (height - new_size) / 2
+            right = (width + new_size) / 2
+            bottom = (height + new_size) / 2
+            image = image.crop((left, top, right, bottom))  # Crop to center square
+
+        # Compress the image to ensure size is under 300KB
+        compressed_image = BytesIO()
+        quality = 95  # Start with high quality
+        for quality in range(95, 30, -5):  # Gradually reduce quality
+            compressed_image.seek(0)  # Reset the buffer for each iteration
+            compressed_image.truncate(0)  # Clear the contents of the buffer
+            image.save(compressed_image, format="JPEG", quality=quality)
+            if compressed_image.tell() <= 400 * 1024:  # Check if size is less than 400KB
+                break
+
+        compressed_image.seek(0)  # Reset the pointer to the start of the file
+
         # Generate a consistent filename based on influencer_id
-        # file_extension = os.path.splitext(image_file.filename)[1]
         blob_filename = f"influencer_{influencer_id}_image"
+
         # Get a blob client
         blob_service_client = AzureBlobClient.get_client()
         blob_client = blob_service_client.get_blob_client(container=container_name, blob=blob_filename)
+
         # Check if the blob already exists and overwrite it
         if blob_client.exists():
             blob_client.delete_blob()
-        # Upload the new image
-        blob_client.upload_blob(image_file.file, overwrite=True)
+
+        # Upload the resized and compressed image
+        blob_client.upload_blob(compressed_image, overwrite=True)
+
         # Construct and return the image URL
         image_url = f"https://{blob_service_client.account_name}.blob.core.windows.net/{container_name}/{blob_filename}"
         return image_url
