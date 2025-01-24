@@ -29,7 +29,7 @@ from app.response.campaign_detail import CampaignDetail
 from app.response.campaign_detail_dump import CampaignDetailDump
 from app.response.generic_response import GenericResponse
 from app.response.influencer_basic_detail import InfluencerBasicDetail
-from app.utils.converters import campaign_stage_to_status, int_to_str_k
+from app.utils.converters import campaign_stage_to_status, int_to_str_k, format_to_views_charge, format_to_rupees
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -83,8 +83,8 @@ class CampaignService:
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                views_charge=existing_campaign.views_charge,
-                content_charge=existing_campaign.content_charge,
+                views_charge=format_to_views_charge(existing_campaign.views_charge),
+                content_charge=format_to_rupees(existing_campaign.content_charge),
                 profile_visited=True
             )
 

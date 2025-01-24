@@ -27,8 +27,8 @@ class InfluencerDetail(BaseModel):
     city: City
     collab_type: CollabType
     deliverables: Optional[List[str]] = None
-    content_charge: int
-    views_charge: int
+    content_charge: str
+    views_charge: str
     collab_charge: Optional[InfluencerCollabCharge] = None
     platform_details: InfluencerMetricDetail
     influencer_review: Optional[InfluencerReview] = None

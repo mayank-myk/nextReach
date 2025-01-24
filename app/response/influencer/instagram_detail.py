@@ -1,10 +1,6 @@
-from typing import Optional
+from typing import Optional, List, Dict
 
 from pydantic import BaseModel
-
-from app.response.influencer.age_distribution_graph import AgeDistributionGraph
-from app.response.influencer.city_distribution_graph import CityDistributionGraph
-from app.response.influencer.sex_distribution_graph import SexDistributionGraph
 
 
 class InstagramDetail(BaseModel):
@@ -21,6 +17,6 @@ class InstagramDetail(BaseModel):
     avg_shares: Optional[str]
     engagement_rate: Optional[int]
 
-    city_graph: Optional[CityDistributionGraph]
-    age_graph: Optional[AgeDistributionGraph]
-    sex_graph: Optional[SexDistributionGraph]
+    city_graph: Optional[List[Dict]]
+    age_graph: Optional[List[Dict]]
+    sex_graph: Optional[List[Dict]]

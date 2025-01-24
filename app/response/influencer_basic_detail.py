@@ -13,8 +13,8 @@ class InfluencerBasicDetail(BaseModel):
     niche: List[Niche]
     city: City
     profile_visited: bool
-    views_charge: Optional[int] = None
-    content_charge: Optional[int] = None
+    views_charge: Optional[str] = None
+    content_charge: Optional[str] = None
     insta_followers: Optional[str] = None
     yt_followers: Optional[str] = None
     fb_followers: Optional[str] = None

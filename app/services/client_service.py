@@ -28,14 +28,11 @@ from app.repository.profile_visit_repository import ProfileVisitRepository
 from app.response.campaign_review import CampaignReview
 from app.response.client_profile import ClientProfile
 from app.response.generic_response import GenericResponse
-from app.response.influencer.age_distribution_graph import AgeDistributionGraph
-from app.response.influencer.city_distribution_graph import CityDistributionGraph
 from app.response.influencer.facebook_detail import FacebookDetail
 from app.response.influencer.influencer_collab_charge import InfluencerCollabCharge
 from app.response.influencer.influencer_metric_detail import InfluencerMetricDetail
 from app.response.influencer.influencer_review import InfluencerReview
 from app.response.influencer.instagram_detail import InstagramDetail
-from app.response.influencer.sex_distribution_graph import SexDistributionGraph
 from app.response.influencer.youtube_detail import YouTubeDetail
 from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.influencer_detail import InfluencerDetail
@@ -43,7 +40,8 @@ from app.response.influencer_listing import InfluencerListing
 from app.response.login_response import LoginResponse
 from app.response.search_filter import SearchFilter
 from app.utils import id_utils
-from app.utils.converters import int_to_str_k, combine_names
+from app.utils.converters import int_to_str_k, combine_names, format_to_rupees, format_to_views_charge, \
+    city_distribution_to_dict, age_distribution_to_dict, sex_distribution_to_dict
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -273,8 +271,8 @@ class ClientService:
                 city=influencer.city,
                 profile_visited=self.check_if_profile_visited(client_id=client_id,
                                                               influencer_id=influencer.id) if client_id != 1 else False,
-                views_charge=influencer.views_charge,
-                content_charge=influencer.content_charge,
+                views_charge=format_to_views_charge(influencer.views_charge),
+                content_charge=format_to_rupees(influencer.content_charge),
                 insta_followers=int_to_str_k(influencer_insta_metric.followers) if influencer_insta_metric else None,
                 yt_followers=int_to_str_k(influencer_yt_metric.followers) if influencer_yt_metric else None,
                 fb_followers=int_to_str_k(influencer_fb_metric.followers) if influencer_fb_metric else None
@@ -427,34 +425,28 @@ class ClientService:
 
             instagram_detail = None
             if influencer_insta_metric:
-                insta_city_graph = None
-                if influencer_insta_metric.city_1 and influencer_insta_metric.city_2 and influencer_insta_metric.city_3 and influencer_insta_metric.city_pc_1 and influencer_insta_metric.city_pc_2 and influencer_insta_metric.city_pc_3:
-                    insta_city_graph = CityDistributionGraph(
-                        city_1=influencer_insta_metric.city_1,
-                        city_pc_1=influencer_insta_metric.city_pc_1,
-                        city_2=influencer_insta_metric.city_2,
-                        city_pc_2=influencer_insta_metric.city_pc_2,
-                        city_3=influencer_insta_metric.city_3,
-                        city_pc_3=influencer_insta_metric.city_pc_3
-                    )
+                insta_city_graph = city_distribution_to_dict(
+                    city_1=influencer_insta_metric.city_1,
+                    city_pc_1=influencer_insta_metric.city_pc_1,
+                    city_2=influencer_insta_metric.city_2,
+                    city_pc_2=influencer_insta_metric.city_pc_2,
+                    city_3=influencer_insta_metric.city_3,
+                    city_pc_3=influencer_insta_metric.city_pc_3
+                )
 
-                insta_age_graph = None
-                if influencer_insta_metric.age_13_to_17 and influencer_insta_metric.age_18_to_24 and influencer_insta_metric.age_25_to_34 and influencer_insta_metric.age_35_to_44 and influencer_insta_metric.age_45_to_54 and influencer_insta_metric.age_55:
-                    insta_age_graph = AgeDistributionGraph(
-                        age_13_to_17=influencer_insta_metric.age_13_to_17,
-                        age_18_to_24=influencer_insta_metric.age_18_to_24,
-                        age_25_to_34=influencer_insta_metric.age_25_to_34,
-                        age_35_to_44=influencer_insta_metric.age_35_to_44,
-                        age_45_to_54=influencer_insta_metric.age_45_to_54,
-                        age_55=influencer_insta_metric.age_55
-                    )
+                insta_age_graph = age_distribution_to_dict(
+                    age_13_to_17=influencer_insta_metric.age_13_to_17,
+                    age_18_to_24=influencer_insta_metric.age_18_to_24,
+                    age_25_to_34=influencer_insta_metric.age_25_to_34,
+                    age_35_to_44=influencer_insta_metric.age_35_to_44,
+                    age_45_to_54=influencer_insta_metric.age_45_to_54,
+                    age_55=influencer_insta_metric.age_55
+                )
 
-                insta_sex_graph = None
-                if influencer_insta_metric.men_follower_pc and influencer_insta_metric.women_follower_pc:
-                    insta_sex_graph = SexDistributionGraph(
-                        men_follower_pc=influencer_insta_metric.men_follower_pc,
-                        women_follower_pc=influencer_insta_metric.women_follower_pc
-                    )
+                insta_sex_graph = sex_distribution_to_dict(
+                    men_follower_pc=influencer_insta_metric.men_follower_pc,
+                    women_follower_pc=influencer_insta_metric.women_follower_pc
+                )
 
                 instagram_detail = InstagramDetail(
                     id=influencer_insta_metric.id,
@@ -476,34 +468,28 @@ class ClientService:
 
             youtube_detail = None
             if influencer_yt_metric:
-                yt_city_graph = None
-                if influencer_yt_metric.city_1 and influencer_yt_metric.city_2 and influencer_yt_metric.city_3 and influencer_yt_metric.city_pc_1 and influencer_yt_metric.city_pc_2 and influencer_yt_metric.city_pc_3:
-                    yt_city_graph = CityDistributionGraph(
-                        city_1=influencer_yt_metric.city_1,
-                        city_pc_1=influencer_yt_metric.city_pc_1,
-                        city_2=influencer_yt_metric.city_2,
-                        city_pc_2=influencer_yt_metric.city_pc_2,
-                        city_3=influencer_yt_metric.city_3,
-                        city_pc_3=influencer_yt_metric.city_pc_3
-                    )
+                yt_city_graph = city_distribution_to_dict(
+                    city_1=influencer_yt_metric.city_1,
+                    city_pc_1=influencer_yt_metric.city_pc_1,
+                    city_2=influencer_yt_metric.city_2,
+                    city_pc_2=influencer_yt_metric.city_pc_2,
+                    city_3=influencer_yt_metric.city_3,
+                    city_pc_3=influencer_yt_metric.city_pc_3
+                )
 
-                yt_age_graph = None
-                if influencer_yt_metric.age_13_to_17 and influencer_yt_metric.age_18_to_24 and influencer_yt_metric.age_25_to_34 and influencer_yt_metric.age_35_to_44 and influencer_yt_metric.age_45_to_54 and influencer_yt_metric.age_55:
-                    yt_age_graph = AgeDistributionGraph(
-                        age_13_to_17=influencer_yt_metric.age_13_to_17,
-                        age_18_to_24=influencer_yt_metric.age_18_to_24,
-                        age_25_to_34=influencer_yt_metric.age_25_to_34,
-                        age_35_to_44=influencer_yt_metric.age_35_to_44,
-                        age_45_to_54=influencer_yt_metric.age_45_to_54,
-                        age_55=influencer_yt_metric.age_55
-                    )
+                yt_age_graph = age_distribution_to_dict(
+                    age_13_to_17=influencer_yt_metric.age_13_to_17,
+                    age_18_to_24=influencer_yt_metric.age_18_to_24,
+                    age_25_to_34=influencer_yt_metric.age_25_to_34,
+                    age_35_to_44=influencer_yt_metric.age_35_to_44,
+                    age_45_to_54=influencer_yt_metric.age_45_to_54,
+                    age_55=influencer_yt_metric.age_55
+                )
 
-                yt_sex_graph = None
-                if influencer_yt_metric.men_follower_pc and influencer_yt_metric.women_follower_pc:
-                    yt_sex_graph = SexDistributionGraph(
-                        men_follower_pc=influencer_yt_metric.men_follower_pc,
-                        women_follower_pc=influencer_yt_metric.women_follower_pc
-                    )
+                yt_sex_graph = sex_distribution_to_dict(
+                    men_follower_pc=influencer_yt_metric.men_follower_pc,
+                    women_follower_pc=influencer_yt_metric.women_follower_pc
+                )
 
                 youtube_detail = YouTubeDetail(
                     id=influencer_yt_metric.id,
@@ -525,34 +511,27 @@ class ClientService:
 
             facebook_detail = None
             if influencer_fb_metric:
-                fb_city_graph = None
-                if influencer_fb_metric.city_1 and influencer_fb_metric.city_2 and influencer_fb_metric.city_3 and influencer_fb_metric.city_pc_1 and influencer_fb_metric.city_pc_2 and influencer_fb_metric.city_pc_3:
-                    fb_city_graph = CityDistributionGraph(
-                        city_1=influencer_fb_metric.city_1,
-                        city_pc_1=influencer_fb_metric.city_pc_1,
-                        city_2=influencer_fb_metric.city_2,
-                        city_pc_2=influencer_fb_metric.city_pc_2,
-                        city_3=influencer_fb_metric.city_3,
-                        city_pc_3=influencer_fb_metric.city_pc_3
-                    )
+                fb_city_graph = city_distribution_to_dict(
+                    city_1=influencer_fb_metric.city_1,
+                    city_pc_1=influencer_fb_metric.city_pc_1,
+                    city_2=influencer_fb_metric.city_2,
+                    city_pc_2=influencer_fb_metric.city_pc_2,
+                    city_3=influencer_fb_metric.city_3,
+                    city_pc_3=influencer_fb_metric.city_pc_3
+                )
 
-                fb_age_graph = None
-                if influencer_fb_metric.age_13_to_17 and influencer_fb_metric.age_18_to_24 and influencer_fb_metric.age_25_to_34 and influencer_fb_metric.age_35_to_44 and influencer_fb_metric.age_45_to_54 and influencer_fb_metric.age_55:
-                    fb_age_graph = AgeDistributionGraph(
-                        age_13_to_17=influencer_fb_metric.age_13_to_17,
-                        age_18_to_24=influencer_fb_metric.age_18_to_24,
-                        age_25_to_34=influencer_fb_metric.age_25_to_34,
-                        age_35_to_44=influencer_fb_metric.age_35_to_44,
-                        age_45_to_54=influencer_fb_metric.age_45_to_54,
-                        age_55=influencer_fb_metric.age_55
-                    )
+                fb_age_graph = age_distribution_to_dict(
+                    age_13_to_17=influencer_fb_metric.age_13_to_17,
+                    age_18_to_24=influencer_fb_metric.age_18_to_24,
+                    age_25_to_34=influencer_fb_metric.age_25_to_34,
+                    age_35_to_44=influencer_fb_metric.age_35_to_44,
+                    age_45_to_54=influencer_fb_metric.age_45_to_54,
+                    age_55=influencer_fb_metric.age_55)
 
-                fb_sex_graph = None
-                if influencer_fb_metric.men_follower_pc and influencer_fb_metric.women_follower_pc:
-                    fb_sex_graph = SexDistributionGraph(
-                        men_follower_pc=influencer_fb_metric.men_follower_pc,
-                        women_follower_pc=influencer_fb_metric.women_follower_pc
-                    )
+                fb_sex_graph = sex_distribution_to_dict(
+                    men_follower_pc=influencer_fb_metric.men_follower_pc,
+                    women_follower_pc=influencer_fb_metric.women_follower_pc
+                )
 
                 facebook_detail = FacebookDetail(
                     id=influencer_fb_metric.id,
@@ -623,8 +602,8 @@ class ClientService:
                 city=influencer.city,
                 collab_type=influencer.collab_type,
                 deliverables=influencer.deliverables,
-                content_charge=influencer.content_charge,
-                views_charge=influencer.views_charge,
+                content_charge=format_to_rupees(influencer.content_charge),
+                views_charge=format_to_views_charge(influencer.views_charge),
                 collab_charge=get_collab_charge(influencer, influencer_primary_metric),
                 platform_details=platform_details,
                 influencer_review=influencer_review)
