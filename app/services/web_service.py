@@ -348,10 +348,8 @@ class WebService:
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
 
-        for admin_phone_number in ADMIN_PHONE_NUMBERS:
-            contact_us_notification_via_whatsapp(admin_phone_number=admin_phone_number, entity_type=request.entity_type,
-                                                 name=request.name,
-                                                 client_phone_number=request.phone_number, email=request.email)
+        contact_us_notification_via_whatsapp(entity_type=request.entity_type, name=request.name,
+                                             client_phone_number=request.phone_number, email=request.email)
         if wait_list:
             return GenericResponse(success=True,
                                    message="Our team will be in touch with you shortly. Thank you for your patience",

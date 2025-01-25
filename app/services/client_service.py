@@ -3,7 +3,8 @@ from typing import List, Optional
 
 from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.profile_update import ProfileUpdate
-from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp
+from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp, \
+    collab_request_admin_notification_via_whatsapp
 from app.enums.average_view import AverageView
 from app.enums.campaign_stage import CampaignStage
 from app.enums.city import City
@@ -195,23 +196,18 @@ class ClientService:
                                                           avg_views=influencer_metric.avg_views
                                                           )
 
-            # collab_request_admin_notification_via_whatsapp(admin_phone_number="8011027300",
-            #                                                date=datetime.today().strftime("%b %d, %Y"),
-            #                                                campaign_id=new_campaign.id,
-            #                                                client_id=new_campaign.client.id,
-            #                                                influencer_id=influencer.id,
-            #                                                client_name=new_campaign.client.name,
-            #                                                client_phone_number=new_campaign.client.phone_number,
-            #                                                influencer_name=influencer.name,
-            #                                                influencer_phone_number=influencer.phone_number,
-            #                                                content_price=influencer.content_charge,
-            #                                                reach_price=influencer.views_charge,
-            #                                                followers=get_follower_count(
-            #                                                    primary_platform=influencer.primary_platform,
-            #                                                    influencer_metric=influencer_metric),
-            #                                                avg_views=get_avg_views(
-            #                                                    primary_platform=influencer.primary_platform,
-            #                                                    influencer_metric=influencer_metric))
+            collab_request_admin_notification_via_whatsapp(date=datetime.today().strftime("%b %d, %Y"),
+                                                           campaign_id=str(new_campaign.id),
+                                                           client_id=str(new_campaign.client.id),
+                                                           influencer_id=str(influencer.id),
+                                                           client_name=new_campaign.client.name,
+                                                           client_phone_number=new_campaign.client.phone_number,
+                                                           influencer_name=influencer.name,
+                                                           influencer_phone_number=influencer.phone_number,
+                                                           content_price=influencer.content_charge,
+                                                           reach_price=influencer.views_charge,
+                                                           followers=influencer_metric.followers,
+                                                           avg_views=influencer_metric.avg_views)
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
                                    message="Collaboration created successfully! Our team will reach out to you shortly")
