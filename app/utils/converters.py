@@ -75,7 +75,7 @@ def format_to_rupees(value: int):
 
 def format_to_views_charge(value: int):
     if value and value > 0:
-        return str(value) + " per 1000 views"
+        return str(value) + " per 1k views"
     else:
         return None
 
