@@ -616,14 +616,11 @@ class ClientService:
 
 
 def get_collab_charge(influencer, influencer_primary_metric) -> Optional[InfluencerCollabCharge]:
-    if influencer.content_charge == 0 or influencer.views_charge == 0:
-        return None
-
-    if influencer_primary_metric.avg_views and influencer_primary_metric.max_views:
+    if influencer.content_charge and influencer_primary_metric.avg_views and influencer_primary_metric.max_views and influencer.content_charge > 0 and influencer_primary_metric.avg_views > 0 and influencer_primary_metric.max_views > 0:
         return InfluencerCollabCharge(
-            min=influencer.content_charge,
-            avg=(influencer_primary_metric.avg_views // 1000) * influencer.views_charge,
-            max=(influencer_primary_metric.max_views // 1000) * influencer.views_charge,
+            min=format_to_rupees(influencer.content_charge),
+            avg=format_to_rupees((influencer_primary_metric.avg_views // 1000) * influencer.views_charge),
+            max=format_to_rupees((influencer_primary_metric.max_views // 1000) * influencer.views_charge),
         )
     else:
         return None

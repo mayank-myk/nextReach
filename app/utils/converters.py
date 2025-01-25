@@ -57,18 +57,14 @@ def combine_names(name1: str, name2: str) -> str:
 def format_to_rupees(value: int):
     if value and value > 0:
         value_str = str(value)[::-1]  # Reverse the string for easier grouping
-        formatted = []
+        formatted = [value_str[:3]]  # First group of 3 digits
 
-        for i in range(0, len(value_str)):
-            if i == 0:
-                # First group of 3 digits
-                formatted.append(value_str[i:i + 3])
-            elif (i - 1) % 2 == 0:
-                # Subsequent groups of 2 digits
-                formatted.append(value_str[i:i + 2])
+        # Process subsequent groups of 2 digits
+        for i in range(3, len(value_str), 2):
+            formatted.append(value_str[i:i + 2])
 
-        # Combine the reversed groups with commas, then reverse again
-        return "₹ " + ','.join(formatted[::-1])
+        # Combine the reversed groups with commas, then reverse the final string
+        return "₹ " + ','.join(formatted)[::-1]
     else:
         return None
 
