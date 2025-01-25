@@ -339,9 +339,9 @@ class WebService:
             influencer_basic_detail_list.append(influencer_basic_detail)
 
         return HomeMetadata(
-            academy_video_list=self.get_all_nra(),
+            academy_video_list=self.get_all_nra()[-3:],
             success_story_list=self.get_all_ss(),
-            blog_list=self.get_all_blogs(),
+            blog_list=self.get_all_blogs()[-3:],
             influencer_list=influencer_basic_detail_list
         )
 
