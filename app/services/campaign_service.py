@@ -152,9 +152,7 @@ class CampaignService:
                     campaign_managed_by=existing_campaign.campaign_managed_by,
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
-                    type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
-                    pending_deliverables=existing_campaign.pending_deliverables
+                    type_of_content=existing_campaign.type_of_content
                 )
             elif existing_campaign.stage == CampaignStage.INFLUENCER_FINALIZED:
                 return CampaignDetail(
@@ -164,7 +162,6 @@ class CampaignService:
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     pending_deliverables=existing_campaign.pending_deliverables
                 )
@@ -176,7 +173,6 @@ class CampaignService:
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
                     pending_deliverables=existing_campaign.pending_deliverables
@@ -189,7 +185,6 @@ class CampaignService:
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
                     content_draft=content_draft,
@@ -203,7 +198,6 @@ class CampaignService:
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
                     content_post=content_post,
@@ -218,7 +212,6 @@ class CampaignService:
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
                     content_draft=content_draft,
@@ -234,7 +227,6 @@ class CampaignService:
                     influencer_basic_detail=influencer_basic_detail,
                     stage=existing_campaign.stage,
                     type_of_content=existing_campaign.type_of_content,
-                    campaign_notes=existing_campaign.campaign_notes,
                     influencer_finalization_date=influencer_finalization_date,
                     content_shoot_date=content_shoot_date,
                     content_draft=content_draft,
