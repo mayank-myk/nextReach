@@ -341,7 +341,7 @@ class WebService:
         return HomeMetadata(
             academy_video_list=self.get_all_nra()[-3:],
             success_story_list=self.get_all_ss(),
-            blog_list=self.get_all_blogs()[-3:],
+            blog_list=self.get_all_blogs()[-6:],
             influencer_list=influencer_basic_detail_list
         )
 
