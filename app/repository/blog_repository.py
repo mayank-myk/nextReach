@@ -81,7 +81,7 @@ class BlogRepository:
     def get_all_blogs(self) -> Optional[List[Blog]]:
 
         try:
-            return self.db.query(Blog).all()
+            return self.db.query(Blog).limit(6).offset(0).all()
 
         except Exception as ex:
             _log.error(f"Unable to fetch all blog records. Error: {str(ex)}")

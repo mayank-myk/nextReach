@@ -73,7 +73,7 @@ class AcademyVideoRepository:
     def get_all_nra(self) -> Optional[List[AcademyVideo]]:
 
         try:
-            return self.db.query(AcademyVideo).all()
+            return self.db.query(AcademyVideo).limit(6).offset(0).all()
 
         except Exception as ex:
             _log.error(f"Unable to fetch all NextReachAcademy records. Error: {str(ex)}")
