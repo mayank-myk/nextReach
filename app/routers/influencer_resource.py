@@ -33,8 +33,8 @@ def create_influencer(request: InfluencerRequest, db=Depends(db_manager.get_db))
 
 
 @router.post("/upload/image/{influencer_id}")
-def create_influencer(influencer_id: int, image_file: UploadFile = File(...),
-                      db=Depends(db_manager.get_db)) -> GenericResponse:
+def upload_influencer_image(influencer_id: int, image_file: UploadFile = File(...),
+                            db=Depends(db_manager.get_db)) -> GenericResponse:
     if image_file.content_type not in ALLOWED_IMAGE_MIME_TYPES:
         return GenericResponse(success=False, status_code=400,
                                message="Invalid image type. Only JPEG, PNG, and JPG are allowed.")
@@ -56,9 +56,9 @@ def update_influencer(influencer_id: int, request: UpdateInfluencerRequest,
 
 
 @router.get("/get", response_model=None)
-def get_influencer_detail(influencer_id: Optional[int] = None, phone_number: Optional[str] = None,
-                          name: Optional[str] = None, insta_username: Optional[str] = None,
-                          db=Depends(db_manager.get_db)) -> List[Influencer] | GenericResponse:
+def get_influencer_basic_detail(influencer_id: Optional[int] = None, phone_number: Optional[str] = None,
+                                name: Optional[str] = None, insta_username: Optional[str] = None,
+                                db=Depends(db_manager.get_db)) -> List[Influencer] | GenericResponse:
     # Ensure at least one search parameter is provided
     if not any([influencer_id, phone_number, name, insta_username]):
         return GenericResponse(success=False, message="At least one search parameter is required.")
@@ -69,6 +69,7 @@ def get_influencer_detail(influencer_id: Optional[int] = None, phone_number: Opt
 
 
 @router.post('/get/insight/{influencer_id}')
-def get_influencer_insight(influencer_id: int, db=Depends(db_manager.get_db)) -> InfluencerDetail | GenericResponse:
+def get_influencer_complete_metrics(influencer_id: int,
+                                    db=Depends(db_manager.get_db)) -> InfluencerDetail | GenericResponse:
     client_service = ClientService(db)
     return client_service.get_influencer_insight(request=InfluencerInsights(client_id=2, influencer_id=influencer_id))

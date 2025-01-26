@@ -26,7 +26,7 @@ def create_lead(wait_list_id: int, status: Status, db=Depends(db_manager.get_db)
 
 
 @router.get("/get/dump")
-def get_all_leads(
+def get_all_leads_dump(
         db=Depends(db_manager.get_db)):
     admin_service = AdminService(db)
     excel_file = admin_service.get_all_active_leads()

@@ -27,13 +27,14 @@ def get_client_profile(phone_number: str, db=Depends(db_manager.get_db)) -> Clie
 
 
 @router.post("/create")
-def create_client(request: ClientRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_client_profile(request: ClientRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.create_client(request=request)
 
 
 @router.post("/update/profile/{client_id}")
-def update_client(client_id: int, request: UpdateClientRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_client_profile(client_id: int, request: UpdateClientRequest,
+                          db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.update_client(client_id=client_id, request=request)
 
@@ -45,7 +46,7 @@ def recharge_coin(client_id: int, coin_count: int, db=Depends(db_manager.get_db)
 
 
 @router.post("/create/collab")
-def request_collab(request: CreateCollab, db=Depends(db_manager.get_db)) -> GenericResponse:
+def request_collab_on_behalf_of_client(request: CreateCollab, db=Depends(db_manager.get_db)) -> GenericResponse:
     client_service = ClientService(db)
     return client_service.request_collab(created_by=request.created_by, client_id=request.client_id,
                                          influencer_id=request.influencer_id, collab_date=None)

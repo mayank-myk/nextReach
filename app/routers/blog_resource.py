@@ -31,24 +31,25 @@ def update_blog(blog_id: int, request: BlogRequest, db=Depends(db_manager.get_db
 
 
 @router.post("/success-story/create")
-def create_ss(request: SuccessStoryRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_success_story(request: SuccessStoryRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.create_ss(request=request)
 
 
 @router.post("/success-story/update/{ss_id}")
-def update_ss(ss_id: int, request: SuccessStoryRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_success_story(ss_id: int, request: SuccessStoryRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.update_ss(ss_id=ss_id, request=request)
 
 
 @router.post("/academy-video/create")
-def create_nra(request: NextReachAcademyRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_academy_video(request: NextReachAcademyRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.create_nra(request=request)
 
 
 @router.post("/academy-video/update/{nra_id}")
-def update_nra(nra_id: int, request: NextReachAcademyRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_academy_video(nra_id: int, request: NextReachAcademyRequest,
+                         db=Depends(db_manager.get_db)) -> GenericResponse:
     admin_service = AdminService(db)
     return admin_service.update_nra(nra_id=nra_id, request=request)

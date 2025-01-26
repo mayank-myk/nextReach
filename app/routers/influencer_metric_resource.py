@@ -27,66 +27,66 @@ db_manager = DatabaseSessionManager()
 
 
 @router.post("/create/insta/{influencer_id}")
-def create_influencer_metric(influencer_id: int, request: InfluencerInstaMetricRequest,
-                             db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_influencer_insta_metric(influencer_id: int, request: InfluencerInstaMetricRequest,
+                                   db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.create_influencer_insta_metric(influencer_id=influencer_id, request=request)
 
 
 @router.post("/create/yt/{influencer_id}")
-def create_influencer_metric(influencer_id: int, request: InfluencerYtMetricRequest,
-                             db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_influencer_yt_metric(influencer_id: int, request: InfluencerYtMetricRequest,
+                                db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.create_influencer_yt_metric(influencer_id=influencer_id, request=request)
 
 
 @router.post("/create/fb/{influencer_id}")
-def create_influencer_metric(influencer_id: int, request: InfluencerFbMetricRequest,
-                             db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_influencer_fb_metric(influencer_id: int, request: InfluencerFbMetricRequest,
+                                db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.create_influencer_fb_metric(influencer_id=influencer_id, request=request)
 
 
 @router.post("/update/insta/{influencer_insta_metric_id}")
-def update_influencer_metric(influencer_insta_metric_id: int, request: UpdateInfluencerInstaMetricRequest,
-                             db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_influencer_insta_metric(influencer_insta_metric_id: int, request: UpdateInfluencerInstaMetricRequest,
+                                   db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer_insta_metric(influencer_insta_metric_id=influencer_insta_metric_id,
                                                              request=request)
 
 
 @router.post("/update/yt/{influencer_yt_metric_id}")
-def update_influencer_metric(influencer_yt_metric_id: int, request: UpdateInfluencerYtMetricRequest,
-                             db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_influencer_yt_metric(influencer_yt_metric_id: int, request: UpdateInfluencerYtMetricRequest,
+                                db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer_yt_metric(influencer_yt_metric_id=influencer_yt_metric_id,
                                                           request=request)
 
 
 @router.post("/update/fb/{influencer_fb_metric_id}")
-def update_influencer_metric(influencer_fb_metric_id: int, request: UpdateInfluencerFbMetricRequest,
-                             db=Depends(db_manager.get_db)) -> GenericResponse:
+def update_influencer_fb_metric(influencer_fb_metric_id: int, request: UpdateInfluencerFbMetricRequest,
+                                db=Depends(db_manager.get_db)) -> GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.update_influencer_fb_metric(influencer_fb_metric_id=influencer_fb_metric_id,
                                                           request=request)
 
 
 @router.get("/get/insta/{influencer_id}", response_model=None)
-def get_influencer_metric_detail(influencer_id: int,
-                                 db=Depends(db_manager.get_db)) -> InfluencerInstaMetric | GenericResponse:
+def get_influencer_insta_latest_metric(influencer_id: int,
+                                       db=Depends(db_manager.get_db)) -> InfluencerInstaMetric | GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.get_influencer_insta_metric_detail(influencer_id=influencer_id)
 
 
 @router.get("/get/yt/{influencer_id}", response_model=None)
-def get_influencer_metric_detail(influencer_id: int,
-                                 db=Depends(db_manager.get_db)) -> InfluencerYtMetric | GenericResponse:
+def get_influencer_yt_latest_metric(influencer_id: int,
+                                    db=Depends(db_manager.get_db)) -> InfluencerYtMetric | GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.get_influencer_yt_metric_detail(influencer_id=influencer_id)
 
 
 @router.get("/get/fb/{influencer_id}", response_model=None)
-def get_influencer_metric_detail(influencer_id: int,
-                                 db=Depends(db_manager.get_db)) -> InfluencerFbMetric | GenericResponse:
+def get_influencer_fb_latest_metric(influencer_id: int,
+                                    db=Depends(db_manager.get_db)) -> InfluencerFbMetric | GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.get_influencer_fb_metric_detail(influencer_id=influencer_id)

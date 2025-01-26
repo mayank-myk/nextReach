@@ -5,6 +5,8 @@ import uvicorn
 from dotenv import load_dotenv
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
+from fastapi.openapi.docs import get_swagger_ui_html, get_redoc_html
+from fastapi.openapi.utils import get_openapi
 from fastapi.responses import ORJSONResponse
 from starlette.exceptions import HTTPException as StarletteException
 from uvicorn.workers import UvicornWorker
@@ -30,7 +32,7 @@ async def lifespan(app: FastAPI):
         log.info("Shutting down the application...")
 
 
-server = FastAPI(title="NextReach Admin Console", lifespan=lifespan)
+server = FastAPI(title="NextReach Admin Console", lifespan=lifespan, docs_url=None, redoc_url=None)
 
 server.include_router(admin_resource.router)
 server.include_router(admin_login_resource.router)
@@ -42,6 +44,47 @@ server.include_router(influencer_metric_resource.router)
 server.include_router(influencer_resource.router)
 server.include_router(website_client_resource.router)
 server.include_router(website_resource.router)
+
+
+@server.get("/february", include_in_schema=False)
+async def custom_swagger_ui():
+    """
+    Custom Swagger UI route.
+    """
+    return get_swagger_ui_html(
+        openapi_url="/february/openapi.json",
+        title="My API Documentation"
+    )
+
+
+@server.get("/february/doc", include_in_schema=False)
+async def custom_redoc_ui():
+    """
+    Custom ReDoc route.
+    """
+    return get_redoc_html(
+        openapi_url="/february/openapi.json",  # Use your custom OpenAPI route
+        title="Custom API Documentation"
+    )
+
+
+# Custom OpenAPI JSON route
+@server.get("/february/openapi.json", include_in_schema=False)
+async def custom_openapi():
+    """
+    Custom OpenAPI JSON route.
+    """
+    return get_openapi(
+        title=server.title,
+        version=server.version,
+        description=server.description,
+        routes=server.routes
+    )
+
+
+@server.get("/")
+async def read_root():
+    return {"message": "Do not try again, I dare you"}
 
 
 class AsyncioUvicornWorker(UvicornWorker):
