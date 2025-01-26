@@ -3,6 +3,7 @@ from typing import List, Optional
 from pydantic import BaseModel
 
 from app.enums.average_view import AverageView
+from app.enums.budget import Budget
 from app.enums.city import City
 from app.enums.collab_type import CollabType
 from app.enums.content_price import ContentPrice
@@ -25,6 +26,7 @@ class SearchFilter(BaseModel):
     avg_views: Optional[List[AverageView]] = None
     engagement: Optional[EngagementRate] = None
     platform: Optional[Platform] = None
+    budget: Optional[Budget] = None
     content_price: Optional[ContentPrice] = None
     gender: Optional[List[Gender]] = None
     collab_type: Optional[CollabType] = None

@@ -10,6 +10,7 @@ from app.api_requests.profile_update import ProfileUpdate
 from app.api_requests.rate_campaign import RateCampaign
 from app.database.session import DatabaseSessionManager
 from app.enums.average_view import AverageView
+from app.enums.budget import Budget
 from app.enums.city import City
 from app.enums.collab_type import CollabType
 from app.enums.content_price import ContentPrice
@@ -125,6 +126,7 @@ def get_influencer_listings(
         engagement: Optional[List[EngagementRate]] = Query(None, description="Engagement rate"),
         platform: Optional[Platform] = Query(None, description="Platform like Instagram, YouTube, etc."),
         content_price: Optional[ContentPrice] = Query(None, description="Content price"),
+        budget: Optional[Budget] = Query(None, description="Budget"),
         collab_type: Optional[CollabType] = Query(None, description="Select one of the collab type"),
         gender: Optional[List[Gender]] = Query(None, description="Gender of the influencer"),
         rating: Optional[Rating] = Query(None, description="Minimum rating"),
@@ -132,7 +134,7 @@ def get_influencer_listings(
         db=Depends(db_manager.get_db)) -> InfluencerListing:
     client_service = ClientService(db)
     return client_service.get_influencer_listing(client_id, page_number, page_size, sort_applied, niche, city,
-                                                 reach_price, follower_count, avg_views, engagement, platform,
+                                                 reach_price, follower_count, avg_views, engagement, platform, budget,
                                                  content_price, collab_type, gender, rating, languages)
 
 

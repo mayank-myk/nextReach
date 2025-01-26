@@ -6,6 +6,7 @@ from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp, \
     collab_request_admin_notification_via_whatsapp
 from app.enums.average_view import AverageView
+from app.enums.budget import Budget
 from app.enums.campaign_stage import CampaignStage
 from app.enums.city import City
 from app.enums.collab_date import CollabDate
@@ -287,6 +288,7 @@ class ClientService:
                                avg_views: Optional[List[AverageView]],
                                engagement: Optional[EngagementRate],
                                platform: Optional[Platform],
+                               budget: Optional[Budget],
                                content_price: Optional[ContentPrice],
                                collab_type: Optional[CollabType],
                                gender: Optional[List[Gender]],
@@ -307,6 +309,7 @@ class ClientService:
             avg_views=avg_views,
             engagement=engagement,
             platform=platform,
+            budget=budget,
             content_price=content_price,
             collab_type=collab_type,
             gender=gender,
@@ -327,6 +330,7 @@ class ClientService:
             avg_views=avg_views,
             engagement=engagement,
             platform=platform,
+            budget=budget,
             content_price=content_price,
             collab_type=collab_type,
             gender=gender,
@@ -360,6 +364,7 @@ class ClientService:
             avg_views=avg_views,
             engagement=engagement,
             platform=platform,
+            budget=budget,
             content_price=content_price,
             gender=gender,
             collab_type=collab_type,

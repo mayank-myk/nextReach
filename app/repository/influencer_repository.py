@@ -2,6 +2,7 @@ from typing import Optional, List
 
 from sqlalchemy import or_, func, desc
 from sqlalchemy.orm import Session, aliased
+from sqlalchemy.sql.functions import coalesce
 
 from app.api_requests.influencer_request import InfluencerRequest
 from app.api_requests.update_influencer_request import UpdateInfluencerRequest
@@ -10,6 +11,7 @@ from app.database.influencer_insta_metric_table import InfluencerInstaMetric
 from app.database.influencer_table import Influencer
 from app.database.influencer_yt_metric_table import InfluencerYtMetric
 from app.enums.average_view import AverageView, VIEW_DICT
+from app.enums.budget import Budget, BUDGET_DICT
 from app.enums.city import City
 from app.enums.collab_type import CollabType, COLLAB_TYPE_DICT
 from app.enums.content_price import ContentPrice, CONTENT_PRICE_DICT
@@ -205,6 +207,7 @@ class InfluencerRepository:
             avg_views: Optional[List[AverageView]],
             engagement: Optional[EngagementRate],
             platform: Optional[Platform],
+            budget: Optional[Budget],
             content_price: Optional[ContentPrice],
             collab_type: Optional[CollabType],
             gender: Optional[List[Gender]],
@@ -260,6 +263,12 @@ class InfluencerRepository:
                                                      ER_DICT[engagement][1]))
         if platform:
             query = query.filter(Influencer.primary_platform == platform)
+        if budget:
+            avg_views_safe = coalesce(metric_table.avg_views, 0)
+            budget_calculation = Influencer.content_charge + (Influencer.views_charge * avg_views_safe) // 1000
+            query = query.filter(
+                budget_calculation.between(BUDGET_DICT[budget][0], BUDGET_DICT[budget][1])
+            )
         if content_price:
             query = query.filter(Influencer.content_charge.between(CONTENT_PRICE_DICT[content_price][0],
                                                                    CONTENT_PRICE_DICT[content_price][1]))
@@ -307,6 +316,7 @@ class InfluencerRepository:
             avg_views: Optional[List[AverageView]],
             engagement: Optional[EngagementRate],
             platform: Optional[Platform],
+            budget: Optional[Budget],
             content_price: Optional[ContentPrice],
             collab_type: Optional[CollabType],
             gender: Optional[List[Gender]],
