@@ -15,7 +15,7 @@ class InstagramDetail(BaseModel):
     avg_likes: Optional[str]
     avg_comments: Optional[str]
     avg_shares: Optional[str]
-    engagement_rate: Optional[int]
+    engagement_rate: Optional[str]
 
     city_graph: Optional[List[Dict]]
     age_graph: Optional[List[Dict]]
