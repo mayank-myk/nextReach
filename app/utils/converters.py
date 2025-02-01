@@ -30,6 +30,13 @@ def int_to_str_k(count) -> Optional[str]:
         return None
 
 
+def float_to_str(value) -> Optional[str]:
+    if value is None or value == 0:
+        return "0"
+
+    return str(int(value)) if value.is_integer() else f"{value:.1f}".rstrip("0").rstrip(".")
+
+
 def engagement_rate_to_quality(engagement_rate: float) -> str:
     if engagement_rate <= 1.0:
         return "LOW"

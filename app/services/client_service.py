@@ -43,7 +43,7 @@ from app.response.login_response import LoginResponse
 from app.response.search_filter import SearchFilter
 from app.utils import id_utils
 from app.utils.converters import int_to_str_k, combine_names, format_to_rupees, format_to_views_charge, \
-    city_distribution_to_dict, age_distribution_to_dict, sex_distribution_to_dict
+    city_distribution_to_dict, age_distribution_to_dict, sex_distribution_to_dict, float_to_str
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -461,7 +461,7 @@ class ClientService:
                     avg_likes=int_to_str_k(influencer_insta_metric.avg_likes),
                     avg_comments=int_to_str_k(influencer_insta_metric.avg_comments),
                     avg_shares=int_to_str_k(influencer_insta_metric.avg_shares),
-                    engagement_rate=influencer_insta_metric.engagement_rate,
+                    engagement_rate=float_to_str(influencer_insta_metric.engagement_rate),
                     city_graph=insta_city_graph,
                     age_graph=insta_age_graph,
                     sex_graph=insta_sex_graph
@@ -504,7 +504,7 @@ class ClientService:
                     avg_likes=int_to_str_k(influencer_yt_metric.avg_likes),
                     avg_comments=int_to_str_k(influencer_yt_metric.avg_comments),
                     avg_shares=int_to_str_k(influencer_yt_metric.avg_shares),
-                    engagement_rate=influencer_yt_metric.engagement_rate,
+                    engagement_rate=float_to_str(influencer_yt_metric.engagement_rate),
                     city_graph=yt_city_graph,
                     age_graph=yt_age_graph,
                     sex_graph=yt_sex_graph
@@ -546,7 +546,7 @@ class ClientService:
                     avg_likes=int_to_str_k(influencer_fb_metric.avg_likes),
                     avg_comments=int_to_str_k(influencer_fb_metric.avg_comments),
                     avg_shares=int_to_str_k(influencer_fb_metric.avg_shares),
-                    engagement_rate=influencer_fb_metric.engagement_rate,
+                    engagement_rate=float_to_str(influencer_fb_metric.engagement_rate),
                     city_graph=fb_city_graph,
                     age_graph=fb_age_graph,
                     sex_graph=fb_sex_graph
