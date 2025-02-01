@@ -24,7 +24,6 @@ class UpdateInfluencerInstaMetricRequest(BaseModel):
     women_follower_pc: Optional[int] = Field(None, ge=0)
     avg_views: Optional[int] = Field(None, ge=0)
     max_views: Optional[int] = Field(None, ge=0)
-    min_views: Optional[int] = Field(None, ge=0)
     consistency_score: Optional[int] = Field(None, ge=0)
     avg_likes: Optional[int] = Field(None, ge=0)
     avg_comments: Optional[int] = Field(None, ge=0)

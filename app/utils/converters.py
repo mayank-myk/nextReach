@@ -23,7 +23,7 @@ def int_to_str_k(count) -> Optional[str]:
         if value % 1 == 0:  # If the number is an integer
             return f"{int(value)}k"
         else:
-            return f"{value:.2f}k"  # Converts to "k" for thousands
+            return f"{value:.1f}k"  # Converts to "k" for thousands
     elif count:
         return str(count)  # For values less than 1000, just return the number as a string
     else:
@@ -78,7 +78,7 @@ def format_to_rupees(value: int):
 
 def format_to_views_charge(value: int):
     if value and value > 0:
-        return str(value) + " per 1k views"
+        return "₹ " + str(value) + " /1k views"
     else:
         return None
 

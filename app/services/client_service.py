@@ -188,7 +188,7 @@ class ClientService:
 
             collab_request_user_notification_via_whatsapp(client_phone_number=new_campaign.client.phone_number,
                                                           date=datetime.today().strftime("%b %d, %Y"),
-                                                          influencer_name=influencer.name,
+                                                          influencer_name=influencer_metric.influencer_id,
                                                           primary_platform=influencer.primary_platform,
                                                           profile_link=influencer_metric.profile_link,
                                                           content_price=new_campaign.content_charge,
@@ -203,7 +203,7 @@ class ClientService:
                                                            influencer_id=str(influencer.id),
                                                            client_name=new_campaign.client.name,
                                                            client_phone_number=new_campaign.client.phone_number,
-                                                           influencer_name=influencer.name,
+                                                           influencer_name=influencer_metric.influencer_id,
                                                            influencer_phone_number=influencer.phone_number,
                                                            content_price=influencer.content_charge,
                                                            reach_price=influencer.views_charge,
@@ -260,9 +260,16 @@ class ClientService:
             influencer_yt_metric = max(influencer.influencer_yt_metric, key=lambda m: m.created_at, default=None)
             influencer_insta_metric = max(influencer.influencer_insta_metric, key=lambda m: m.created_at, default=None)
 
+            if influencer.primary_platform == Platform.FACEBOOK:
+                influencer_metric = influencer_fb_metric
+            elif influencer.primary_platform == Platform.YOUTUBE:
+                influencer_metric = influencer_yt_metric
+            else:
+                influencer_metric = influencer_insta_metric
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
-                name=influencer.name,
+                name=influencer_metric.username,
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
@@ -620,8 +627,10 @@ def get_collab_charge(influencer, influencer_primary_metric) -> Optional[Influen
     if influencer.content_charge and influencer_primary_metric.avg_views and influencer_primary_metric.max_views and influencer.content_charge > 0 and influencer_primary_metric.avg_views > 0 and influencer_primary_metric.max_views > 0:
         return InfluencerCollabCharge(
             min=format_to_rupees(influencer.content_charge),
-            avg=format_to_rupees((influencer_primary_metric.avg_views // 1000) * influencer.views_charge),
-            max=format_to_rupees((influencer_primary_metric.max_views // 1000) * influencer.views_charge),
+            avg=format_to_rupees(
+                influencer.content_charge + (influencer_primary_metric.avg_views // 1000) * influencer.views_charge),
+            max=format_to_rupees(
+                influencer.content_charge + (influencer_primary_metric.max_views // 1000) * influencer.views_charge),
         )
     else:
         return None

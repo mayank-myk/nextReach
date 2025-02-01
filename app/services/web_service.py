@@ -11,6 +11,7 @@ import requests
 from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
 from app.clients.interakt_client import contact_us_notification_via_whatsapp
+from app.enums.platform import Platform
 from app.repository.academy_video_repository import AcademyVideoRepository
 from app.repository.blog_repository import BlogRepository
 from app.repository.influencer_repository import InfluencerRepository
@@ -325,9 +326,16 @@ class WebService:
             influencer_yt_metric = max(influencer.influencer_yt_metric, key=lambda m: m.created_at, default=None)
             influencer_insta_metric = max(influencer.influencer_insta_metric, key=lambda m: m.created_at, default=None)
 
+            if influencer.primary_platform == Platform.FACEBOOK:
+                influencer_metric = influencer_fb_metric
+            elif influencer.primary_platform == Platform.YOUTUBE:
+                influencer_metric = influencer_yt_metric
+            else:
+                influencer_metric = influencer_insta_metric
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
-                name=influencer.name,
+                name=influencer_metric.username,
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
