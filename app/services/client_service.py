@@ -607,7 +607,7 @@ class ClientService:
                 name=influencer.name,
                 gender=influencer.gender,
                 profile_picture=influencer.profile_picture,
-                languages=influencer.languages,
+                languages=uppercase_to_capitalized(influencer.languages),
                 next_reach_score=influencer.next_reach_score,
                 niche=influencer.niche,
                 city=influencer.city,
@@ -637,3 +637,16 @@ def get_collab_charge(influencer, influencer_primary_metric) -> Optional[Influen
         )
     else:
         return None
+
+
+def uppercase_to_capitalized(language_list):
+    if language_list is None or len(language_list) == 0:
+        return None
+
+    output_list = []
+    for language in language_list:
+        words = language.value.lower().split("_")
+        formatted_language = " ".join(words).capitalize()
+        output_list.append(formatted_language)
+
+    return output_list
