@@ -267,6 +267,9 @@ class ClientService:
             else:
                 influencer_metric = influencer_insta_metric
 
+            if influencer_metric is None:
+                continue
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
                 name=influencer_metric.username,

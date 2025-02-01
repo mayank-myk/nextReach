@@ -68,12 +68,12 @@ def calculate_influencer_earning(request: CalculateEarningRequest) -> str:
         'FOOD_COOKING': 25,
         'BEAUTY_SKINCARE': 30,
         'TRAVEL_TOURISM': 25,
-        'FASHION_LIFESTYLE': 30,
+        'FASHION': 30,
         'HEALTH_FITNESS': 30,
         'TECH_GADGETS': 35,
         'WEALTH_FINANCE': 35,
         'ENTERTAINMENT': 30,
-        'GAMING': 30,
+        'LIFESTYLE': 25,
         'MOTIVATIONAL_SPIRITUAL': 20,
         'PARENTING_FAMILY': 25,
         'EDUCATION': 25
@@ -332,6 +332,9 @@ class WebService:
                 influencer_metric = influencer_yt_metric
             else:
                 influencer_metric = influencer_insta_metric
+
+            if influencer_metric is None:
+                continue
 
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
