@@ -5,8 +5,8 @@ from pydantic import BaseModel, Field
 
 class UpdateInfluencerYtMetricRequest(BaseModel):
     updated_by: str = Field(..., min_length=3)
-    username: str = Field(..., max_length=255)
-    profile_link: str = Field(..., max_length=255)
+    username: Optional[str] = Field(None, max_length=255)
+    profile_link: Optional[str] = Field(None, max_length=255)
     followers: Optional[int] = Field(None, ge=0)
     city_1: Optional[str] = None
     city_pc_1: Optional[int] = Field(None, ge=0)
