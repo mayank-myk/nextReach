@@ -203,7 +203,7 @@ class ClientService:
                                                            influencer_id=str(influencer.id),
                                                            client_name=new_campaign.client.name,
                                                            client_phone_number=new_campaign.client.phone_number,
-                                                           influencer_name=influencer_metric.influencer_id,
+                                                           influencer_name=influencer_metric.username,
                                                            influencer_phone_number=influencer.phone_number,
                                                            content_price=influencer.content_charge,
                                                            reach_price=influencer.views_charge,
