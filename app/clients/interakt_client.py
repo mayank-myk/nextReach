@@ -2,6 +2,7 @@ import requests
 
 from app.enums.entity_type import EntityType
 from app.enums.platform import Platform
+from app.utils.converters import format_to_rupees, format_to_views_charge, int_to_str_k
 from app.utils.logger import configure_logger
 
 logger = configure_logger()
@@ -118,10 +119,10 @@ def collab_request_user_notification_via_whatsapp(client_phone_number: str, date
                 influencer_name,
                 primary_platform.value,
                 profile_link,
-                str(content_price),
-                str(reach_price),
-                str(followers),
-                str(avg_views)
+                format_to_rupees(content_price),
+                format_to_views_charge(reach_price),
+                int_to_str_k(followers),
+                int_to_str_k(avg_views)
             ]
         }
     }
@@ -174,10 +175,10 @@ def collab_request_admin_notification_via_whatsapp(date: str, campaign_id: str, 
                     influencer_id,
                     influencer_name,
                     influencer_phone_number,
-                    str(content_price),
-                    str(reach_price),
-                    str(followers),
-                    str(avg_views)
+                    format_to_rupees(content_price),
+                    format_to_views_charge(reach_price),
+                    int_to_str_k(followers),
+                    int_to_str_k(avg_views)
                 ]
             }
         }

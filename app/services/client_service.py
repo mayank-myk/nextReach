@@ -188,7 +188,7 @@ class ClientService:
 
             collab_request_user_notification_via_whatsapp(client_phone_number=new_campaign.client.phone_number,
                                                           date=datetime.today().strftime("%b %d, %Y"),
-                                                          influencer_name=influencer_metric.influencer_id,
+                                                          influencer_name=influencer_metric.username,
                                                           primary_platform=influencer.primary_platform,
                                                           profile_link=influencer_metric.profile_link,
                                                           content_price=new_campaign.content_charge,
