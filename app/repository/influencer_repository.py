@@ -30,14 +30,16 @@ from app.utils.logger import configure_logger
 _log = configure_logger()
 
 
-def get_influencer_metric_table(platform):
+def get_influencer_metric_table(platform=None):
     platform_table_map = {
         Platform.INSTAGRAM: InfluencerInstaMetric,
         Platform.YOUTUBE: InfluencerYtMetric,
         Platform.FACEBOOK: InfluencerFbMetric,
     }
-    metric_table = platform_table_map.get(platform, InfluencerInstaMetric)  # Default to Instagram if not specified
-    return metric_table
+    if platform is None:
+        return list(platform_table_map.values())  # Return list of all metric tables
+
+    return [platform_table_map.get(platform, InfluencerInstaMetric)]  # Default to Instagram if not specified
 
 
 class InfluencerRepository:
@@ -215,89 +217,99 @@ class InfluencerRepository:
             language_list: Optional[List[Language]]
     ):
 
-        metric_table = get_influencer_metric_table(platform)
-        metric_alias = aliased(metric_table)
+        metric_tables = get_influencer_metric_table(platform)
 
-        query = (
-            self.db.query(Influencer)
-            .join(metric_table, Influencer.id == metric_table.influencer_id)
-            .filter(metric_table.id.in_(
-                self.db.query(metric_alias.id)  # Use the alias here
-                .filter(metric_alias.influencer_id == Influencer.id)  # Correlate with the outer query
-                .order_by(metric_alias.created_at.desc())
-                .limit(1)
-            ))
-        )
-
-        # Apply filters
-        if niche:
-            query = query.filter(
-                (Influencer.niche.op("&&")(niche)) |  # Overlap operator for non-empty arrays
-                (Influencer.niche.is_(None)) |  # Check for None values
-                (func.cardinality(Influencer.niche) == 0)  # Check for empty array
-            )
-        if city:
-            query = query.filter(Influencer.city.in_(city))
-        if reach_price:
-            filters = [
-                Influencer.views_charge.between(REACH_PRICE_DICT[price][0], REACH_PRICE_DICT[price][1])
-                for price in reach_price
-            ]
-            query = query.filter(or_(*filters))
-        if follower_count:
-            filters = [
-                metric_table.followers.between(FOLLOWER_COUNT_DICT[fc][0],
-                                               FOLLOWER_COUNT_DICT[fc][1])
-                for fc in follower_count
-            ]
-            query = query.filter(or_(*filters))
-        if avg_views:
-            filters = [
-                metric_table.avg_views.between(VIEW_DICT[av][0], VIEW_DICT[av][1])
-                for av in avg_views
-            ]
-            query = query.filter(or_(*filters))
-        if engagement:
-            query = query.filter(
-                metric_table.engagement_rate.between(ER_DICT[engagement][0],
-                                                     ER_DICT[engagement][1]))
-        if platform:
-            query = query.filter(Influencer.primary_platform == platform)
-        if budget:
-            avg_views_safe = coalesce(metric_table.avg_views, 0)
-            budget_calculation = Influencer.content_charge + (Influencer.views_charge * avg_views_safe) // 1000
-            query = query.filter(
-                budget_calculation.between(BUDGET_DICT[budget][0], BUDGET_DICT[budget][1])
-            )
-        if content_price:
-            query = query.filter(Influencer.content_charge.between(CONTENT_PRICE_DICT[content_price][0],
-                                                                   CONTENT_PRICE_DICT[content_price][1]))
-        if collab_type:
-            query = query.filter(Influencer.collab_type.in_(COLLAB_TYPE_DICT[collab_type]))
-        if gender:
-            query = query.filter(Influencer.gender.in_(gender))
-        if language_list:
-            query = query.filter(
-                (Influencer.languages.op("&&")(language_list)) |  # Overlap operator for non-empty arrays
-                (Influencer.languages.is_(None)) |  # Check for None values
-                (func.cardinality(Influencer.languages) == 0)  # Check for empty array
+        queries = []  # To store queries for different platforms
+        for metric_table in metric_tables:
+            metric_alias = aliased(metric_table)
+            query = (
+                self.db.query(Influencer)
+                .join(metric_table, Influencer.id == metric_table.influencer_id)
+                .filter(metric_table.id.in_(
+                    self.db.query(metric_alias.id)  # Use the alias here
+                    .filter(metric_alias.influencer_id == Influencer.id)  # Correlate with the outer query
+                    .order_by(metric_alias.created_at.desc())
+                    .limit(1)
+                ))
             )
 
-        # Apply sorting based on the 'sort_applied' parameter
-        if sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
-            query = query.order_by(Influencer.content_charge.asc())  # Sort by content charge in ascending order
-        elif sort_applied == SortApplied.CONTENT_PRICE_HIGH_TO_LOW:
-            query = query.order_by(Influencer.content_charge.desc())  # Sort by content charge in descending order
-        elif sort_applied == SortApplied.VIEWS_CHARGE_LOW_TO_HIGH:
-            query = query.order_by(Influencer.views_charge.asc())  # Sort by views charge in ascending order
-        elif sort_applied == SortApplied.VIEWS_CHARGE_HIGH_TO_LOW:
-            query = query.order_by(Influencer.views_charge.desc())  # Sort by views charge in descending order
+            # Apply filters
+            if niche:
+                query = query.filter(
+                    (Influencer.niche.op("&&")(niche)) |  # Overlap operator for non-empty arrays
+                    (Influencer.niche.is_(None)) |  # Check for None values
+                    (func.cardinality(Influencer.niche) == 0)  # Check for empty array
+                )
+            if city:
+                query = query.filter(Influencer.city.in_(city))
+            if reach_price:
+                filters = [
+                    Influencer.views_charge.between(REACH_PRICE_DICT[price][0], REACH_PRICE_DICT[price][1])
+                    for price in reach_price
+                ]
+                query = query.filter(or_(*filters))
+            if follower_count:
+                filters = [
+                    metric_table.followers.between(FOLLOWER_COUNT_DICT[fc][0],
+                                                   FOLLOWER_COUNT_DICT[fc][1])
+                    for fc in follower_count
+                ]
+                query = query.filter(or_(*filters))
+            if avg_views:
+                filters = [
+                    metric_table.avg_views.between(VIEW_DICT[av][0], VIEW_DICT[av][1])
+                    for av in avg_views
+                ]
+                query = query.filter(or_(*filters))
+            if engagement:
+                query = query.filter(
+                    metric_table.engagement_rate.between(ER_DICT[engagement][0],
+                                                         ER_DICT[engagement][1]))
+            if platform:
+                query = query.filter(Influencer.primary_platform == platform)
+            if budget:
+                avg_views_safe = coalesce(metric_table.avg_views, 0)
+                budget_calculation = Influencer.content_charge + (Influencer.views_charge * avg_views_safe) // 1000
+                query = query.filter(
+                    budget_calculation.between(BUDGET_DICT[budget][0], BUDGET_DICT[budget][1])
+                )
+            if content_price:
+                query = query.filter(Influencer.content_charge.between(CONTENT_PRICE_DICT[content_price][0],
+                                                                       CONTENT_PRICE_DICT[content_price][1]))
+            if collab_type:
+                query = query.filter(Influencer.collab_type.in_(COLLAB_TYPE_DICT[collab_type]))
+            if gender:
+                query = query.filter(Influencer.gender.in_(gender))
+            if language_list:
+                query = query.filter(
+                    (Influencer.languages.op("&&")(language_list)) |  # Overlap operator for non-empty arrays
+                    (Influencer.languages.is_(None)) |  # Check for None values
+                    (func.cardinality(Influencer.languages) == 0)  # Check for empty array
+                )
+
+            queries.append(query)
+
+        # If multiple platform queries exist, combine them using `union_all`
+        if len(queries) > 1:
+            final_query = queries[0].union_all(*queries[1:])
         else:
-            query = query.order_by(
+            final_query = queries[0]
+
+            # Apply sorting based on the 'sort_applied' parameter
+        if sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
+            query = final_query.order_by(Influencer.content_charge.asc())  # Sort by content charge in ascending order
+        elif sort_applied == SortApplied.CONTENT_PRICE_HIGH_TO_LOW:
+            query = final_query.order_by(Influencer.content_charge.desc())  # Sort by content charge in descending order
+        elif sort_applied == SortApplied.VIEWS_CHARGE_LOW_TO_HIGH:
+            query = final_query.order_by(Influencer.views_charge.asc())  # Sort by views charge in ascending order
+        elif sort_applied == SortApplied.VIEWS_CHARGE_HIGH_TO_LOW:
+            query = final_query.order_by(Influencer.views_charge.desc())  # Sort by views charge in descending order
+        else:
+            query = final_query.order_by(
                 desc(Influencer.next_reach_score))  # Sort by next_reach_score in descending order
 
         # Pagination
-        all_matched_influencers = query.all()
+        all_matched_influencers = final_query.all()
         matched_influencers = query.limit(page_size).offset((page_number - 1) * page_size).all()
 
         return matched_influencers, all_matched_influencers
@@ -326,19 +338,23 @@ class InfluencerRepository:
 
         all_matched_influencer_ids = [matched_influencer.id for matched_influencer in all_matched_influencers]
 
-        metric_table = get_influencer_metric_table(platform)
-        metric_alias = aliased(metric_table)
-        query = (
-            self.db.query(Influencer)
-            .join(metric_table, Influencer.id == metric_table.influencer_id)
-            .filter(metric_table.id.in_(
-                self.db.query(metric_alias.id)  # Use the alias here
-                .filter(metric_alias.influencer_id == Influencer.id)  # Correlate with the outer query
-                .order_by(metric_alias.created_at.desc())
-                .limit(1)
-            ))
-            .filter(Influencer.id.notin_(all_matched_influencer_ids))
-        )
+        metric_tables = get_influencer_metric_table()  # Get list of metric tables for platforms
+        queries = []
+
+        for metric_table in metric_tables:
+            metric_alias = aliased(metric_table)
+            query = (
+                self.db.query(Influencer)
+                .join(metric_table, Influencer.id == metric_table.influencer_id)
+                .filter(metric_table.id.in_(
+                    self.db.query(metric_alias.id)  # Use the alias here
+                    .filter(metric_alias.influencer_id == Influencer.id)  # Correlate with the outer query
+                    .order_by(metric_alias.created_at.desc())
+                    .limit(1)
+                ))
+                .filter(Influencer.id.notin_(all_matched_influencer_ids))
+            )
+            queries.append(query)
 
         # Apply filters
         # if niche:
@@ -356,28 +372,40 @@ class InfluencerRepository:
         #         (func.cardinality(Influencer.languages) == 0)  # Check for empty array
         #     )
 
-        # Apply sorting based on the 'sort_applied' parameter
-        if sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
-            query = query.order_by(Influencer.content_charge.asc())  # Sort by content charge in ascending order
-        elif sort_applied == SortApplied.CONTENT_PRICE_HIGH_TO_LOW:
-            query = query.order_by(Influencer.content_charge.desc())  # Sort by content charge in descending order
-        elif sort_applied == SortApplied.VIEWS_CHARGE_LOW_TO_HIGH:
-            query = query.order_by(Influencer.views_charge.asc())  # Sort by views charge in ascending order
-        elif sort_applied == SortApplied.VIEWS_CHARGE_HIGH_TO_LOW:
-            query = query.order_by(Influencer.views_charge.desc())  # Sort by views charge in descending order
+        # Merge all platform queries using `union_all`
+        if len(queries) > 1:
+            final_query = queries[0].union_all(*queries[1:])
         else:
-            query = query.order_by(
-                desc(Influencer.next_reach_score))  # Sort by next_reach_score in descending order
+            final_query = queries[0]
+
+        # # Ensure uniqueness of influencers by selecting only distinct IDs
+        # unique_influencer_ids_subquery = self.db.query(
+        #     final_query.with_entities(Influencer.id).subquery().c.id).distinct().subquery()
+        #
+        # # Get only unique influencers
+        # final_query = self.db.query(Influencer).filter(Influencer.id.in_(unique_influencer_ids_subquery))
+
+        # Apply sorting AFTER merging queries
+        if sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
+            final_query = final_query.order_by(Influencer.content_charge.asc())
+        elif sort_applied == SortApplied.CONTENT_PRICE_HIGH_TO_LOW:
+            final_query = final_query.order_by(Influencer.content_charge.desc())
+        elif sort_applied == SortApplied.VIEWS_CHARGE_LOW_TO_HIGH:
+            final_query = final_query.order_by(Influencer.views_charge.asc())
+        elif sort_applied == SortApplied.VIEWS_CHARGE_HIGH_TO_LOW:
+            final_query = final_query.order_by(Influencer.views_charge.desc())
+        else:
+            final_query = final_query.order_by(desc(Influencer.next_reach_score))  # Default sorting
 
         # Pagination
-        all_unmatched_influencers = query.all()
+        all_unmatched_influencers = final_query.all()
         if page_size - len(matched_influencers) < 0:
             unmatched_influencers = []
         else:
             matched_pages = len(all_matched_influencer_ids) // page_size
             remaining_matched = len(all_matched_influencer_ids) % page_size
             offset = max(0, (page_number - matched_pages - 1) * page_size - remaining_matched)
-            unmatched_influencers = query.limit(page_size - len(matched_influencers)).offset(offset).all()
+            unmatched_influencers = final_query.limit(page_size - len(matched_influencers)).offset(offset).all()
 
         return unmatched_influencers, all_unmatched_influencers
 
