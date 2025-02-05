@@ -252,37 +252,57 @@ class ClientService:
                 f"client_id: {client_id} has no balance left to visit influencer_id: {influencer_id}.")
             return False
 
-    def influencer_to_influencer_basic_detail(self, influencers, client_id):
+    def influencer_to_influencer_basic_detail(self, matched_influencers, unmatched_influencers, client_id):
+
+        influencer_ids = [influencer.id for influencer in matched_influencers] + [influencer.id for influencer in
+                                                                                  unmatched_influencers]
+
+        visited_profiles = set()
+        if client_id != 1:
+            visited_profiles = self.profile_visit_repository.get_all_influencers_visited(client_id=client_id,
+                                                                                         influencer_ids=influencer_ids)
+
+        latest_metrics = self.influencer_metric_repository.get_latest_influencer_metrics(influencer_ids=influencer_ids)
+        metric_map = {metric.id: metric for metric in latest_metrics}
+
+        matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail_helper(matched_influencers,
+                                                                                                 metric_map,
+                                                                                                 visited_profiles)
+        unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail_helper(
+            unmatched_influencers, metric_map, visited_profiles)
+
+        return matched_influencer_basic_detail_list, unmatched_influencer_basic_detail_list
+
+    def influencer_to_influencer_basic_detail_helper(self, influencers, metric_map, visited_profiles):
 
         influencer_basic_detail_list = []
-        for influencer in influencers:
-            influencer_fb_metric = max(influencer.influencer_fb_metric, key=lambda m: m.created_at, default=None)
-            influencer_yt_metric = max(influencer.influencer_yt_metric, key=lambda m: m.created_at, default=None)
-            influencer_insta_metric = max(influencer.influencer_insta_metric, key=lambda m: m.created_at, default=None)
 
-            if influencer.primary_platform == Platform.FACEBOOK:
-                influencer_metric = influencer_fb_metric
-            elif influencer.primary_platform == Platform.YOUTUBE:
-                influencer_metric = influencer_yt_metric
-            else:
-                influencer_metric = influencer_insta_metric
+        for influencer in influencers:
+            influencer_metric = metric_map.get(influencer.id, None)
 
             if influencer_metric is None:
                 continue
 
+            if influencer.primary_platform == Platform.FACEBOOK:
+                influencer_username = influencer_metric.fb_username
+            elif influencer.primary_platform == Platform.YOUTUBE:
+                influencer_username = influencer_metric.yt_username
+            else:
+                influencer_username = influencer_metric.insta_username
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
-                name=influencer_metric.username,
+                name=influencer_username,
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                profile_visited=self.check_if_profile_visited(client_id=client_id,
-                                                              influencer_id=influencer.id) if client_id != 1 else False,
+                profile_visited=(influencer.id in visited_profiles),
                 views_charge=format_to_views_charge(influencer.views_charge),
                 content_charge=format_to_rupees(influencer.content_charge),
-                insta_followers=int_to_str_k(influencer_insta_metric.followers) if influencer_insta_metric else None,
-                yt_followers=int_to_str_k(influencer_yt_metric.followers) if influencer_yt_metric else None,
-                fb_followers=int_to_str_k(influencer_fb_metric.followers) if influencer_fb_metric else None
+                insta_followers=int_to_str_k(
+                    influencer_metric.insta_followers) if influencer_metric.insta_followers else None,
+                yt_followers=int_to_str_k(influencer_metric.yt_followers) if influencer_metric.yt_followers else None,
+                fb_followers=int_to_str_k(influencer_metric.fb_followers) if influencer_metric.fb_followers else None
             )
             influencer_basic_detail_list.append(influencer_basic_detail)
         return influencer_basic_detail_list
@@ -348,10 +368,8 @@ class ClientService:
             language_list=languages
         )
 
-        matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(matched_influencers,
-                                                                                          client_id)
-        unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(unmatched_influencers,
-                                                                                            client_id)
+        matched_influencer_basic_detail_list, unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(
+            matched_influencers, unmatched_influencers, client_id)
 
         if client_id == 1:
             balance_profile_visit_count = 0

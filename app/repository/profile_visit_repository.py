@@ -1,4 +1,5 @@
 from datetime import datetime
+from typing import List
 
 from sqlalchemy.exc import SQLAlchemyError
 from sqlalchemy.orm import Session
@@ -49,6 +50,21 @@ class ProfileVisitRepository:
         except Exception as ex:
             _log.error(
                 f"Exception while getting total profile visits for client {client_id} to influencer {influencer_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(client_id))
+
+    def get_all_influencers_visited(self, client_id: int, influencer_ids: List[int]) -> List[int]:
+        try:
+            visted_influencer_ids = self.db.query(ProfileVisit.influencer_id).filter(
+                ProfileVisit.client_id == client_id, ProfileVisit.influencer_id.in_(influencer_ids)
+            ).all()
+
+            return visted_influencer_ids
+        except SQLAlchemyError as ex:
+            _log.error(f"Error getting all visited influencers for client {client_id}: {str(ex)}")
+            raise FetchOneUserMetadataException(ex, str(client_id))
+        except Exception as ex:
+            _log.error(
+                f"Exception while getting all visited influencers for client {client_id}: {str(ex)}")
             raise FetchOneUserMetadataException(ex, str(client_id))
 
     def log_already_visited_profile(self, client_id: int, influencer_id: int) -> ProfileVisit:

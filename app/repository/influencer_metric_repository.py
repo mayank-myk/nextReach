@@ -1,5 +1,6 @@
 from typing import Optional
 
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from app.api_requests.influencer_fb_metric_request import InfluencerFbMetricRequest
@@ -10,6 +11,7 @@ from app.api_requests.update_influencer_insta_metric_request import UpdateInflue
 from app.api_requests.update_influencer_yt_metric_request import UpdateInfluencerYtMetricRequest
 from app.database.influencer_fb_metric_table import InfluencerFbMetric
 from app.database.influencer_insta_metric_table import InfluencerInstaMetric
+from app.database.influencer_table import Influencer
 from app.database.influencer_yt_metric_table import InfluencerYtMetric
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
 from app.utils.logger import configure_logger
@@ -417,7 +419,7 @@ class InfluencerMetricRepository:
             if hasattr(influencer_metric_request,
                        'profile_link') and influencer_metric_request.profile_link is not None:
                 setattr(existing_influencer_metric, 'profile_link', influencer_metric_request.profile_link)
-                
+
             if hasattr(influencer_metric_request,
                        'followers') and influencer_metric_request.followers is not None:
                 setattr(existing_influencer_metric, 'followers', influencer_metric_request.followers)
@@ -536,7 +538,7 @@ class InfluencerMetricRepository:
         latest_metric = (
             self.db.query(InfluencerInstaMetric)
             .filter(InfluencerInstaMetric.influencer_id == influencer_id)
-            .order_by(InfluencerInstaMetric.created_at.desc())
+            .order_by(InfluencerInstaMetric.id.desc())  # Faster sorting using auto-incremented ID
             .limit(1)
             .one_or_none()
         )
@@ -549,7 +551,7 @@ class InfluencerMetricRepository:
         latest_metric = (
             self.db.query(InfluencerYtMetric)
             .filter(InfluencerYtMetric.influencer_id == influencer_id)
-            .order_by(InfluencerYtMetric.created_at.desc())
+            .order_by(InfluencerYtMetric.id.desc())  # Faster sorting using auto-incremented ID
             .limit(1)
             .one_or_none()
         )
@@ -557,13 +559,78 @@ class InfluencerMetricRepository:
 
     def get_latest_influencer_fb_metric(self, influencer_id: int) -> Optional[InfluencerFbMetric]:
         """
-        Fetch the latest metrics for each influencer.
+        Fetch the latest Facebook metrics for a given influencer using `id DESC` instead of `created_at DESC`.
         """
-        latest_metric = (
+        return (
             self.db.query(InfluencerFbMetric)
             .filter(InfluencerFbMetric.influencer_id == influencer_id)
-            .order_by(InfluencerFbMetric.created_at.desc())
+            .order_by(InfluencerFbMetric.id.desc())  # Faster sorting using auto-incremented ID
             .limit(1)
             .one_or_none()
         )
-        return latest_metric
+
+    def get_latest_influencer_metrics(self, influencer_ids):
+        """
+        Fetches the latest metrics for influencers across Facebook, YouTube, and Instagram.
+        Optimized using `id DESC` instead of `created_at`.
+        """
+
+        # 🔹 Subqueries to fetch latest influencer metric IDs using MAX(id)
+        latest_fb_metric_subquery = (
+            self.db.query(
+                InfluencerFbMetric.influencer_id,
+                func.max(InfluencerFbMetric.id).label("latest_id")  # Get latest metric ID
+            )
+            .filter(InfluencerFbMetric.influencer_id.in_(influencer_ids))
+            .group_by(InfluencerFbMetric.influencer_id)
+            .subquery()
+        )
+
+        latest_yt_metric_subquery = (
+            self.db.query(
+                InfluencerYtMetric.influencer_id,
+                func.max(InfluencerYtMetric.id).label("latest_id")  # Get latest metric ID
+            )
+            .filter(InfluencerYtMetric.influencer_id.in_(influencer_ids))
+            .group_by(InfluencerYtMetric.influencer_id)
+            .subquery()
+        )
+
+        latest_insta_metric_subquery = (
+            self.db.query(
+                InfluencerInstaMetric.influencer_id,
+                func.max(InfluencerInstaMetric.id).label("latest_id")  # Get latest metric ID
+            )
+            .filter(InfluencerInstaMetric.influencer_id.in_(influencer_ids))
+            .group_by(InfluencerInstaMetric.influencer_id)
+            .subquery()
+        )
+
+        # 🔹 Join each subquery to fetch the latest full metric records
+        latest_metrics = (
+            self.db.query(
+                Influencer.id,
+                InfluencerFbMetric.followers.label("fb_followers"),
+                InfluencerFbMetric.username.label("fb_username"),
+                InfluencerYtMetric.followers.label("yt_followers"),
+                InfluencerYtMetric.username.label("yt_username"),
+                InfluencerInstaMetric.followers.label("insta_followers"),
+                InfluencerInstaMetric.username.label("insta_username")
+            )
+            .outerjoin(latest_fb_metric_subquery,
+                       (latest_fb_metric_subquery.c.influencer_id == Influencer.id))
+            .outerjoin(latest_yt_metric_subquery,
+                       (latest_yt_metric_subquery.c.influencer_id == Influencer.id))
+            .outerjoin(latest_insta_metric_subquery,
+                       (latest_insta_metric_subquery.c.influencer_id == Influencer.id))
+            .outerjoin(InfluencerFbMetric,
+                       (InfluencerFbMetric.id == latest_fb_metric_subquery.c.latest_id))
+            .outerjoin(InfluencerYtMetric,
+                       (InfluencerYtMetric.id == latest_yt_metric_subquery.c.latest_id))
+            .outerjoin(InfluencerInstaMetric,
+                       (InfluencerInstaMetric.id == latest_insta_metric_subquery.c.latest_id))
+            .filter(Influencer.id.in_(influencer_ids))  # Apply filters as needed
+            .all()
+        )
+
+        return latest_metrics
