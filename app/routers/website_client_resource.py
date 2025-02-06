@@ -123,7 +123,7 @@ def get_influencer_listings(
         reach_price: Optional[List[ReachPrice]] = Query(None, description="Reach price"),
         follower_count: Optional[List[FollowerCount]] = Query(None, description="Minimum number of followers"),
         avg_views: Optional[List[AverageView]] = Query(None, description="Average views"),
-        engagement: Optional[List[EngagementRate]] = Query(None, description="Engagement rate"),
+        engagement: Optional[EngagementRate] = Query(None, description="Engagement rate"),
         platform: Optional[Platform] = Query(None, description="Platform like Instagram, YouTube, etc."),
         content_price: Optional[ContentPrice] = Query(None, description="Content price"),
         budget: Optional[Budget] = Query(None, description="Budget"),
