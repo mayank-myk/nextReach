@@ -71,14 +71,14 @@ def format_to_rupees(value: int):
             formatted.append(value_str[i:i + 2])
 
         # Combine the reversed groups with commas, then reverse the final string
-        return "₹ " + ','.join(formatted)[::-1]
+        return "₹" + ','.join(formatted)[::-1]
     else:
         return None
 
 
 def format_to_views_charge(value: int):
     if value and value > 0:
-        return "₹ " + str(value) + " /1k views"
+        return "₹" + str(value) + " per 1000 views"
     else:
         return None
 
