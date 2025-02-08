@@ -17,7 +17,9 @@ from app.api_requests.campaign_request import CampaignRequest
 from app.api_requests.rate_campaign import RateCampaign
 from app.api_requests.update_campaign_request import UpdateCampaignRequest
 from app.enums.campaign_stage import CampaignStage
+from app.enums.platform import Platform
 from app.repository.campaign_repository import CampaignRepository
+from app.repository.influencer_metric_repository import InfluencerMetricRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.response.campaign.billing_info import BillingInfo
 from app.response.campaign.campaign_billing import CampaignBilling
@@ -39,24 +41,40 @@ class CampaignService:
     def __init__(self, session):
         self.campaign_repository = CampaignRepository(session)
         self.influencer_repository = InfluencerRepository(session)
+        self.influencer_metric_repository = InfluencerMetricRepository(session)
 
     def get_client_campaign_all(self, client_id: int) -> List[CampaignBasicDetail] | GenericResponse:
         try:
             all_campaigns = self.campaign_repository.get_all_campaign_by_client(client_id)
             campaign_basic_details = []
+
+            influencer_ids = [campaign.influencer_id for campaign in all_campaigns]
+            influencer_data_and_latest_metric = self.influencer_metric_repository.get_influencer_data_and_latest_metrics(
+                influencer_ids=influencer_ids)
+            metric_map = {metric.id: metric for metric in influencer_data_and_latest_metric}
+
             for campaign in all_campaigns:
-                influencer_basic_detail = self.influencer_repository.get_influencer_by_id(
-                    influencer_id=campaign.influencer_id)
+                influencer_metric = metric_map.get(campaign.influencer_id)
+
+                if influencer_metric is None:
+                    continue
+
+                if influencer_metric.primary_platform == Platform.FACEBOOK:
+                    influencer_username = influencer_metric.fb_username
+                elif influencer_metric.primary_platform == Platform.YOUTUBE:
+                    influencer_username = influencer_metric.yt_username
+                else:
+                    influencer_username = influencer_metric.insta_username
+
                 campaign_basic_detail = CampaignBasicDetail(id=campaign.id,
                                                             last_updated_at=campaign.last_updated_at.strftime(
                                                                 "%d %b %Y"),
                                                             influencer_basic_detail=InfluencerBasicDetail(
                                                                 id=campaign.influencer_id,
-                                                                name=influencer_basic_detail.name,
-                                                                profile_picture=influencer_basic_detail.profile_picture,
-                                                                niche=influencer_basic_detail.niche,
-                                                                city=influencer_basic_detail.city,
-                                                                profile_visited=True
+                                                                name=influencer_username,
+                                                                profile_picture=influencer_metric.profile_picture,
+                                                                niche=influencer_metric.niche,
+                                                                city=influencer_metric.city
                                                             ),
                                                             status=campaign_stage_to_status(campaign.stage))
                 campaign_basic_details.append(campaign_basic_detail)

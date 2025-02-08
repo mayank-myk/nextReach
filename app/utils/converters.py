@@ -18,7 +18,7 @@ def campaign_stage_to_status(stage: CampaignStage) -> Status:
 
 
 def int_to_str_k(count) -> Optional[str]:
-    if count and count >= 10000:
+    if count and count > 10000:
         value = count / 1000
         if value % 1 == 0:  # If the number is an integer
             return f"{int(value)}k"

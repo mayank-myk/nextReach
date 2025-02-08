@@ -54,11 +54,11 @@ class ProfileVisitRepository:
 
     def get_all_influencers_visited(self, client_id: int, influencer_ids: List[int]) -> List[int]:
         try:
-            visted_influencer_ids = self.db.query(ProfileVisit.influencer_id).filter(
+            visited_influencer_ids = self.db.query(ProfileVisit.influencer_id).filter(
                 ProfileVisit.client_id == client_id, ProfileVisit.influencer_id.in_(influencer_ids)
             ).all()
-
-            return visted_influencer_ids
+            visited_influencer_ids = [row[0] for row in visited_influencer_ids]
+            return visited_influencer_ids
         except SQLAlchemyError as ex:
             _log.error(f"Error getting all visited influencers for client {client_id}: {str(ex)}")
             raise FetchOneUserMetadataException(ex, str(client_id))

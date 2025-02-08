@@ -5,6 +5,7 @@ from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp, \
     collab_request_admin_notification_via_whatsapp
+from app.clients.meta_client import MetaAPIClient
 from app.enums.average_view import AverageView
 from app.enums.budget import Budget
 from app.enums.campaign_stage import CampaignStage
@@ -47,6 +48,30 @@ from app.utils.converters import int_to_str_k, combine_names, format_to_rupees, 
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
+
+
+def client_login_event(phone_number: str):
+    meta_client = MetaAPIClient()
+    event_data = {
+        "phone": phone_number,
+        "custom_data": {
+            "action": "client_login"
+        },
+        "event_source_url": "https://nextreach.ai/login_signup"
+    }
+    return meta_client.send_event("Client Login", event_data)
+
+
+def influencer_discovery_event(phone_number: str):
+    meta_client = MetaAPIClient()
+    event_data = {
+        "phone": phone_number,
+        "custom_data": {
+            "action": "influencer_discovery"
+        },
+        "event_source_url": "https://nextreach.ai/top_rated_influencers"
+    }
+    return meta_client.send_event("Discover Influencer", event_data)
 
 
 class ClientService:
@@ -102,6 +127,7 @@ class ClientService:
                                    message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
+        # client_login_event(phone_number=phone_number)
         try:
             # login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
             # if login_record:
@@ -262,7 +288,7 @@ class ClientService:
             visited_profiles = self.profile_visit_repository.get_all_influencers_visited(client_id=client_id,
                                                                                          influencer_ids=influencer_ids)
 
-        latest_metrics = self.influencer_metric_repository.get_latest_influencer_metrics(influencer_ids=influencer_ids)
+        latest_metrics = self.influencer_metric_repository.get_influencer_data_and_latest_metrics(influencer_ids=influencer_ids)
         metric_map = {metric.id: metric for metric in latest_metrics}
 
         matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail_helper(matched_influencers,
@@ -376,6 +402,8 @@ class ClientService:
         else:
             client = self.client_repository.get_client_by_id(client_id)
             balance_profile_visit_count = client.balance_profile_visits
+            # influencer_discovery_event(phone_number=client.phone_number)
+
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
             total_count_further_page = len(all_matched_influencers) + len(
                 all_unmatched_influencers) - page_number * page_size

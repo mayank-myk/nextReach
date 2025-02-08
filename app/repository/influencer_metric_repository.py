@@ -569,7 +569,7 @@ class InfluencerMetricRepository:
             .one_or_none()
         )
 
-    def get_latest_influencer_metrics(self, influencer_ids):
+    def get_influencer_data_and_latest_metrics(self, influencer_ids):
         """
         Fetches the latest metrics for influencers across Facebook, YouTube, and Instagram.
         Optimized using `id DESC` instead of `created_at`.
@@ -610,6 +610,10 @@ class InfluencerMetricRepository:
         latest_metrics = (
             self.db.query(
                 Influencer.id,
+                Influencer.niche,
+                Influencer.city,
+                Influencer.primary_platform,
+                Influencer.profile_picture,
                 InfluencerFbMetric.followers.label("fb_followers"),
                 InfluencerFbMetric.username.label("fb_username"),
                 InfluencerYtMetric.followers.label("yt_followers"),

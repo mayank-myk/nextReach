@@ -11,9 +11,12 @@ import requests
 from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
 from app.clients.interakt_client import contact_us_notification_via_whatsapp
+from app.clients.meta_client import MetaAPIClient
+from app.enums.entity_type import EntityType
 from app.enums.platform import Platform
 from app.repository.academy_video_repository import AcademyVideoRepository
 from app.repository.blog_repository import BlogRepository
+from app.repository.influencer_metric_repository import InfluencerMetricRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.repository.success_story_repository import SuccessStoryRepository
 from app.repository.wait_list_repository import WaitListRepository
@@ -310,6 +313,20 @@ def load_data_using_instaloader(L, username: str) -> EnagementMetric | GenericRe
         )
 
 
+def waitlist_join_event(name: str, phone_number: str, email: Optional[str]):
+    meta_client = MetaAPIClient()
+    event_data = {
+        "phone": phone_number,
+        "email": email if email else None,
+        "name": name,
+        "custom_data": {
+            "action": f"join_waitlist"
+        },
+        "event_source_url": "https://nextreach.ai/contact_us"
+    }
+    return meta_client.send_event(f"Join Waitlist", event_data)
+
+
 class WebService:
     def __init__(self, session):
         self.wait_list_user_repository = WaitListRepository(session)
@@ -317,35 +334,39 @@ class WebService:
         self.success_story_repository = SuccessStoryRepository(session)
         self.academy_video_repository = AcademyVideoRepository(session)
         self.influencer_repository = InfluencerRepository(session)
+        self.influencer_metric_repository = InfluencerMetricRepository(session)
 
     def get_web_metadata(self) -> HomeMetadata:
         influencer_list = self.influencer_repository.get_top_rated_influencers()
+        influencer_ids = [influencer.id for influencer in influencer_list]
+        influencer_data_and_latest_metric = self.influencer_metric_repository.get_influencer_data_and_latest_metrics(
+            influencer_ids=influencer_ids)
+        metric_map = {metric.id: metric for metric in influencer_data_and_latest_metric}
+
         influencer_basic_detail_list = []
         for influencer in influencer_list:
-            influencer_fb_metric = max(influencer.influencer_fb_metric, key=lambda m: m.created_at, default=None)
-            influencer_yt_metric = max(influencer.influencer_yt_metric, key=lambda m: m.created_at, default=None)
-            influencer_insta_metric = max(influencer.influencer_insta_metric, key=lambda m: m.created_at, default=None)
-
-            if influencer.primary_platform == Platform.FACEBOOK:
-                influencer_metric = influencer_fb_metric
-            elif influencer.primary_platform == Platform.YOUTUBE:
-                influencer_metric = influencer_yt_metric
-            else:
-                influencer_metric = influencer_insta_metric
+            influencer_metric = metric_map.get(influencer.id, None)
 
             if influencer_metric is None:
                 continue
 
+            if influencer_metric.primary_platform == Platform.FACEBOOK:
+                influencer_username = influencer_metric.fb_username
+            elif influencer_metric.primary_platform == Platform.YOUTUBE:
+                influencer_username = influencer_metric.yt_username
+            else:
+                influencer_username = influencer_metric.insta_username
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
-                name=influencer_metric.username,
+                name=influencer_username,
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
                 profile_visited=False,
-                insta_followers=int_to_str_k(influencer_insta_metric.followers) if influencer_insta_metric else None,
-                yt_followers=int_to_str_k(influencer_yt_metric.followers) if influencer_yt_metric else None,
-                fb_followers=int_to_str_k(influencer_fb_metric.followers) if influencer_fb_metric else None
+                insta_followers=int_to_str_k(influencer_metric.insta_followers),
+                yt_followers=int_to_str_k(influencer_metric.yt_followers),
+                fb_followers=int_to_str_k(influencer_metric.fb_followers)
             )
             influencer_basic_detail_list.append(influencer_basic_detail)
 
@@ -358,6 +379,9 @@ class WebService:
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
+
+        # if request.entity_type == EntityType.CLIENT:
+        #     waitlist_join_event(name=request.name, phone_number=request.phone_number, email=request.email)
 
         contact_us_notification_via_whatsapp(entity_type=request.entity_type, name=request.name,
                                              client_phone_number=request.phone_number, email=request.email)
