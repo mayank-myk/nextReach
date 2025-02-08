@@ -18,16 +18,24 @@ def campaign_stage_to_status(stage: CampaignStage) -> Status:
 
 
 def int_to_str_k(count) -> Optional[str]:
-    if count and count > 10000:
+    if not count:
+        return None  # Return None for None or 0 values
+
+    if count >= 1000000:  # For millions
+        value = count / 1000000
+        if value % 1 == 0:  # If the number is an integer
+            return f"{int(value)} M"
+        else:
+            return f"{value:.1f} M"  # Converts to "m" for millions
+
+    elif count >= 1000:  # For thousands
         value = count / 1000
         if value % 1 == 0:  # If the number is an integer
-            return f"{int(value)}k"
+            return f"{int(value)}K"
         else:
-            return f"{value:.1f}k"  # Converts to "k" for thousands
-    elif count:
-        return str(count)  # For values less than 1000, just return the number as a string
-    else:
-        return None
+            return f"{value:.1f}K"  # Converts to "k" for thousands
+
+    return str(count)  # For values less than 1,000, return as a string
 
 
 def float_to_str(value) -> Optional[str]:
