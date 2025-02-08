@@ -1,6 +1,7 @@
 from typing import Dict, List
 
 from fastapi import APIRouter, Depends
+from fastapi import Query
 from fastapi.responses import HTMLResponse
 
 from app.api_requests.calculate_earning_request import CalculateEarningRequest
@@ -26,9 +27,10 @@ db_manager = DatabaseSessionManager()
 
 
 @router.get('/home/metadata')
-def get_web_metadata(db=Depends(db_manager.get_db)) -> HomeMetadata:
+def get_web_metadata(client_id: int = Query(None, description="Client Id", ge=1),
+                     db=Depends(db_manager.get_db)) -> HomeMetadata:
     web_service = WebService(db)
-    return web_service.get_web_metadata()
+    return web_service.get_web_metadata(client_id=client_id)
 
 
 @router.post("/create/lead")

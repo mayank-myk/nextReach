@@ -12,8 +12,6 @@ from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
 from app.clients.interakt_client import contact_us_notification_via_whatsapp
 from app.clients.meta_client import MetaAPIClient
-from app.enums.entity_type import EntityType
-from app.enums.platform import Platform
 from app.repository.academy_video_repository import AcademyVideoRepository
 from app.repository.blog_repository import BlogRepository
 from app.repository.influencer_metric_repository import InfluencerMetricRepository
@@ -27,6 +25,7 @@ from app.response.generic_response import GenericResponse
 from app.response.home_metadata import HomeMetadata
 from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.success_story_response import SuccessStoryResponse
+from app.services.client_service import ClientService
 from app.utils.converters import engagement_rate_to_quality, int_to_str_k
 from app.utils.logger import configure_logger
 
@@ -329,6 +328,7 @@ def waitlist_join_event(name: str, phone_number: str, email: Optional[str]):
 
 class WebService:
     def __init__(self, session):
+        self.session = session
         self.wait_list_user_repository = WaitListRepository(session)
         self.blog_repository = BlogRepository(session)
         self.success_story_repository = SuccessStoryRepository(session)
@@ -336,46 +336,22 @@ class WebService:
         self.influencer_repository = InfluencerRepository(session)
         self.influencer_metric_repository = InfluencerMetricRepository(session)
 
-    def get_web_metadata(self) -> HomeMetadata:
-        influencer_list = self.influencer_repository.get_top_rated_influencers()
-        influencer_ids = [influencer.id for influencer in influencer_list]
-        influencer_data_and_latest_metric = self.influencer_metric_repository.get_influencer_data_and_latest_metrics(
-            influencer_ids=influencer_ids)
-        metric_map = {metric.id: metric for metric in influencer_data_and_latest_metric}
-
-        influencer_basic_detail_list = []
-        for influencer in influencer_list:
-            influencer_metric = metric_map.get(influencer.id, None)
-
-            if influencer_metric is None:
-                continue
-
-            if influencer_metric.primary_platform == Platform.FACEBOOK:
-                influencer_username = influencer_metric.fb_username
-            elif influencer_metric.primary_platform == Platform.YOUTUBE:
-                influencer_username = influencer_metric.yt_username
-            else:
-                influencer_username = influencer_metric.insta_username
-
-            influencer_basic_detail = InfluencerBasicDetail(
-                id=influencer.id,
-                name=influencer_username,
-                profile_picture=influencer.profile_picture,
-                niche=influencer.niche,
-                city=influencer.city,
-                profile_visited=False,
-                insta_followers=int_to_str_k(influencer_metric.insta_followers),
-                yt_followers=int_to_str_k(influencer_metric.yt_followers),
-                fb_followers=int_to_str_k(influencer_metric.fb_followers)
-            )
-            influencer_basic_detail_list.append(influencer_basic_detail)
+    def get_web_metadata(self, client_id: Optional[int]) -> HomeMetadata:
 
         return HomeMetadata(
             academy_video_list=self.get_all_nra()[-3:],
             success_story_list=self.get_all_ss(),
             blog_list=self.get_all_blogs()[-6:],
-            influencer_list=influencer_basic_detail_list
+            influencer_list=self.get_top_rated_influencer_detais(client_id=client_id)
         )
+
+    def get_top_rated_influencer_detais(self, client_id: Optional[int]) -> List[InfluencerBasicDetail]:
+        client_service = ClientService(self.session)
+        influencer_list = self.influencer_repository.get_top_rated_influencers()
+
+        influencer_basic_detail_list, ignore = client_service.influencer_to_influencer_basic_detail(influencer_list, [],
+                                                                                                    client_id)
+        return influencer_basic_detail_list
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
