@@ -74,7 +74,8 @@ class CampaignService:
                                                                 name=influencer_username,
                                                                 profile_picture=influencer_metric.profile_picture,
                                                                 niche=influencer_metric.niche,
-                                                                city=influencer_metric.city
+                                                                city=influencer_metric.city,
+                                                                profile_visited=True
                                                             ),
                                                             status=campaign_stage_to_status(campaign.stage))
                 campaign_basic_details.append(campaign_basic_detail)
