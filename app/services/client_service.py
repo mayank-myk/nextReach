@@ -1,6 +1,8 @@
 from datetime import datetime
 from typing import List, Optional
 
+from fastapi import BackgroundTasks
+
 from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp, \
@@ -50,28 +52,28 @@ from app.utils.logger import configure_logger
 _log = configure_logger()
 
 
-def client_login_event(phone_number: str):
-    meta_client = MetaAPIClient()
-    event_data = {
-        "phone": phone_number,
-        "custom_data": {
-            "action": "client_login"
-        },
-        "event_source_url": "https://nextreach.ai/login_signup"
-    }
-    return meta_client.send_event("Client Login", event_data)
+async def client_login_event(phone_number: str):
+    try:
+        meta_client = MetaAPIClient()
+        await meta_client.send_event("Client Login", {
+            "phone": phone_number,
+            "custom_data": {"action": "client_login"},
+            "event_source_url": "https://nextreach.ai/login_signup"
+        })
+    except Exception as ex:
+        _log.error(f"Failed to push discovery event for {phone_number}: {str(ex)}")
 
 
-def influencer_discovery_event(phone_number: str):
-    meta_client = MetaAPIClient()
-    event_data = {
-        "phone": phone_number,
-        "custom_data": {
-            "action": "influencer_discovery"
-        },
-        "event_source_url": "https://nextreach.ai/top_rated_influencers"
-    }
-    return meta_client.send_event("Discover Influencer", event_data)
+async def influencer_discovery_event(phone_number: str):
+    try:
+        meta_client = MetaAPIClient()
+        await meta_client.send_event("Discover Influencer", {
+            "phone": phone_number,
+            "custom_data": {"action": "influencer_discovery"},
+            "event_source_url": "https://nextreach.ai/top_rated_influencers"
+        })
+    except Exception as ex:
+        _log.error(f"Failed to push discovery event for {phone_number}: {str(ex)}")
 
 
 class ClientService:
@@ -126,8 +128,8 @@ class ClientService:
             return GenericResponse(success=False, button_text="Retry",
                                    message="Something went wrong while updating your profile")
 
-    def send_otp(self, phone_number: str) -> GenericResponse:
-        client_login_event(phone_number=phone_number)
+    def send_otp(self, phone_number: str, background_tasks: BackgroundTasks) -> GenericResponse:
+        background_tasks.add_task(client_login_event, phone_number)
         try:
             # login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
             # if login_record:
@@ -350,7 +352,8 @@ class ClientService:
                                collab_type: Optional[CollabType],
                                gender: Optional[List[Gender]],
                                rating: Optional[Rating],
-                               languages: Optional[List[Language]]
+                               languages: Optional[List[Language]],
+                               background_tasks: BackgroundTasks
                                ) -> InfluencerListing:
         """
         Retrieve filtered influencer listings with latest metrics.
@@ -403,7 +406,7 @@ class ClientService:
         else:
             client = self.client_repository.get_client_by_id(client_id)
             balance_profile_visit_count = client.balance_profile_visits
-            influencer_discovery_event(phone_number=client.phone_number)
+            # background_tasks.add_task(influencer_discovery_event, client.phone_number)
 
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
             total_count_further_page = len(all_matched_influencers) + len(

@@ -1,7 +1,7 @@
 import datetime
 import hashlib
 
-import requests
+import httpx
 
 META_API_URL = "https://graph.facebook.com/v16.0/{pixel_id}/events"
 META_PIXEL_ID = 612504087921019
@@ -18,7 +18,7 @@ class MetaAPIClient:
         """Hashes data using SHA-256 for secure transmission."""
         return hashlib.sha256(data.encode("utf-8")).hexdigest()
 
-    def send_event(self, event_name: str, data: dict):
+    async def send_event(self, event_name: str, data: dict):
         """Sends an event to Meta API."""
         url = META_API_URL.format(pixel_id=self.pixel_id)
         payload = {
@@ -39,7 +39,7 @@ class MetaAPIClient:
             ],
             "access_token": self.access_token
         }
-        response = requests.post(url, json=payload, headers=self.headers)
-        if response.status_code != 200:
-            print(f"Meta API Error: {response.status_code} - {response.text}")
-        return response.json()
+        async with httpx.AsyncClient() as client:
+            response = await client.post(url, json=payload, headers=self.headers)
+            if response.status_code != 200:
+                print(f"Meta API Error: {response.status_code} - {response.text}")

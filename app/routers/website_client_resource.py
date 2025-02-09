@@ -1,6 +1,7 @@
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends
+from fastapi import BackgroundTasks
 from fastapi import Query
 
 from app.api_requests.client_login_request import ClientLogin
@@ -57,9 +58,9 @@ def update_client_profile(client_id: int, profile: ProfileUpdate, db=Depends(db_
 
 
 @router.get("/request/otp/{phone_number}")
-def request_otp(phone_number: str, db=Depends(db_manager.get_db)) -> GenericResponse:
+def request_otp(background_tasks: BackgroundTasks, phone_number: str, db=Depends(db_manager.get_db)) -> GenericResponse:
     client_service = ClientService(db)
-    return client_service.send_otp(phone_number=phone_number)
+    return client_service.send_otp(phone_number=phone_number, background_tasks=background_tasks)
 
 
 @router.post("/validate/otp")
@@ -114,6 +115,7 @@ def rate_campaign(rate_campaign_request: RateCampaign, db=Depends(db_manager.get
 
 @router.get('/influencer/discover')
 def get_influencer_listings(
+        background_tasks: BackgroundTasks,
         client_id: int = Query(1, description="Client Id", ge=1),
         page_number: int = Query(1, description="Page number to fetch", ge=1),
         page_size: int = Query(40, description="Number of influencers per page", ge=1, le=100),
@@ -135,7 +137,8 @@ def get_influencer_listings(
     client_service = ClientService(db)
     return client_service.get_influencer_listing(client_id, page_number, page_size, sort_applied, niche, city,
                                                  reach_price, follower_count, avg_views, engagement, platform, budget,
-                                                 content_price, collab_type, gender, rating, languages)
+                                                 content_price, collab_type, gender, rating, languages,
+                                                 background_tasks)
 
 
 @router.post('/influencer/insight')
