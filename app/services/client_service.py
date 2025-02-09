@@ -127,7 +127,7 @@ class ClientService:
                                    message="Something went wrong while updating your profile")
 
     def send_otp(self, phone_number: str) -> GenericResponse:
-        # client_login_event(phone_number=phone_number)
+        client_login_event(phone_number=phone_number)
         try:
             # login_record = self.client_login_repository.get_otp_by_phone_number(phone_number=phone_number)
             # if login_record:
@@ -288,7 +288,8 @@ class ClientService:
             visited_profiles = self.profile_visit_repository.get_all_influencers_visited(client_id=client_id,
                                                                                          influencer_ids=influencer_ids)
 
-        latest_metrics = self.influencer_metric_repository.get_influencer_data_and_latest_metrics(influencer_ids=influencer_ids)
+        latest_metrics = self.influencer_metric_repository.get_influencer_data_and_latest_metrics(
+            influencer_ids=influencer_ids)
         metric_map = {metric.id: metric for metric in latest_metrics}
 
         matched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail_helper(matched_influencers,
@@ -402,7 +403,7 @@ class ClientService:
         else:
             client = self.client_repository.get_client_by_id(client_id)
             balance_profile_visit_count = client.balance_profile_visits
-            # influencer_discovery_event(phone_number=client.phone_number)
+            influencer_discovery_event(phone_number=client.phone_number)
 
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
             total_count_further_page = len(all_matched_influencers) + len(

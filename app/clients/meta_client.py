@@ -4,14 +4,14 @@ import hashlib
 import requests
 
 META_API_URL = "https://graph.facebook.com/v16.0/{pixel_id}/events"
-META_PIXEL_ID = 123
-META_ACCESS_TOKEN = "abc"
+META_PIXEL_ID = 612504087921019
+META_ACCESS_TOKEN = "EAAdUDeSjEqsBO5IIYnQQi7r7v30xJE9Xy4iWVjMrv2tRwiKSBFZBjOASF6u6jE7Qne23bg4ynOrLqmevbiK3GMr7AdOnqrrQm8x9Cqdz1P9q6f1ATyIID8PtXVGCGVWCppjZBaJaGTd96WxgG7ZAGopWR72WU4nxjjwJNETVs838xbgVkbzHgVCmqjgDhC9tQZDZD"
 
 
 class MetaAPIClient:
     def __init__(self):
-        self.pixel_id = "META_PIXEL_ID"
-        self.access_token = "META_ACCESS_TOKEN"
+        self.pixel_id = META_PIXEL_ID
+        self.access_token = META_ACCESS_TOKEN
         self.headers = {"Content-Type": "application/json"}
 
     def hash_data(self, data: str) -> str:
