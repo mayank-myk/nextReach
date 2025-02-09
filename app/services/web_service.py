@@ -12,6 +12,7 @@ from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
 from app.clients.interakt_client import contact_us_notification_via_whatsapp
 from app.clients.meta_client import MetaAPIClient
+from app.enums.entity_type import EntityType
 from app.repository.academy_video_repository import AcademyVideoRepository
 from app.repository.blog_repository import BlogRepository
 from app.repository.influencer_metric_repository import InfluencerMetricRepository
@@ -356,8 +357,8 @@ class WebService:
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
 
-        # if request.entity_type == EntityType.CLIENT:
-        #     waitlist_join_event(name=request.name, phone_number=request.phone_number, email=request.email)
+        if request.entity_type == EntityType.CLIENT:
+            waitlist_join_event(name=request.name, phone_number=request.phone_number, email=request.email)
 
         contact_us_notification_via_whatsapp(entity_type=request.entity_type, name=request.name,
                                              client_phone_number=request.phone_number, email=request.email)
