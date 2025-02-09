@@ -86,14 +86,11 @@ def contact_us_notification_via_whatsapp(entity_type: EntityType, name: str,
             # Check if message was successfully sent
             if response.status_code // 100 == 2:
                 logger.info(f"Contact Us notification sent successfully to {admin_phone_number}")
-                return True
             else:
                 logger.info(f"Failed to send Contact Us notification: {response.text}")
-                return False
         except requests.exceptions.RequestException as e:
             logger.error(
                 f"An error occurred while sending Contact Us notification to {admin_phone_number}. Error: {str(e)}")
-            return False
 
 
 def collab_request_user_notification_via_whatsapp(client_phone_number: str, date: str, influencer_name: str,
