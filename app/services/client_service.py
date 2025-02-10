@@ -286,7 +286,7 @@ class ClientService:
                                                                                   unmatched_influencers]
 
         visited_profiles = set()
-        if client_id != 1:
+        if client_id and client_id != 1:
             visited_profiles = self.profile_visit_repository.get_all_influencers_visited(client_id=client_id,
                                                                                          influencer_ids=influencer_ids)
 
