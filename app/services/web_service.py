@@ -352,7 +352,7 @@ class WebService:
 
         influencer_basic_detail_list, ignore = client_service.influencer_to_influencer_basic_detail(influencer_list, [],
                                                                                                     client_id)
-        return influencer_basic_detail_list
+        return influencer_basic_detail_list[:12]
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
