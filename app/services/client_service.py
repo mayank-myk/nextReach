@@ -319,13 +319,16 @@ class ClientService:
             else:
                 influencer_username = influencer_metric.insta_username
 
+            if influencer_username is None:
+                continue
+
             influencer_basic_detail = InfluencerBasicDetail(
                 id=influencer.id,
                 name=influencer_username,
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                profile_visited=(influencer.id in visited_profiles),
+                profile_visited=True if influencer.id in visited_profiles else False,
                 views_charge=format_to_views_charge(influencer.views_charge),
                 content_charge=format_to_rupees(influencer.content_charge),
                 insta_followers=int_to_str_k(
