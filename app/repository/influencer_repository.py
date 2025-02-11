@@ -1,6 +1,6 @@
 from typing import Optional, List
 
-from sqlalchemy import or_, func, desc, asc
+from sqlalchemy import or_, func, desc
 from sqlalchemy.orm import Session, aliased
 from sqlalchemy.sql.functions import coalesce
 
@@ -412,7 +412,3 @@ class InfluencerRepository:
     def get_top_rated_influencers(self) -> List[Influencer]:
 
         return self.db.query(Influencer).order_by(desc(Influencer.next_reach_score)).limit(20).offset(0).all()
-
-    def get_all_influencers(self) -> List[Influencer]:
-
-        return self.db.query(Influencer).order_by(asc(Influencer.id)).all()

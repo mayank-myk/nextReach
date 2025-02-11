@@ -1,7 +1,7 @@
-from typing import Optional, List
+from typing import Optional
 
-from sqlalchemy import func, asc
-from sqlalchemy.orm import Session
+from sqlalchemy import func
+from sqlalchemy.orm import Session, aliased
 
 from app.api_requests.influencer_fb_metric_request import InfluencerFbMetricRequest
 from app.api_requests.influencer_insta_metric_request import InfluencerInstaMetricRequest
@@ -639,6 +639,74 @@ class InfluencerMetricRepository:
 
         return latest_metrics
 
-    def get_all_influencers_insta_details(self) -> List[InfluencerInstaMetric]:
+    def get_influencer_detail_dump(self):
+        # Subquery to fetch the latest Instagram metric for each influencer
+        latest_insta_metric_subquery = (
+            self.db.query(
+                InfluencerInstaMetric.influencer_id,
+                func.max(InfluencerInstaMetric.id).label("latest_id")
+            )
+            .group_by(InfluencerInstaMetric.influencer_id)
+            .subquery()
+        )
 
-        return self.db.query(InfluencerInstaMetric).order_by(asc(InfluencerInstaMetric.id)).all()
+        # Alias for the Instagram metric table
+        latest_insta_metric_alias = aliased(InfluencerInstaMetric)
+
+        # Join Influencer table with the latest Instagram metric
+        all_influencers = (
+            self.db.query(
+                Influencer.id,
+                Influencer.last_updated_at,
+                Influencer.primary_platform,
+                Influencer.name,
+                Influencer.phone_number,
+                Influencer.email,
+                Influencer.content_charge,
+                Influencer.views_charge,
+                Influencer.niche,
+                Influencer.gender,
+                Influencer.languages,
+                Influencer.next_reach_score,
+                Influencer.city,
+                Influencer.profile_picture,
+                Influencer.collab_type,
+                Influencer.deliverables,
+                latest_insta_metric_alias.id.label("influencer_insta_metric_id"),
+                latest_insta_metric_alias.username,
+                latest_insta_metric_alias.profile_link,
+                latest_insta_metric_alias.engagement_rate,
+                latest_insta_metric_alias.consistency_score,
+                latest_insta_metric_alias.followers,
+                latest_insta_metric_alias.avg_views,
+                latest_insta_metric_alias.max_views,
+                latest_insta_metric_alias.avg_likes,
+                latest_insta_metric_alias.avg_comments,
+                latest_insta_metric_alias.avg_shares,
+                latest_insta_metric_alias.city_1,
+                latest_insta_metric_alias.city_pc_1,
+                latest_insta_metric_alias.city_2,
+                latest_insta_metric_alias.city_pc_2,
+                latest_insta_metric_alias.city_3,
+                latest_insta_metric_alias.city_pc_3,
+                latest_insta_metric_alias.age_13_to_17,
+                latest_insta_metric_alias.age_18_to_24,
+                latest_insta_metric_alias.age_25_to_34,
+                latest_insta_metric_alias.age_35_to_44,
+                latest_insta_metric_alias.age_45_to_54,
+                latest_insta_metric_alias.age_55,
+                latest_insta_metric_alias.men_follower_pc,
+                latest_insta_metric_alias.women_follower_pc
+            )
+            .outerjoin(
+                latest_insta_metric_subquery,
+                latest_insta_metric_subquery.c.influencer_id == Influencer.id
+            )
+            .outerjoin(
+                latest_insta_metric_alias,
+                latest_insta_metric_alias.id == latest_insta_metric_subquery.c.latest_id
+            )
+            .all()
+        )
+
+        return all_influencers

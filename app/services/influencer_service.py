@@ -23,7 +23,6 @@ from app.repository.influencer_metric_repository import InfluencerMetricReposito
 from app.repository.influencer_repository import InfluencerRepository
 from app.response.generic_response import GenericResponse
 from app.response.influencer_detail_dump import InfluencerDetailDump
-from app.response.influencer_insta_detail_dump import InfluencerInstaDetailDump
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -233,11 +232,11 @@ class InfluencerService:
 
     def get_all_influencer_detail(self) -> BytesIO:
         try:
-            all_influencers = self.influencer_repository.get_all_influencers()
+            all_influencers = self.influencer_metric_repository.get_influencer_detail_dump()
             influencer_detail_dump_list = []
             for influencer in all_influencers:
                 influencer_detail_dump = InfluencerDetailDump(
-                    id=influencer.id,
+                    influencer_id=influencer.id,
                     last_updated_at=influencer.last_updated_at.strftime(
                         "%d %b %Y %I:%M %p"),
                     primary_platform=influencer.primary_platform.value,
@@ -253,7 +252,32 @@ class InfluencerService:
                     city=influencer.city.value,
                     profile_picture=influencer.profile_picture,
                     collab_type=influencer.collab_type.value,
-                    deliverables=influencer.deliverables
+                    deliverables=influencer.deliverables,
+                    influencer_insta_metric_id=influencer.influencer_insta_metric_id,
+                    username=influencer.username,
+                    profile_link=influencer.profile_link,
+                    engagement_rate=influencer.engagement_rate,
+                    consistency_score=influencer.consistency_score,
+                    followers=influencer.followers,
+                    avg_views=influencer.avg_views,
+                    max_views=influencer.max_views,
+                    avg_likes=influencer.avg_likes,
+                    avg_comments=influencer.avg_comments,
+                    avg_shares=influencer.avg_shares,
+                    city_1=influencer.city_1,
+                    city_pc_1=influencer.city_pc_1,
+                    city_2=influencer.city_2,
+                    city_pc_2=influencer.city_pc_2,
+                    city_3=influencer.city_3,
+                    city_pc_3=influencer.city_pc_3,
+                    age_13_to_17=influencer.age_13_to_17,
+                    age_18_to_24=influencer.age_18_to_24,
+                    age_25_to_34=influencer.age_25_to_34,
+                    age_35_to_44=influencer.age_35_to_44,
+                    age_45_to_54=influencer.age_45_to_54,
+                    age_55=influencer.age_55,
+                    men_follower_pc=influencer.men_follower_pc,
+                    women_follower_pc=influencer.women_follower_pc
                 )
                 influencer_detail_dump_list.append(influencer_detail_dump)
 
@@ -273,57 +297,3 @@ class InfluencerService:
         except Exception as e:
             _log.error(
                 f"Error occurred while fetching influencer details dump. Error: {str(e)}")
-
-    def get_all_influencer_insta_detail(self) -> BytesIO:
-        try:
-            all_influencer_insta_details = self.influencer_metric_repository.get_all_influencers_insta_details()
-            influencer_insta_detail_dump_list = []
-            for influencer_insta in all_influencer_insta_details:
-                influencer_detail_dump = InfluencerInstaDetailDump(
-                    id=influencer_insta.id,
-                    influencer_id=influencer_insta.influencer_id,
-                    last_updated_at=influencer_insta.last_updated_at.strftime(
-                        "%d %b %Y %I:%M %p"),
-                    username=influencer_insta.username,
-                    profile_link=influencer_insta.profile_link,
-                    engagement_rate=influencer_insta.engagement_rate,
-                    consistency_score=influencer_insta.consistency_score,
-                    followers=influencer_insta.followers,
-                    avg_views=influencer_insta.avg_views,
-                    max_views=influencer_insta.max_views,
-                    avg_likes=influencer_insta.avg_likes,
-                    avg_comments=influencer_insta.avg_comments,
-                    avg_shares=influencer_insta.avg_shares,
-                    city_1=influencer_insta.city_1,
-                    city_pc_1=influencer_insta.city_pc_1,
-                    city_2=influencer_insta.city_2,
-                    city_pc_2=influencer_insta.city_pc_2,
-                    city_3=influencer_insta.city_3,
-                    city_pc_3=influencer_insta.city_pc_3,
-                    age_13_to_17=influencer_insta.age_13_to_17,
-                    age_18_to_24=influencer_insta.age_18_to_24,
-                    age_25_to_34=influencer_insta.age_25_to_34,
-                    age_35_to_44=influencer_insta.age_35_to_44,
-                    age_45_to_54=influencer_insta.age_45_to_54,
-                    age_55=influencer_insta.age_55,
-                    men_follower_pc=influencer_insta.men_follower_pc,
-                    women_follower_pc=influencer_insta.women_follower_pc
-                )
-                influencer_insta_detail_dump_list.append(influencer_detail_dump)
-
-            influencer_data = [influencer.dict() for influencer in influencer_insta_detail_dump_list]
-
-            # Create a DataFrame from the list of dictionaries
-            df = pd.DataFrame(influencer_data)
-
-            # Save the DataFrame to a BytesIO buffer
-            buffer = BytesIO()
-            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                df.to_excel(writer, index=False,
-                            sheet_name=f'Influencer_Insta_{datetime.today().strftime("%Y-%m-%d")}')
-            buffer.seek(0)
-            return buffer
-
-        except Exception as e:
-            _log.error(
-                f"Error occurred while fetching influencer_insta details dump. Error: {str(e)}")

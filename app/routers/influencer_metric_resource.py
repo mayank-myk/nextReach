@@ -1,7 +1,4 @@
-from datetime import datetime
-
 from fastapi import APIRouter, Depends
-from fastapi.responses import StreamingResponse
 
 from app.api_requests.influencer_fb_metric_request import InfluencerFbMetricRequest
 from app.api_requests.influencer_insta_metric_request import InfluencerInstaMetricRequest
@@ -93,19 +90,3 @@ def get_influencer_fb_latest_metric(influencer_id: int,
                                     db=Depends(db_manager.get_db)) -> InfluencerFbMetric | GenericResponse:
     influencer_service = InfluencerService(db)
     return influencer_service.get_influencer_fb_metric_detail(influencer_id=influencer_id)
-
-
-@router.get("/get/dump/insta")
-def get_all_influencer_insta_dumo(db=Depends(db_manager.get_db)):
-    influencer_service = InfluencerService(db)
-    excel_file = influencer_service.get_all_influencer_insta_detail()
-
-    filename = f'Influencer_Insta_{datetime.today().strftime("%Y-%m-%d")}.xlsx'
-
-    return StreamingResponse(
-        excel_file,
-        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        headers={
-            "Content-Disposition": f"attachment; filename={filename}"
-        }
-    )
