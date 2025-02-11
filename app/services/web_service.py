@@ -342,8 +342,8 @@ class WebService:
         return HomeMetadata(
             academy_video_list=self.get_all_nra()[-3:],
             success_story_list=self.get_all_ss(),
-            blog_list=self.get_all_blogs()[-6:],
-            influencer_list=self.get_top_rated_influencer_detais(client_id=client_id)
+            blog_list=random.sample(self.get_all_blogs(), 6),
+            influencer_list=random.sample(self.get_top_rated_influencer_detais(client_id=client_id), 12)
         )
 
     def get_top_rated_influencer_detais(self, client_id: Optional[int]) -> List[InfluencerBasicDetail]:
@@ -352,7 +352,7 @@ class WebService:
 
         influencer_basic_detail_list, ignore = client_service.influencer_to_influencer_basic_detail(influencer_list, [],
                                                                                                     client_id)
-        return influencer_basic_detail_list[:12]
+        return influencer_basic_detail_list
 
     def create_lead(self, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
