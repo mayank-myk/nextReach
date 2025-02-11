@@ -367,7 +367,7 @@ class CampaignService:
             # Save the DataFrame to a BytesIO buffer
             buffer = BytesIO()
             with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
-                df.to_excel(writer, index=False, sheet_name=f'Campaigns{datetime.today().strftime("%Y-%m-%d")}')
+                df.to_excel(writer, index=False, sheet_name=f'Campaigns_{datetime.today().strftime("%Y-%m-%d")}')
             buffer.seek(0)
             return buffer
 

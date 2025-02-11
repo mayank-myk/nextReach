@@ -1,6 +1,6 @@
-from typing import Optional
+from typing import Optional, List
 
-from sqlalchemy import func
+from sqlalchemy import func, asc
 from sqlalchemy.orm import Session
 
 from app.api_requests.influencer_fb_metric_request import InfluencerFbMetricRequest
@@ -638,3 +638,7 @@ class InfluencerMetricRepository:
         )
 
         return latest_metrics
+
+    def get_all_influencers_insta_details(self) -> List[InfluencerInstaMetric]:
+
+        return self.db.query(InfluencerInstaMetric).order_by(asc(InfluencerInstaMetric.id)).all()

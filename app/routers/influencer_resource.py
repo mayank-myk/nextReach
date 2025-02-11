@@ -1,7 +1,9 @@
 import os
+from datetime import datetime
 from typing import Optional, List
 
 from fastapi import APIRouter, Depends, UploadFile, File
+from fastapi.responses import StreamingResponse
 
 from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.influencer_request import InfluencerRequest
@@ -73,3 +75,19 @@ def get_influencer_complete_metrics(influencer_id: int,
                                     db=Depends(db_manager.get_db)) -> InfluencerDetail | GenericResponse:
     client_service = ClientService(db)
     return client_service.get_influencer_insight(request=InfluencerInsights(client_id=2, influencer_id=influencer_id))
+
+
+@router.get("/get/dump")
+def get_all_influencer_detail_dump(db=Depends(db_manager.get_db)):
+    influencer_service = InfluencerService(db)
+    excel_file = influencer_service.get_all_influencer_detail()
+
+    filename = f'Influencer_Details_{datetime.today().strftime("%Y-%m-%d")}.xlsx'
+
+    return StreamingResponse(
+        excel_file,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={
+            "Content-Disposition": f"attachment; filename={filename}"
+        }
+    )

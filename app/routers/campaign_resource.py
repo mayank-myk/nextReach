@@ -115,7 +115,7 @@ def get_all_active_campaign_detail(db=Depends(db_manager.get_db)):
     campaign_service = CampaignService(db)
     excel_file = campaign_service.get_all_active_campaign_detail()
 
-    filename = f'Campaigns{datetime.today().strftime("%Y-%m-%d")}.xlsx'
+    filename = f'Campaigns_{datetime.today().strftime("%Y-%m-%d")}.xlsx'
 
     return StreamingResponse(
         excel_file,

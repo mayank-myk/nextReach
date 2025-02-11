@@ -409,7 +409,7 @@ class ClientService:
         else:
             client = self.client_repository.get_client_by_id(client_id)
             balance_profile_visit_count = client.balance_profile_visits
-            # background_tasks.add_task(influencer_discovery_event, client.phone_number)
+            background_tasks.add_task(influencer_discovery_event, client.phone_number)
 
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
             total_count_further_page = len(all_matched_influencers) + len(

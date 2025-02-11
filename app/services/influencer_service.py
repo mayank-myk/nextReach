@@ -1,6 +1,10 @@
 from __future__ import print_function
 
+from datetime import datetime
+from io import BytesIO
 from typing import Optional, List
+
+import pandas as pd
 
 from app.api_requests.influencer_fb_metric_request import InfluencerFbMetricRequest
 from app.api_requests.influencer_insta_metric_request import InfluencerInstaMetricRequest
@@ -18,6 +22,8 @@ from app.database.influencer_yt_metric_table import InfluencerYtMetric
 from app.repository.influencer_metric_repository import InfluencerMetricRepository
 from app.repository.influencer_repository import InfluencerRepository
 from app.response.generic_response import GenericResponse
+from app.response.influencer_detail_dump import InfluencerDetailDump
+from app.response.influencer_insta_detail_dump import InfluencerInstaDetailDump
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -224,3 +230,100 @@ class InfluencerService:
                                    message="No influencer_fb_metric found for given influencer_id")
 
         return influencer_metric
+
+    def get_all_influencer_detail(self) -> BytesIO:
+        try:
+            all_influencers = self.influencer_repository.get_all_influencers()
+            influencer_detail_dump_list = []
+            for influencer in all_influencers:
+                influencer_detail_dump = InfluencerDetailDump(
+                    id=influencer.id,
+                    last_updated_at=influencer.last_updated_at.strftime(
+                        "%d %b %Y %I:%M %p"),
+                    primary_platform=influencer.primary_platform.value,
+                    name=influencer.name,
+                    phone_number=influencer.phone_number,
+                    email=influencer.email,
+                    content_charge=influencer.content_charge,
+                    views_charge=influencer.views_charge,
+                    niche=[niche.value for niche in influencer.niche] if influencer.niche else None,
+                    gender=influencer.gender.value if influencer.gender else None,
+                    languages=[lang.value for lang in influencer.languages] if influencer.languages else None,
+                    next_reach_score=influencer.next_reach_score,
+                    city=influencer.city.value,
+                    profile_picture=influencer.profile_picture,
+                    collab_type=influencer.collab_type.value,
+                    deliverables=influencer.deliverables
+                )
+                influencer_detail_dump_list.append(influencer_detail_dump)
+
+            influencer_data = [influencer.dict() for influencer in influencer_detail_dump_list]
+
+            # Create a DataFrame from the list of dictionaries
+            df = pd.DataFrame(influencer_data)
+
+            # Save the DataFrame to a BytesIO buffer
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False,
+                            sheet_name=f'Influencer_Details_{datetime.today().strftime("%Y-%m-%d")}')
+            buffer.seek(0)
+            return buffer
+
+        except Exception as e:
+            _log.error(
+                f"Error occurred while fetching influencer details dump. Error: {str(e)}")
+
+    def get_all_influencer_insta_detail(self) -> BytesIO:
+        try:
+            all_influencer_insta_details = self.influencer_metric_repository.get_all_influencers_insta_details()
+            influencer_insta_detail_dump_list = []
+            for influencer_insta in all_influencer_insta_details:
+                influencer_detail_dump = InfluencerInstaDetailDump(
+                    id=influencer_insta.id,
+                    influencer_id=influencer_insta.influencer_id,
+                    last_updated_at=influencer_insta.last_updated_at.strftime(
+                        "%d %b %Y %I:%M %p"),
+                    username=influencer_insta.username,
+                    profile_link=influencer_insta.profile_link,
+                    engagement_rate=influencer_insta.engagement_rate,
+                    consistency_score=influencer_insta.consistency_score,
+                    followers=influencer_insta.followers,
+                    avg_views=influencer_insta.avg_views,
+                    max_views=influencer_insta.max_views,
+                    avg_likes=influencer_insta.avg_likes,
+                    avg_comments=influencer_insta.avg_comments,
+                    avg_shares=influencer_insta.avg_shares,
+                    city_1=influencer_insta.city_1,
+                    city_pc_1=influencer_insta.city_pc_1,
+                    city_2=influencer_insta.city_2,
+                    city_pc_2=influencer_insta.city_pc_2,
+                    city_3=influencer_insta.city_3,
+                    city_pc_3=influencer_insta.city_pc_3,
+                    age_13_to_17=influencer_insta.age_13_to_17,
+                    age_18_to_24=influencer_insta.age_18_to_24,
+                    age_25_to_34=influencer_insta.age_25_to_34,
+                    age_35_to_44=influencer_insta.age_35_to_44,
+                    age_45_to_54=influencer_insta.age_45_to_54,
+                    age_55=influencer_insta.age_55,
+                    men_follower_pc=influencer_insta.men_follower_pc,
+                    women_follower_pc=influencer_insta.women_follower_pc
+                )
+                influencer_insta_detail_dump_list.append(influencer_detail_dump)
+
+            influencer_data = [influencer.dict() for influencer in influencer_insta_detail_dump_list]
+
+            # Create a DataFrame from the list of dictionaries
+            df = pd.DataFrame(influencer_data)
+
+            # Save the DataFrame to a BytesIO buffer
+            buffer = BytesIO()
+            with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                df.to_excel(writer, index=False,
+                            sheet_name=f'Influencer_Insta_{datetime.today().strftime("%Y-%m-%d")}')
+            buffer.seek(0)
+            return buffer
+
+        except Exception as e:
+            _log.error(
+                f"Error occurred while fetching influencer_insta details dump. Error: {str(e)}")
