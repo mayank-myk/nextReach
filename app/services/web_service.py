@@ -340,7 +340,7 @@ class WebService:
     def get_web_metadata(self, client_id: Optional[int]) -> HomeMetadata:
 
         return HomeMetadata(
-            academy_video_list=self.get_all_nra()[-3:],
+            academy_video_list=random.sample(self.get_all_nra(), 6),
             success_story_list=self.get_all_ss(),
             blog_list=random.sample(self.get_all_blogs(), 6),
             influencer_list=random.sample(self.get_top_rated_influencer_detais(client_id=client_id), 12)
