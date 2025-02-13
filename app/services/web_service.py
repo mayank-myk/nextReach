@@ -364,8 +364,8 @@ class WebService:
                                              client_phone_number=request.phone_number, email=request.email)
         if wait_list:
             return GenericResponse(success=True,
-                                   message="Our team will be in touch with you shortly. Thank you for your patience",
-                                   header="Congratulations!", button_text="Continue")
+                                   message="We have received your inquiry. Our team will be in touch with you soon.",
+                                   header="Thank You!", button_text="Continue")
         else:
             return GenericResponse(success=False, message="Something went wrong while create your wait_list",
                                    button_text="Retry")
