@@ -241,7 +241,7 @@ class InfluencerRepository:
                     (func.cardinality(Influencer.niche) == 0)  # Check for empty array
                 )
             if city:
-                query = query.filter(Influencer.city.in_(city))
+                query = query.filter(Influencer.city == city)
             if reach_price:
                 filters = [
                     Influencer.views_charge.between(REACH_PRICE_DICT[price][0], REACH_PRICE_DICT[price][1])
@@ -279,7 +279,7 @@ class InfluencerRepository:
             if collab_type:
                 query = query.filter(Influencer.collab_type.in_(COLLAB_TYPE_DICT[collab_type]))
             if gender:
-                query = query.filter(Influencer.gender.in_(gender))
+                query = query.filter(Influencer.gender == gender)
             if language_list:
                 query = query.filter(
                     (Influencer.languages.op("&&")(language_list)) |  # Overlap operator for non-empty arrays
