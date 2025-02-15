@@ -121,7 +121,7 @@ def get_influencer_listings(
         page_size: int = Query(40, description="Number of influencers per page", ge=1, le=100),
         sort_applied: SortApplied = Query(SortApplied.RECOMMENDED, description="Sorting applied"),
         niche: Optional[List[Niche]] = Query(None, description="Influencer's niche"),
-        city: Optional[List[City]] = Query(None, description="Region where influencer is located"),
+        city: Optional[City] = Query(None, description="Region where influencer is located"),
         reach_price: Optional[List[ReachPrice]] = Query(None, description="Reach price"),
         follower_count: Optional[List[FollowerCount]] = Query(None, description="Minimum number of followers"),
         avg_views: Optional[List[AverageView]] = Query(None, description="Average views"),
@@ -130,7 +130,7 @@ def get_influencer_listings(
         content_price: Optional[ContentPrice] = Query(None, description="Content price"),
         budget: Optional[Budget] = Query(None, description="Budget"),
         collab_type: Optional[CollabType] = Query(None, description="Select one of the collab type"),
-        gender: Optional[List[Gender]] = Query(None, description="Gender of the influencer"),
+        gender: Optional[Gender] = Query(None, description="Gender of the influencer"),
         rating: Optional[Rating] = Query(None, description="Minimum rating"),
         languages: Optional[List[Language]] = Query(None, description="Language"),
         db=Depends(db_manager.get_db)) -> InfluencerListing:

@@ -344,7 +344,7 @@ class ClientService:
                                page_size: int,
                                sort_applied: SortApplied,
                                niche: Optional[List[Niche]],
-                               city: Optional[List[City]],
+                               city: Optional[City],
                                reach_price: Optional[List[ReachPrice]],
                                follower_count: Optional[List[FollowerCount]],
                                avg_views: Optional[List[AverageView]],
@@ -353,7 +353,7 @@ class ClientService:
                                budget: Optional[Budget],
                                content_price: Optional[ContentPrice],
                                collab_type: Optional[CollabType],
-                               gender: Optional[List[Gender]],
+                               gender: Optional[Gender],
                                rating: Optional[Rating],
                                languages: Optional[List[Language]],
                                background_tasks: BackgroundTasks

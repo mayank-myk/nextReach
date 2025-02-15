@@ -20,7 +20,7 @@ from app.enums.reach_price import ReachPrice
 
 class SearchFilter(BaseModel):
     niche: Optional[List[Niche]] = None
-    city: Optional[List[City]] = None
+    city: Optional[City] = None
     reach_price: Optional[List[ReachPrice]] = None
     follower_count: Optional[List[FollowerCount]] = None
     avg_views: Optional[List[AverageView]] = None
@@ -28,7 +28,7 @@ class SearchFilter(BaseModel):
     platform: Optional[Platform] = None
     budget: Optional[Budget] = None
     content_price: Optional[ContentPrice] = None
-    gender: Optional[List[Gender]] = None
+    gender: Optional[Gender] = None
     collab_type: Optional[CollabType] = None
     age: Optional[List[InfluencerAge]] = None
     rating: Optional[Rating] = None
