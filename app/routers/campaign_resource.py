@@ -1,14 +1,13 @@
 from datetime import datetime, date
-from typing import Optional
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi.responses import StreamingResponse
 
-from app.api_requests.campaign_completion_request import CampaignCompletionRequest
 from app.api_requests.campaign_content_post_request import CampaignContentPostRequest
 from app.api_requests.campaign_day2_billing_request import CampaignDay2BillingRequest
+from app.api_requests.campaign_day2_payment_request import CampaignDay2PaymentRequest
 from app.api_requests.campaign_day8_billing_request import CampaignDay8BillingRequest
-from app.api_requests.campaign_draft_approved_request import CampaignDraftApprovedRequest
+from app.api_requests.campaign_day8_payment_request import CampaignDay8PaymentRequest
 from app.api_requests.campaign_influencer_finalized_request import CampaignInfluencerFinalizedRequest
 from app.api_requests.campaign_pending_deliverables_request import CampaignPendingDeliverables
 from app.api_requests.campaign_request import CampaignRequest
@@ -29,60 +28,86 @@ router = APIRouter(
 db_manager = DatabaseSessionManager()
 
 
-@router.post("/move-to/influencer-finalized/{campaign_id}")
-def move_campaign_to_influencer_finalized_stage(campaign_id: int, request: CampaignInfluencerFinalizedRequest,
-                                                db=Depends(db_manager.get_db)) -> GenericResponse:
+@router.post("/update-to/influencer-finalized/{campaign_id}")
+def update_campaign_to_influencer_finalized_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                                  request: CampaignInfluencerFinalizedRequest,
+                                                  db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_influencer_finalization(campaign_id=campaign_id, request=request)
+    return campaign_service.update_campaign_to_influencer_finalization(campaign_id=campaign_id,
+                                                                       background_tasks=background_tasks,
+                                                                       request=request)
 
 
-@router.post("/move-to/shoot-completed/{campaign_id}")
-def move_campaign_to_shoot_completed_stage(campaign_id: int, content_shoot_date: date,
-                                           db=Depends(db_manager.get_db)) -> GenericResponse:
+@router.post("/update-to/shoot-completed/{campaign_id}")
+def update_campaign_to_shoot_completed_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                             content_shoot_date: date,
+                                             db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
     return campaign_service.update_campaign_to_shoot_completed(campaign_id=campaign_id,
+                                                               background_tasks=background_tasks,
                                                                content_shoot_date=content_shoot_date)
 
 
-@router.post("/move-to/draft-approved/{campaign_id}")
-def move_campaign_to_draft_approved_stage(campaign_id: int, request: CampaignDraftApprovedRequest,
+@router.post("/update-to/draft-approved/{campaign_id}")
+def update_campaign_to_draft_approved_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                            draft_approved_date: date,
+                                            db=Depends(db_manager.get_db)) -> GenericResponse:
+    campaign_service = CampaignService(db)
+    return campaign_service.update_campaign_to_draft_approved(campaign_id=campaign_id,
+                                                              background_tasks=background_tasks,
+                                                              draft_approved_date=draft_approved_date)
+
+
+@router.post("/update-to/content-posted/{campaign_id}")
+def update_campaign_to_content_posted_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                            request: CampaignContentPostRequest,
+                                            db=Depends(db_manager.get_db)) -> GenericResponse:
+    campaign_service = CampaignService(db)
+    return campaign_service.update_campaign_to_content_posted(campaign_id=campaign_id,
+                                                              background_tasks=background_tasks, request=request)
+
+
+@router.post("/update-to/day2-billing/{campaign_id}")
+def update_campaign_to_day2_billing_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                          request: CampaignDay2BillingRequest,
                                           db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_draft_approved(campaign_id=campaign_id, request=request)
+    return campaign_service.update_campaign_to_day2_billing(campaign_id=campaign_id, background_tasks=background_tasks,
+                                                            request=request)
 
 
-@router.post("/move-to/content-posted/{campaign_id}")
-def move_campaign_to_content_posted_stage(campaign_id: int, request: CampaignContentPostRequest,
+@router.post("/update-to/day2-payment/{campaign_id}")
+def update_campaign_to_day2_payment_received_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                                   request: CampaignDay2PaymentRequest,
+                                                   db=Depends(db_manager.get_db)) -> GenericResponse:
+    campaign_service = CampaignService(db)
+    return campaign_service.update_campaign_to_day2_payment(campaign_id=campaign_id, background_tasks=background_tasks,
+                                                            request=request)
+
+
+@router.post("/update-to/day8-billing/{campaign_id}")
+def update_campaign_to_day8_billing_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                          request: CampaignDay8BillingRequest,
                                           db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_content_posted(campaign_id=campaign_id, request=request)
+    return campaign_service.update_campaign_to_day8_billing(campaign_id=campaign_id, background_tasks=background_tasks,
+                                                            request=request)
 
 
-@router.post("/move-to/day2-billing/{campaign_id}")
-def move_campaign_to_day2_billing_stage(campaign_id: int, request: CampaignDay2BillingRequest,
-                                        db=Depends(db_manager.get_db)) -> GenericResponse:
+@router.post("/update-to/day8-payment/{campaign_id}")
+def update_campaign_to_day8_payment_received_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                                   request: CampaignDay8PaymentRequest,
+                                                   db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_day2_billing(campaign_id=campaign_id, request=request)
+    return campaign_service.update_campaign_to_day8_payment(campaign_id=campaign_id, background_tasks=background_tasks,
+                                                            request=request)
 
 
-@router.post("/move-to/day8-billing/{campaign_id}")
-def move_campaign_to_day8_billing_stage(campaign_id: int, request: CampaignDay8BillingRequest,
-                                        db=Depends(db_manager.get_db)) -> GenericResponse:
+@router.post("/update-to/cancelled/{campaign_id}")
+def update_campaign_to_cancelled_stage(campaign_id: int, background_tasks: BackgroundTasks,
+                                       db=Depends(db_manager.get_db)) -> GenericResponse:
     campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_day8_billing(campaign_id=campaign_id, request=request)
-
-
-@router.post("/move-to/completed/{campaign_id}")
-def move_campaign_to_completed_stage(campaign_id: int, request: Optional[CampaignCompletionRequest] = None,
-                                     db=Depends(db_manager.get_db)) -> GenericResponse:
-    campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_completed(campaign_id=campaign_id, request=request)
-
-
-@router.post("/move-to/cancelled/{campaign_id}")
-def move_campaign_to_cancelled_stage(campaign_id: int, db=Depends(db_manager.get_db)) -> GenericResponse:
-    campaign_service = CampaignService(db)
-    return campaign_service.update_campaign_to_cancelled(campaign_id=campaign_id)
+    return campaign_service.update_campaign_to_cancelled(campaign_id=campaign_id, background_tasks=background_tasks, )
 
 
 @router.post("/update/pending-deliverables/{campaign_id}")

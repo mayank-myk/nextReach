@@ -1,6 +1,6 @@
 from typing import Dict, List
 
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, BackgroundTasks
 from fastapi import Query
 from fastapi.responses import HTMLResponse
 
@@ -34,9 +34,9 @@ def get_web_metadata(client_id: int = Query(None, description="Client Id", ge=1)
 
 
 @router.post("/create/lead")
-def create_lead(request: WaitListRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_lead(background_tasks: BackgroundTasks, request: WaitListRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
     web_service = WebService(db)
-    return web_service.create_lead(request=request)
+    return web_service.create_lead(background_tasks=background_tasks, request=request)
 
 
 @router.post("/calculate/earning")

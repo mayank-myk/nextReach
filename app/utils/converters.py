@@ -18,22 +18,22 @@ def campaign_stage_to_status(stage: CampaignStage) -> Status:
 
 
 def int_to_str_k(count) -> Optional[str]:
-    if not count:
+    if not count or not isinstance(count, (int, float)) or count < 0:
         return None  # Return None for None or 0 values
 
     if count >= 1000000:  # For millions
-        value = count / 1000000
+        value = round(count / 1000000, 1)
         if value % 1 == 0:  # If the number is an integer
             return f"{int(value)} M"
         else:
-            return f"{value:.1f} M"  # Converts to "m" for millions
+            return f"{value} M"  # Converts to "m" for millions
 
     elif count >= 1000:  # For thousands
         value = count / 1000
         if value % 1 == 0:  # If the number is an integer
             return f"{int(value)}K"
         else:
-            return f"{value:.1f}K"  # Converts to "k" for thousands
+            return f"{value}K"  # Converts to "k" for thousands
 
     return str(count)  # For values less than 1,000, return as a string
 
@@ -42,7 +42,10 @@ def float_to_str(value) -> Optional[str]:
     if value is None or value == 0:
         return "0"
 
-    return str(int(value)) if value.is_integer() else f"{value:.1f}".rstrip("0").rstrip(".")
+    if value.is_integer():
+        return str(int(value))
+
+    return f"{round(value, 1):.1f}".rstrip("0").rstrip(".")
 
 
 def engagement_rate_to_quality(engagement_rate: float) -> str:
@@ -84,6 +87,21 @@ def format_to_rupees(value: int):
         return None
 
 
+def format_to_currency(value: int):
+    if value and value > 0:
+        value_str = str(value)[::-1]  # Reverse the string for easier grouping
+        formatted = [value_str[:3]]  # First group of 3 digits
+
+        # Process subsequent groups of 2 digits
+        for i in range(3, len(value_str), 2):
+            formatted.append(value_str[i:i + 2])
+
+        # Combine the reversed groups with commas, then reverse the final string
+        return ','.join(formatted)[::-1]
+    else:
+        return "NOT_FOUND"
+
+
 def format_to_views_charge(value: int):
     if value and value > 0:
         return "₹" + str(value) + " per 1000 views"
@@ -116,3 +134,27 @@ def sex_distribution_to_dict(men_follower_pc: int, women_follower_pc: int) -> Op
         return [{"name": "Male", "value": men_follower_pc}, {"name": "Female", "value": women_follower_pc}]
     else:
         return None
+
+
+def campaign_stage_to_user_friendly_str(campaign_stage: CampaignStage):
+    if not campaign_stage:
+        return "NOT_FOUND"
+
+    if campaign_stage == CampaignStage.INFLUENCER_FINALIZED:
+        return "INFLUENCER-FINALIZED"
+    elif campaign_stage == CampaignStage.SHOOT_COMPLETED:
+        return "CONTENT-SHOOT-COMPLETED"
+    elif campaign_stage == CampaignStage.DRAFT_APPROVED:
+        return "CONTENT-DRAFT-APPROVED"
+    elif campaign_stage == CampaignStage.CONTENT_POSTED:
+        return "CONTENT-POSTED"
+    elif campaign_stage == CampaignStage.DAY2_BILLING:
+        return "DAY2-PAYMENT-UPDATED"
+    elif campaign_stage == CampaignStage.DAY8_BILLING:
+        return "DAY8-PAYMENT-UPDATED"
+    elif campaign_stage == CampaignStage.COMPLETED:
+        return "COMPLETED"
+    elif campaign_stage == CampaignStage.CANCELLED:
+        return "CANCELLED"
+    else:
+        return ""

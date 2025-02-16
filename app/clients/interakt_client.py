@@ -1,194 +1,212 @@
+from datetime import datetime
+from typing import Optional, List, Dict
+
+import httpx
 import requests
 
+from app.enums.campaign_stage import CampaignStage
 from app.enums.entity_type import EntityType
 from app.enums.platform import Platform
-from app.utils.converters import format_to_rupees, format_to_views_charge, int_to_str_k
+from app.utils.converters import format_to_currency, format_to_views_charge, int_to_str_k, \
+    campaign_stage_to_user_friendly_str
 from app.utils.logger import configure_logger
 
 logger = configure_logger()
 # INTERAKT_API_KEY = get_config("INTERAKT_API_KEY")
 INTERAKT_API_KEY = "bGJEM09RRE0zTlp1bVplRURESUlQZnA3LXNYY3B4WExCOWJXMG1PZ0ZNazo="
 ADMIN_PHONE_NUMBERS = ["7008680032", "7676604090", "9731923797", "6901030545"]
+HEADERS = {
+    "Authorization": "Basic " + INTERAKT_API_KEY,
+    "Content-Type": "application/json"
+}
+API_URL = "https://api.interakt.ai/v1/public/message/"
 
 
-def send_otp_via_whatsapp(phone_number: str, otp: str):
-    API_URL = "https://api.interakt.ai/v1/public/message/"
-
-    headers = {
-        "Authorization": "Basic " + INTERAKT_API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    payload = {
+def build_payload(phone_number: str, template_name: str, body_values: List[str]) -> Dict:
+    """Builds the payload for the WhatsApp API."""
+    return {
         "countryCode": "+91",
         "phoneNumber": phone_number,
         "callbackData": "some text here",
         "type": "Template",
         "template": {
-            "name": "verification",
+            "name": template_name,
             "languageCode": "en",
-            "bodyValues": [
-                str(otp)
-            ],
-            "buttonValues": {
-                "1": [str(otp)]
-            }
+            "bodyValues": body_values
         }
     }
 
-    try:
-        response = requests.post(API_URL, json=payload, headers=headers)
-        response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
 
-        # Check if message was successfully sent
+def send_sync_whatsapp_message(phone_number: str, template_name: str, body_values: List[str], command: str) -> bool:
+    """Sends a WhatsApp message synchronously using the Interakt API."""
+    payload = build_payload(phone_number, template_name, body_values)
+    try:
+        response = requests.post(API_URL, json=payload, headers=HEADERS)
+        response.raise_for_status()
+
         if response.status_code // 100 == 2:
-            logger.info(f"OTP sent successfully to {phone_number}")
+            logger.info(f"{command} whatsapp message successfully sent to {phone_number}")
             return True
         else:
-            logger.info(f"Failed to send OTP: {response.text}")
+            logger.error(f"Failed to send {command} whatsapp message: {response.text}")
             return False
-    except requests.exceptions.RequestException as e:
-        logger.error(f"An error occurred while sending OTP to {phone_number}. Error: {str(e)}")
-        return False
-
-
-def contact_us_notification_via_whatsapp(entity_type: EntityType, name: str,
-                                         client_phone_number: str, email: str):
-    API_URL = "https://api.interakt.ai/v1/public/message/"
-
-    headers = {
-        "Authorization": "Basic " + INTERAKT_API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    for admin_phone_number in ADMIN_PHONE_NUMBERS:
-        payload = {
-            "countryCode": "+91",
-            "phoneNumber": admin_phone_number,
-            "callbackData": "some text here",
-            "type": "Template",
-            "template": {
-                "name": "contact_us",
-                "languageCode": "en",
-                "bodyValues": [
-                    entity_type.value,
-                    name,
-                    client_phone_number,
-                    email
-                ]
-            }
-        }
-
-        try:
-            response = requests.post(API_URL, json=payload, headers=headers)
-            response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
-
-            # Check if message was successfully sent
-            if response.status_code // 100 == 2:
-                logger.info(f"Contact Us notification sent successfully to {admin_phone_number}")
-            else:
-                logger.info(f"Failed to send Contact Us notification: {response.text}")
-        except requests.exceptions.RequestException as e:
-            logger.error(
-                f"An error occurred while sending Contact Us notification to {admin_phone_number}. Error: {str(e)}")
-
-
-def collab_request_user_notification_via_whatsapp(client_phone_number: str, date: str, influencer_name: str,
-                                                  primary_platform: Platform, profile_link: str, content_price: int,
-                                                  reach_price: int, followers: int, avg_views: int):
-    API_URL = "https://api.interakt.ai/v1/public/message/"
-
-    headers = {
-        "Authorization": "Basic " + INTERAKT_API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    payload = {
-        "countryCode": "+91",
-        "phoneNumber": client_phone_number,
-        "callbackData": "some text here",
-        "type": "Template",
-        "template": {
-            "name": "collab_request_user",
-            "languageCode": "en",
-            "bodyValues": [
-                date,
-                influencer_name,
-                primary_platform.value,
-                profile_link,
-                format_to_rupees(content_price),
-                format_to_views_charge(reach_price),
-                int_to_str_k(followers),
-                int_to_str_k(avg_views)
-            ]
-        }
-    }
-
-    try:
-        response = requests.post(API_URL, json=payload, headers=headers)
-        response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
-
-        # Check if message was successfully sent
-        if response.status_code // 100 == 2:
-            logger.info(f"Collab request user notification sent successfully to {client_phone_number}")
-            return True
-        else:
-            logger.info(f"Failed to send Collab request user notification: {response.text}")
-            return False
-    except requests.exceptions.RequestException as e:
+    except Exception as e:
         logger.error(
-            f"An error occurred while sending Collab request user notification to {client_phone_number}. Error: {str(e)}")
+            f"An error occurred while sending {command} whatsapp message to {phone_number}. Error: {str(e)}")
         return False
 
 
-def collab_request_admin_notification_via_whatsapp(date: str, campaign_id: str, client_id: str,
-                                                   influencer_id: str, client_name: str, client_phone_number: str,
-                                                   influencer_name: str, influencer_phone_number: str,
-                                                   content_price: int, reach_price: int, followers: int,
-                                                   avg_views: int):
-    API_URL = "https://api.interakt.ai/v1/public/message/"
-
-    headers = {
-        "Authorization": "Basic " + INTERAKT_API_KEY,
-        "Content-Type": "application/json"
-    }
-
-    for admin_phone_number in ADMIN_PHONE_NUMBERS:
-
-        payload = {
-            "countryCode": "+91",
-            "phoneNumber": admin_phone_number,
-            "callbackData": "some text here",
-            "type": "Template",
-            "template": {
-                "name": "incoming_collab_request",
-                "languageCode": "en",
-                "bodyValues": [
-                    date,
-                    campaign_id,
-                    client_id,
-                    client_name,
-                    client_phone_number,
-                    influencer_id,
-                    influencer_name,
-                    influencer_phone_number,
-                    format_to_rupees(content_price),
-                    format_to_views_charge(reach_price),
-                    int_to_str_k(followers),
-                    int_to_str_k(avg_views)
-                ]
-            }
-        }
-
+async def send_async_whatsapp_message(phone_number: str, template_name: str, body_values: List[str],
+                                      command: str) -> bool:
+    """Sends a WhatsApp message using the Interakt API."""
+    payload = build_payload(phone_number, template_name, body_values)
+    async with httpx.AsyncClient() as client:
         try:
-            response = requests.post(API_URL, json=payload, headers=headers)
-            response.raise_for_status()  # Raises an HTTPError if the response code is 4xx/5xx
+            response = await client.post(API_URL, json=payload, headers=HEADERS)
+            response.raise_for_status()
 
-            # Check if message was successfully sent
             if response.status_code // 100 == 2:
-                logger.info(f"Collab request user notification sent successfully to {admin_phone_number}")
+                logger.info(f"{command} whatsapp message successfully sent to {phone_number}")
+                return True
             else:
-                logger.info(f"Failed to send Collab request user notification: {response.text}")
-        except requests.exceptions.RequestException as e:
+                logger.error(f"Failed to send {command} whatsapp message: {response.text}")
+                return False
+        except Exception as e:
             logger.error(
-                f"An error occurred while sending Collab request user notification to {admin_phone_number}. Error: {str(e)}")
+                f"An error occurred while sending {command} whatsapp message to {phone_number}. Error: {str(e)}")
+            return False
+
+
+def send_otp_via_whatsapp(phone_number: str, otp: str):
+    """Synchronous OTP sending."""
+    return send_sync_whatsapp_message(phone_number, "verification", [str(otp)], "User OTP")
+
+
+async def notify_admins(template_name: str, body_values: List[str], command: str):
+    """Sends a notification to all admin phone numbers."""
+    for admin_phone_number in ADMIN_PHONE_NUMBERS:
+        await send_async_whatsapp_message(admin_phone_number, template_name, body_values, command)
+
+
+async def contact_us_notification_via_whatsapp(entity_type: EntityType, name: str,
+                                               client_phone_number: str, email: Optional[str], message: Optional[str]):
+    await notify_admins(
+        "contact_us",
+        [
+            entity_type.value,
+            name,
+            client_phone_number,
+            email or "Null",
+            message or "Null",
+            datetime.now().strftime("%b %d, %Y %I:%M %p")
+        ], "Contact Us Admin"
+    )
+
+
+async def collab_request_user_notification_via_whatsapp(client_phone_number: str, date: str, influencer_name: str,
+                                                        primary_platform: Platform, profile_link: str,
+                                                        content_price: int, reach_price: int, followers: int,
+                                                        avg_views: int):
+    await send_async_whatsapp_message(
+        client_phone_number,
+        "collab_request_user",
+        [
+            date,
+            influencer_name,
+            primary_platform.value,
+            profile_link,
+            format_to_currency(content_price),
+            format_to_views_charge(reach_price),
+            int_to_str_k(followers),
+            int_to_str_k(avg_views)
+        ],
+        "Collab Request User"
+    )
+
+
+async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id: str, client_id: str,
+                                                         influencer_id: str, client_name: str,
+                                                         client_phone_number: str, influencer_name: str,
+                                                         influencer_phone_number: str, content_price: int,
+                                                         reach_price: int, followers: int, avg_views: int):
+    await notify_admins(
+        "incoming_collab_request",
+        [
+            date,
+            campaign_id,
+            client_id,
+            client_name,
+            client_phone_number,
+            influencer_id,
+            influencer_name,
+            influencer_phone_number,
+            format_to_currency(content_price),
+            format_to_views_charge(reach_price),
+            int_to_str_k(followers),
+            int_to_str_k(avg_views)
+        ],
+        "Collab Request Admin"
+    )
+
+
+async def campaign_update_notification_via_whatsapp(client_phone_number: Optional[str], client_name: Optional[str],
+                                                    influencer_name: str,
+                                                    campaign_status: CampaignStage):
+    user_name = ""
+    if client_name:
+        user_name = client_name
+    elif client_phone_number:
+        user_name = client_phone_number
+
+    await send_async_whatsapp_message(
+        client_phone_number,
+        "campaign_update_client",
+        [user_name, influencer_name, campaign_stage_to_user_friendly_str(campaign_status)],
+        "Campaign Update User"
+    )
+
+
+async def campaign_draft_approved_notification_via_whatsapp(client_phone_number: str, influencer_name: str,
+                                                            content_charge: int, upi_id: Optional[str]):
+    await send_async_whatsapp_message(
+        client_phone_number,
+        "payment_request_content",
+        [
+            influencer_name,
+            format_to_currency(content_charge),
+            upi_id or "NOT_FOUND"
+        ],
+        "Campaign draft approved user"
+    )
+
+
+async def campaign_day2_billing_notification_via_whatsapp(client_phone_number: str, influencer_name: str,
+                                                          views: int, reach_price: int, upi_id: Optional[str]):
+    await send_async_whatsapp_message(
+        client_phone_number,
+        "payment_request_day2",
+        [
+            influencer_name,
+            format_to_currency(views),
+            format_to_views_charge(reach_price),
+            format_to_currency((views * reach_price) // 1000),
+            upi_id or "NOT_FOUND"
+        ],
+        "Campaign day2 billing user"
+    )
+
+
+async def campaign_day8_billing_notification_via_whatsapp(client_phone_number: str, influencer_name: str,
+                                                          views: int, reach_price: int, upi_id: Optional[str]):
+    await send_async_whatsapp_message(
+        client_phone_number,
+        "payment_request_day8",
+        [
+            influencer_name,
+            format_to_currency(views),
+            format_to_views_charge(reach_price),
+            format_to_currency((views * reach_price) // 1000),
+            upi_id or "NOT_FOUND"
+        ],
+        "Campaign day8 billing user"
+    )

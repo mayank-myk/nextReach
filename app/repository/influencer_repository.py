@@ -58,6 +58,7 @@ class InfluencerRepository:
             phone_number=influencer_request.phone_number,
             email=influencer_request.email,
             address=influencer_request.address,
+            upi_id=influencer_request.upi_id,
             languages=influencer_request.languages,
             next_reach_score=influencer_request.next_reach_score,
             dob=influencer_request.dob,
@@ -101,6 +102,9 @@ class InfluencerRepository:
 
             if hasattr(influencer_request, 'address') and influencer_request.address is not None:
                 setattr(existing_influencer, 'address', influencer_request.address)
+
+            if hasattr(influencer_request, 'upi_id') and influencer_request.upi_id is not None:
+                setattr(existing_influencer, 'upi_id', influencer_request.upi_id)
 
             if hasattr(influencer_request, 'languages') and influencer_request.languages is not None:
                 setattr(existing_influencer, 'languages', influencer_request.languages)

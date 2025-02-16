@@ -7,6 +7,7 @@ from typing import List, Optional, Dict
 
 import instaloader
 import requests
+from fastapi import BackgroundTasks
 
 from app.api_requests.calculate_earning_request import CalculateEarningRequest
 from app.api_requests.waitlist_request import WaitListRequest
@@ -50,10 +51,13 @@ USER_AGENTS = [
 # More realistic headers with dynamic and rotating headers
 HEADERS = {
     "User-Agent": random.choice(USER_AGENTS),  # Randomly select a User-Agent from the list
-    "Accept-Language": "en-US,en;q=0.9,ru;q=0.8",
+    "Content-Type": "application/json",
+    "Accept-Language": "en-US,en;q=0.9",
     "Accept-Encoding": "gzip, deflate, br",
     "Referer": "https://www.instagram.com/",
-    "Accept": "*/*"
+    "Accept": "*/*",
+    "x-ig-app-id": "936619743392459"
+    # "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 Safari/537.36"
     # "x-ig-app-id": "936619743392459",  # Instagram app id (static for all)
     # "x-ig-www-claim": "hmac.4e2d882f1c0ac7d2c6c1de1b318f69b7ff84d052",  # Claim header (static for all)
     # "x-ig-session-id": str(random.randint(100000000, 999999999)),  # Random session ID
@@ -224,7 +228,7 @@ def scrap_data_using_official_api(username: str) -> EnagementMetric | GenericRes
     engagement_rate = (total_engagement / (followers_count * post_count))
 
     return EnagementMetric(
-        engagement_rate=f"{engagement_rate:.1f}",
+        engagement_rate=f"{round(engagement_rate, 1):.1f}",
         engagement_quality=engagement_rate_to_quality(engagement_rate),
         followers=int_to_str_k(followers_count),
         likes=int_to_str_k(int(total_likes / post_count)),
@@ -292,7 +296,7 @@ def load_data_using_instaloader(L, username: str) -> EnagementMetric | GenericRe
         engagement_rate = (total_engagements / (follower_count * post_count))
 
         return EnagementMetric(
-            engagement_rate=f"{engagement_rate:.1f}",
+            engagement_rate=f"{round(engagement_rate, 1):.1f}",
             engagement_quality=engagement_rate_to_quality(engagement_rate),
             followers=int_to_str_k(follower_count),
             likes=int_to_str_k(int(avg_likes)),
@@ -354,14 +358,15 @@ class WebService:
                                                                                                     client_id)
         return influencer_basic_detail_list
 
-    def create_lead(self, request: WaitListRequest) -> GenericResponse:
+    def create_lead(self, background_tasks: BackgroundTasks, request: WaitListRequest) -> GenericResponse:
         wait_list = self.wait_list_user_repository.create_wait_list(request=request)
 
         if request.entity_type == EntityType.CLIENT:
             waitlist_join_event(name=request.name, phone_number=request.phone_number, email=request.email)
 
-        contact_us_notification_via_whatsapp(entity_type=request.entity_type, name=request.name,
-                                             client_phone_number=request.phone_number, email=request.email)
+        background_tasks.add_task(contact_us_notification_via_whatsapp, request.entity_type, request.name,
+                                  request.phone_number, request.email, request.message)
+
         if wait_list:
             return GenericResponse(success=True,
                                    message="We have received your inquiry. Our team will be in touch with you soon.",

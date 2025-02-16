@@ -1,7 +1,8 @@
 from datetime import datetime, timedelta
 from typing import Optional, List
 
-from sqlalchemy.orm import Session
+from sqlalchemy import func, desc
+from sqlalchemy.orm import Session, aliased
 
 from app.database.client_login_table import ClientLogin
 from app.exceptions.repository_exceptions import FetchOneUserMetadataException
@@ -48,3 +49,46 @@ class ClientLoginRepository:
         except Exception as ex:
             _log.error(f"Unable to create otp record for phone_number {phone_number}. Error: {str(ex)}")
             raise FetchOneUserMetadataException(ex, phone_number)
+
+    def get_unique_logins(self):
+        # Subquery: Get the first-ever login per phone number
+        first_ever_login_subquery = (
+            self.db.query(
+                ClientLogin.phone_number.label("phone_number"),
+                func.min(func.timezone('Asia/Kolkata', ClientLogin.created_at)).label("first_ever_login_time")
+            )
+            .group_by(ClientLogin.phone_number)
+            .subquery()
+        )
+
+        # Subquery: Get the first login of the day for each phone number
+        daily_first_login_subquery = (
+            self.db.query(
+                func.date(func.timezone('Asia/Kolkata', ClientLogin.created_at)).label("login_date"),  # Extract the date
+                ClientLogin.phone_number.label("phone_number"),
+                func.min(func.timezone('Asia/Kolkata', ClientLogin.created_at)).label("first_login_time")
+            )
+            .group_by(func.date(func.timezone('Asia/Kolkata', ClientLogin.created_at)), ClientLogin.phone_number)
+            .subquery()
+        )
+
+        # Alias subqueries for better readability
+        first_ever_login = aliased(first_ever_login_subquery)
+        daily_first_login = aliased(daily_first_login_subquery)
+
+        # Main Query: Determine if the user is "New" or "Old"
+        query = (
+            self.db.query(
+                daily_first_login.c.login_date,
+                daily_first_login.c.first_login_time,
+                daily_first_login.c.phone_number,
+                first_ever_login.c.first_ever_login_time
+            )
+            .join(
+                first_ever_login,
+                daily_first_login.c.phone_number == first_ever_login.c.phone_number
+            )
+            .order_by(desc(daily_first_login.c.login_date), desc(daily_first_login.c.first_login_time))
+        )
+
+        return query.all()

@@ -31,6 +31,7 @@ class Influencer(Base):
     phone_number = Column(String(10), nullable=False)  # Assuming it's a 10-digit phone number
     email = Column(String(255), nullable=True)
     address = Column(String(255), nullable=True)
+    upi_id = Column(String(255), nullable=True)
     profile_picture = Column(String(255), nullable=False)  # URL for profile picture
     languages = Column(ARRAY(Enum(Language, name="language_enum")), nullable=True)  # List of languages
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)

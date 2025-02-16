@@ -19,6 +19,7 @@ class InfluencerRequest(BaseModel):
     phone_number: str = Field(..., min_length=10, max_length=10)
     email: Optional[str] = Field(None, max_length=255)
     address: Optional[str] = Field(None, max_length=255)
+    upi_id: Optional[str] = Field(None, max_length=255)
     languages: List[Language]
     next_reach_score: int = Field(..., ge=0)
     dob: Optional[date] = None

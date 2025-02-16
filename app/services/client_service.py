@@ -1,6 +1,8 @@
 from datetime import datetime
+from io import BytesIO
 from typing import List, Optional
 
+import pandas as pd
 from fastapi import BackgroundTasks
 
 from app.api_requests.influencer_insights import InfluencerInsights
@@ -43,6 +45,7 @@ from app.response.influencer_basic_detail import InfluencerBasicDetail
 from app.response.influencer_detail import InfluencerDetail
 from app.response.influencer_listing import InfluencerListing
 from app.response.login_response import LoginResponse
+from app.response.new_singup_dump import NewSignupDump
 from app.response.search_filter import SearchFilter
 from app.utils import id_utils
 from app.utils.converters import int_to_str_k, combine_names, format_to_rupees, format_to_views_charge, \
@@ -172,6 +175,39 @@ class ClientService:
                                  message="Invalid OTP. It may have expired or doesn't match the latest one.",
                                  button_text="Get New OTP")
 
+    def get_unique_logins(self):
+
+        try:
+            signup_records = self.client_login_repository.get_unique_logins()
+            signup_detail_dump_list = []
+            for record in signup_records:
+                login_detail_dump = NewSignupDump(
+                    login_date=record.login_date.strftime("%d-%m-%Y"),
+                    first_login_time=record.first_login_time.strftime("%I:%M %p"),
+                    phone_number=record.phone_number,
+                    user_status=("New"
+                                 if record.first_login_time == record.first_ever_login_time
+                                 else "Old"
+                                 )
+                )
+                signup_detail_dump_list.append(login_detail_dump)
+
+                signup_data = [data.dict() for data in signup_detail_dump_list]
+
+                # Create a DataFrame from the list of dictionaries
+                df = pd.DataFrame(signup_data)
+
+                # Save the DataFrame to a BytesIO buffer
+                buffer = BytesIO()
+                with pd.ExcelWriter(buffer, engine='xlsxwriter') as writer:
+                    df.to_excel(writer, index=False, sheet_name=f'Signups_{datetime.today().strftime("%Y-%m-%d")}')
+                buffer.seek(0)
+            return buffer
+
+        except Exception as e:
+            _log.error(
+                f"Error occurred while fetching campaigns details dump. Error: {str(e)}")
+
     def get_watchlist(self, client_id: int) -> List[InfluencerDetail]:
 
         pass
@@ -184,7 +220,7 @@ class ClientService:
 
         pass
 
-    def request_collab(self, created_by: str, client_id: int, influencer_id: int,
+    def request_collab(self, background_tasks: BackgroundTasks, created_by: str, client_id: int, influencer_id: int,
                        collab_date: Optional[CollabDate]) -> GenericResponse:
 
         try:
@@ -214,29 +250,19 @@ class ClientService:
                                                                            client_id=client_id, influencer=influencer,
                                                                            collab_date=collab_date)
 
-            collab_request_user_notification_via_whatsapp(client_phone_number=new_campaign.client.phone_number,
-                                                          date=datetime.today().strftime("%b %d, %Y"),
-                                                          influencer_name=influencer_metric.username,
-                                                          primary_platform=influencer.primary_platform,
-                                                          profile_link=influencer_metric.profile_link,
-                                                          content_price=new_campaign.content_charge,
-                                                          reach_price=new_campaign.views_charge,
-                                                          followers=influencer_metric.followers,
-                                                          avg_views=influencer_metric.avg_views
-                                                          )
+            background_tasks.add_task(collab_request_user_notification_via_whatsapp, new_campaign.client.phone_number,
+                                      datetime.today().strftime("%b %d, %Y"),
+                                      influencer_metric.username, influencer.primary_platform,
+                                      influencer_metric.profile_link,
+                                      new_campaign.content_charge, new_campaign.views_charge,
+                                      influencer_metric.followers, influencer_metric.avg_views)
 
-            collab_request_admin_notification_via_whatsapp(date=datetime.today().strftime("%b %d, %Y"),
-                                                           campaign_id=str(new_campaign.id),
-                                                           client_id=str(new_campaign.client.id),
-                                                           influencer_id=str(influencer.id),
-                                                           client_name=new_campaign.client.name,
-                                                           client_phone_number=new_campaign.client.phone_number,
-                                                           influencer_name=influencer_metric.username,
-                                                           influencer_phone_number=influencer.phone_number,
-                                                           content_price=influencer.content_charge,
-                                                           reach_price=influencer.views_charge,
-                                                           followers=influencer_metric.followers,
-                                                           avg_views=influencer_metric.avg_views)
+            background_tasks.add_task(collab_request_admin_notification_via_whatsapp,
+                                      datetime.today().strftime("%b %d, %Y"), str(new_campaign.id),
+                                      str(new_campaign.client.id), str(influencer.id), new_campaign.client.name,
+                                      new_campaign.client.phone_number, influencer_metric.username,
+                                      influencer.phone_number, new_campaign.content_charge, new_campaign.views_charge,
+                                      influencer_metric.followers, influencer_metric.avg_views)
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
                                    message="Collaboration created successfully! Our team will reach out to you shortly")
@@ -645,9 +671,9 @@ class ClientService:
                             "%d %b %Y") if campaign.second_billing_date else None))
 
             if len(campaign_review_list) > 0:
-                avg_rating = total_rating / len(campaign_review_list)
+                avg_rating = round(total_rating / len(campaign_review_list), 1)
                 influencer_review = InfluencerReview(count=len(campaign_review_list),
-                                                     avg_rating=f"{avg_rating:.1f}",
+                                                     avg_rating=f"{avg_rating}",
                                                      campaign_reviews=campaign_review_list)
             else:
                 influencer_review = None

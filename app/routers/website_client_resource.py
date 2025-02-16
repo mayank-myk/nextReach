@@ -88,9 +88,11 @@ def remove_from_watchlist(request: CollabRequest, db=Depends(db_manager.get_db))
 
 
 @router.post("/request/collab")
-def request_collab(request: CollabRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def request_collab(background_tasks: BackgroundTasks, request: CollabRequest,
+                   db=Depends(db_manager.get_db)) -> GenericResponse:
     client_service = ClientService(db)
-    return client_service.request_collab(created_by="client_id_" + str(request.client_id), client_id=request.client_id,
+    return client_service.request_collab(background_tasks=background_tasks,
+                                         created_by="client_id_" + str(request.client_id), client_id=request.client_id,
                                          influencer_id=request.influencer_id, collab_date=request.collab_date)
 
 
