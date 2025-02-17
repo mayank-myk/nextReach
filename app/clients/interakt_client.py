@@ -38,8 +38,21 @@ def build_payload(phone_number: str, template_name: str, body_values: List[str])
 
 
 def send_sync_whatsapp_message(phone_number: str, template_name: str, body_values: List[str], command: str) -> bool:
-    """Sends a WhatsApp message synchronously using the Interakt API."""
-    payload = build_payload(phone_number, template_name, body_values)
+    payload = {
+        "countryCode": "+91",
+        "phoneNumber": phone_number,
+        "callbackData": "some text here",
+        "type": "Template",
+        "template": {
+            "name": template_name,
+            "languageCode": "en",
+            "bodyValues": body_values,
+            "buttonValues": {
+                "1": body_values
+            }
+        }
+    }
+
     try:
         response = requests.post(API_URL, json=payload, headers=HEADERS)
         response.raise_for_status()
