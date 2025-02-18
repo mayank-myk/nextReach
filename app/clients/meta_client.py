@@ -27,7 +27,7 @@ class MetaAPIClient:
                     "event_name": event_name,
                     "event_time": int(datetime.datetime.now().timestamp()),
                     "user_data": {
-                        "ph": "+91" + self.hash_data(data.get("phone")),
+                        "ph": self.hash_data("+91" + data.get("phone")),
                         "em": self.hash_data(data.get("email").strip().lower()) if data.get("email", "") else None,
                         "fn": self.hash_data(data.get("name").strip().lower()) if data.get("name", "") else None,
                         "external_id": data.get("insta_user_id").strip().lower() if data.get("insta_user_id",
