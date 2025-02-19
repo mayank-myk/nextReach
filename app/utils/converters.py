@@ -45,7 +45,7 @@ def float_to_str(value) -> Optional[str]:
     if value.is_integer():
         return str(int(value))
 
-    return f"{round(value, 1):.1f}".rstrip("0").rstrip(".")
+    return f"{round(value, 1):.1f}".rstrip("0").rstrip(".") + "%"
 
 
 def engagement_rate_to_quality(engagement_rate: float) -> str:
