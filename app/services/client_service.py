@@ -484,7 +484,7 @@ class ClientService:
             # return GenericResponse(success=False, button_text="Get Started Now", header="Login to Unlock Access",
             #                        message="Log in to unlock full influencer profiles and start collaborating, new users get 20 free coins!")
 
-            return GenericResponse(success=False, button_text="Claim Your 20 Coins Now", header="Signup today & get free coins",
+            return GenericResponse(success=False, button_text="Claim Free Coins Now", header="Signup today & get 20 free coins",
                                    message="Use them to unlock complete influencer profiles & find the perfect match for your brand")
 
         try:
