@@ -485,7 +485,7 @@ class ClientService:
             #                        message="Log in to unlock full influencer profiles and start collaborating, new users get 20 free coins!")
 
             return GenericResponse(success=False, button_text="One Step Signup", header="Signup & get 20 free coins",
-                                   message="Use the coins to unlock influencer profiles & start collaboration — Zero commissions, Zero upfront fees")
+                                   message="Use the coins to unlock influencer profiles & start collaboration — Zero commission, Zero upfront fees !!")
 
         try:
 
