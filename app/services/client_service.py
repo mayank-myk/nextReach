@@ -221,8 +221,13 @@ class ClientService:
 
         pass
 
-    def request_collab(self, background_tasks: BackgroundTasks, created_by: str, client_id: int, influencer_id: int,
+    def request_collab(self, background_tasks: BackgroundTasks, created_by: str, client_id: Optional[int],
+                       influencer_id: int,
                        collab_date: Optional[CollabDate]) -> GenericResponse:
+
+        if not client_id or client_id == 1:
+            return GenericResponse(success=False, button_text="One Step Signup", header="Login to start collaboration",
+                                   message="Log in to start collaboration — Zero commission, Zero upfront influencer fees !!")
 
         try:
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
@@ -482,9 +487,6 @@ class ClientService:
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
 
         if request.client_id is None or request.client_id == 1:
-            # return GenericResponse(success=False, button_text="Get Started Now", header="Login to Unlock Access",
-            #                        message="Log in to unlock full influencer profiles and start collaborating, new users get 20 free coins!")
-
             return GenericResponse(success=False, button_text="One Step Signup", header="Signup & get 20 free coins",
                                    message="Use the coins to unlock influencer profiles & start collaboration — Zero commission, Zero upfront fees !!")
 

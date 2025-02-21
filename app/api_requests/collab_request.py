@@ -6,6 +6,6 @@ from app.enums.collab_date import CollabDate
 
 
 class CollabRequest(BaseModel):
-    client_id: int = Field(...)
+    client_id: Optional[int] = None
     influencer_id: int = Field(...)
     collab_date: Optional[CollabDate] = None
