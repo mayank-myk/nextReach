@@ -487,8 +487,9 @@ class ClientService:
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
 
         if request.client_id is None or request.client_id == 1:
-            return GenericResponse(success=False, button_text="One Step Signup", header="Signup & get 20 free coins",
-                                   message="Use the coins to unlock influencer profiles & start collaboration — Zero commission, Zero upfront fees !!")
+            return GenericResponse(success=False, button_text="One Step Signup",
+                                   header="Signup & get 20 free profile unlocks",
+                                   message="Use these unlocks to explore influencer profiles for free and find the best match for your brand — Zero commission, Zero upfront fees !!")
 
         try:
 
