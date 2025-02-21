@@ -141,11 +141,11 @@ class ClientService:
             #                                message="OTP has already been sent to this number, it's valid for 10minutes")
             otp = id_utils.generate_otp()
             otp_sent_successfully = send_otp_via_whatsapp(phone_number=phone_number, otp=otp)
+            self.client_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number,
+                                                                   otp_sent_successfully=otp_sent_successfully)
             if not otp_sent_successfully:
                 return GenericResponse(success=False, button_text="Retry",
                                        message="Failed to send OTP. Please ensure the number is a valid 10-digit WhatsApp number")
-
-            self.client_login_repository.save_otp_and_phone_number(otp=otp, phone_number=phone_number)
 
             return GenericResponse(success=True, button_text="Okay", header="Success!",
                                    message="OTP has been successfully sent. Please check your WhatsApp")
@@ -162,14 +162,12 @@ class ClientService:
             return LoginResponse(success=False, message="No OTP record found for the provided phone number",
                                  button_text="Understood", header="Oops!")
 
-        otp_list = []
         for login_record in login_records:
-            otp_list.append(login_record.otp)
-
-        if otp in otp_list:
-            client_record = self.client_repository.get_or_create_client_by_phone_number(phone_number=phone_number)
-            return LoginResponse(client_id=client_record.id, success=True, header="Success!",
-                                 message="OTP has been successfully verified", button_text="Proceed")
+            if login_record.otp == otp:
+                client_record = self.client_repository.get_or_create_client_by_phone_number(phone_number=phone_number)
+                otp_updated = self.client_login_repository.mark_otp_as_used(phone_number=phone_number, otp=otp)
+                return LoginResponse(client_id=client_record.id, success=True, header="Success!",
+                                     message="OTP has been successfully verified", button_text="Proceed")
         else:
             return LoginResponse(success=False, header="Failed",
                                  message="Invalid OTP. It may have expired or doesn't match the latest one.",
@@ -188,7 +186,10 @@ class ClientService:
                     user_status=("New"
                                  if record.first_login_time == record.first_ever_login_time
                                  else "Old"
-                                 )
+                                 ),
+                    otp_sent_successfully=record.otp_sent,
+                    login_success=record.otp_validated,
+                    total_profile_visited=record.total_profile_visited
                 )
                 signup_detail_dump_list.append(login_detail_dump)
 
