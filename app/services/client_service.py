@@ -25,6 +25,7 @@ from app.enums.niche import Niche
 from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
+from app.enums.response_action import ResponseAction
 from app.enums.sort_applied import SortApplied
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.client_login_repository import ClientLoginRepository
@@ -227,7 +228,7 @@ class ClientService:
 
         if not client_id or client_id == 1:
             return GenericResponse(success=False, button_text="One Step Signup", header="Login to start collaboration",
-                                   message="Log in to start collaboration — Zero commission, Zero upfront influencer fees !!")
+                                   message="Log in to explore complete influencers profiles and start collaboration — Zero commission, Zero upfront fees !!")
 
         try:
             all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
@@ -487,7 +488,7 @@ class ClientService:
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
 
         if request.client_id is None or request.client_id == 1:
-            return GenericResponse(success=False, button_text="One Step Signup",
+            return GenericResponse(success=False, button_text="One Step Signup", action=ResponseAction.LOGIN_REDIRECT,
                                    header="Signup & get 20 free profile unlocks",
                                    message="Use these unlocks to explore influencer profiles for free and find the best match for your brand — Zero commission, Zero upfront fees !!")
 
@@ -518,6 +519,7 @@ class ClientService:
 
             if not profile_visit_success:
                 return GenericResponse(success=False, button_text="Request Coins", header="Oops",
+                                       action=ResponseAction.API_CALL_RECHARGE,
                                        message="Your coin balance is currently zero. Please recharge to view more profiles")
 
             instagram_detail = None

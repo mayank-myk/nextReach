@@ -1,0 +1,8 @@
+from enum import Enum
+
+
+class ResponseAction(Enum):
+    NO_ACTION = "NO_ACTION"
+    LOGIN_REDIRECT = "LOGIN_REDIRECT"
+    API_CALL_RECHARGE = "API_CALL_RECHARGE"
+    API_CALL_COLLAB = "API_CALL_COLLAB"
