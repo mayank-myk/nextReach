@@ -138,7 +138,7 @@ async def collab_request_user_notification_via_whatsapp(client_phone_number: str
 
 
 async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id: str, client_id: str,
-                                                         influencer_id: str, client_name: str,
+                                                         influencer_id: str, client_name: Optional[str],
                                                          client_phone_number: str, influencer_name: str,
                                                          influencer_phone_number: str, content_price: int,
                                                          reach_price: int, followers: int, avg_views: int):
@@ -148,7 +148,7 @@ async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id:
             date,
             campaign_id,
             client_id,
-            client_name,
+            client_name if client_name else "",
             client_phone_number,
             influencer_id,
             influencer_name,
