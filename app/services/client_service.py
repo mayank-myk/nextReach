@@ -437,7 +437,9 @@ class ClientService:
         matched_influencer_basic_detail_list, unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(
             matched_influencers, unmatched_influencers, client_id)
 
-        if client_id and client_id > 1:
+        if not client_id or client_id == 1:
+            balance_profile_visit_count = 0
+        else:
             client = self.client_repository.get_client_by_id(client_id)
             balance_profile_visit_count = client.balance_profile_visits
             background_tasks.add_task(influencer_discovery_event, client.phone_number)
@@ -468,7 +470,7 @@ class ClientService:
 
         return InfluencerListing(
             client_id=client_id,
-            coin_balance=balance_profile_visit_count if client_id and client_id > 1 else None,
+            coin_balance=balance_profile_visit_count,
             matched_influencer_list=matched_influencer_basic_detail_list,
             unmatched_influencer_list=unmatched_influencer_basic_detail_list,
             filters_applied=filters_applied,
