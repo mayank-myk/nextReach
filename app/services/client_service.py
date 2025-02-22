@@ -468,7 +468,7 @@ class ClientService:
 
         return InfluencerListing(
             client_id=client_id,
-            coin_balance=balance_profile_visit_count,
+            coin_balance=balance_profile_visit_count if client_id and client_id > 1 else None,
             matched_influencer_list=matched_influencer_basic_detail_list,
             unmatched_influencer_list=unmatched_influencer_basic_detail_list,
             filters_applied=filters_applied,
