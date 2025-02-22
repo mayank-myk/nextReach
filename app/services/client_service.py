@@ -372,7 +372,7 @@ class ClientService:
             influencer_basic_detail_list.append(influencer_basic_detail)
         return influencer_basic_detail_list
 
-    def get_influencer_listing(self, client_id: int,
+    def get_influencer_listing(self, client_id: Optional[int],
                                page_number: int,
                                page_size: int,
                                sort_applied: SortApplied,
@@ -437,9 +437,7 @@ class ClientService:
         matched_influencer_basic_detail_list, unmatched_influencer_basic_detail_list = self.influencer_to_influencer_basic_detail(
             matched_influencers, unmatched_influencers, client_id)
 
-        if client_id == 1:
-            balance_profile_visit_count = 0
-        else:
+        if client_id and client_id > 1:
             client = self.client_repository.get_client_by_id(client_id)
             balance_profile_visit_count = client.balance_profile_visits
             background_tasks.add_task(influencer_discovery_event, client.phone_number)

@@ -118,7 +118,7 @@ def rate_campaign(rate_campaign_request: RateCampaign, db=Depends(db_manager.get
 @router.get('/influencer/discover')
 def get_influencer_listings(
         background_tasks: BackgroundTasks,
-        client_id: int = Query(1, description="Client Id", ge=1),
+        client_id: int = Query(None, description="Client Id"),
         page_number: int = Query(1, description="Page number to fetch", ge=1),
         page_size: int = Query(40, description="Number of influencers per page", ge=1, le=100),
         sort_applied: SortApplied = Query(SortApplied.RECOMMENDED, description="Sorting applied"),
