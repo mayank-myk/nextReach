@@ -272,7 +272,7 @@ class ClientService:
                                       influencer_metric.followers, influencer_metric.avg_views)
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
-                                   message="Collaboration created successfully! Our team will reach out to you shortly")
+                                   message="Collaboration request created successfully! Our team will reach out to you shortly")
         except Exception as e:
             _log.error(
                 f"Error occurred while creating collaboration request for client_id: {client_id}, influencer_id: {influencer_id}. Error: {str(e)}")
