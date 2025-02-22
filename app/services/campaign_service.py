@@ -314,7 +314,8 @@ class CampaignService:
                     views_charge=campaign.views_charge,
                     influencer_id=influencer.id,
                     influencer_name=influencer.name,
-                    insta_username=influencer.influencer_insta_metric[0].username if influencer.influencer_insta_metric else None,
+                    insta_username=influencer.influencer_insta_metric[
+                        0].username if influencer.influencer_insta_metric else None,
                     stage=campaign.stage.value,
                     ageing_day=(
                             datetime.today() - campaign.content_post_date).days if campaign.content_post_date else None,
@@ -438,8 +439,8 @@ class CampaignService:
                     campaign_id=campaign_id, campaign_request=request)
 
                 influencer_username = self.get_influencer_username(db_campaign.influencer)
-                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.client.phone_number,
-                                          db_campaign.client.name, influencer_username,
+                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.id,
+                                          db_campaign.client.phone_number, influencer_username,
                                           CampaignStage.INFLUENCER_FINALIZED)
                 return GenericResponse(success=True, header="Success",
                                        message="Campaign updated successfully, campaign_id {}".format(
@@ -474,8 +475,8 @@ class CampaignService:
                     campaign_id=campaign_id, content_shoot_date=content_shoot_date)
 
                 influencer_username = self.get_influencer_username(db_campaign.influencer)
-                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.client.phone_number,
-                                          db_campaign.client.name, influencer_username,
+                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.id,
+                                          db_campaign.client.phone_number, influencer_username,
                                           CampaignStage.SHOOT_COMPLETED)
                 return GenericResponse(success=True, header="Success",
                                        message="Campaign updated successfully, campaign_id {}".format(
@@ -525,8 +526,8 @@ class CampaignService:
                 updated_campaign = self.campaign_repository.update_campaign_to_content_posted(
                     campaign_id=campaign_id, campaign_request=request)
                 influencer_username = self.get_influencer_username(db_campaign.influencer)
-                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.client.phone_number,
-                                          db_campaign.client.name, influencer_username,
+                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.id,
+                                          db_campaign.client.phone_number, influencer_username,
                                           CampaignStage.CONTENT_POSTED)
                 return GenericResponse(success=True, header="Success",
                                        message="Campaign updated successfully, campaign_id {}".format(
@@ -575,8 +576,8 @@ class CampaignService:
                     campaign_id=campaign_id, campaign_request=request)
 
                 influencer_username = self.get_influencer_username(db_campaign.influencer)
-                background_tasks.add_task(campaign_update_notification_via_whatsapp,
-                                          db_campaign.client.phone_number, db_campaign.client.name,
+                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.id,
+                                          db_campaign.client.phone_number,
                                           influencer_username, CampaignStage.DAY2_BILLING)
 
                 return GenericResponse(success=True, header="Success",
@@ -637,8 +638,8 @@ class CampaignService:
                     campaign_id=campaign_id, campaign_request=request, post_insights=post_insights)
 
                 influencer_username = self.get_influencer_username(db_campaign.influencer)
-                background_tasks.add_task(campaign_update_notification_via_whatsapp,
-                                          db_campaign.client.phone_number, db_campaign.client.name,
+                background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.id,
+                                          db_campaign.client.phone_number,
                                           influencer_username, CampaignStage.DAY8_BILLING)
 
                 return GenericResponse(success=True, header="Success",
@@ -658,8 +659,8 @@ class CampaignService:
         if db_campaign:
             updated_campaign = self.campaign_repository.update_campaign_to_cancelled(campaign_id=campaign_id)
             influencer_username = self.get_influencer_username(db_campaign.influencer)
-            background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.client.phone_number,
-                                      db_campaign.client.name, influencer_username,
+            background_tasks.add_task(campaign_update_notification_via_whatsapp, db_campaign.id,
+                                      db_campaign.client.phone_number, influencer_username,
                                       CampaignStage.CANCELLED)
             return GenericResponse(success=True, header="Success",
                                    message="Campaign updated successfully, campaign_id {}".format(

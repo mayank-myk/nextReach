@@ -22,36 +22,41 @@ HEADERS = {
 API_URL = "https://api.interakt.ai/v1/public/message/"
 
 
-def build_payload(phone_number: str, template_name: str, body_values: List[str]) -> Dict:
+def build_payload(phone_number: str, template_name: str, body_values: List[str],
+                  button_values: Optional[List[str]]) -> Dict:
     """Builds the payload for the WhatsApp API."""
-    return {
-        "countryCode": "+91",
-        "phoneNumber": phone_number,
-        "callbackData": "some text here",
-        "type": "Template",
-        "template": {
-            "name": template_name,
-            "languageCode": "en",
-            "bodyValues": body_values
-        }
-    }
-
-
-def send_sync_whatsapp_message(phone_number: str, template_name: str, body_values: List[str], command: str) -> bool:
-    payload = {
-        "countryCode": "+91",
-        "phoneNumber": phone_number,
-        "callbackData": "some text here",
-        "type": "Template",
-        "template": {
-            "name": template_name,
-            "languageCode": "en",
-            "bodyValues": body_values,
-            "buttonValues": {
-                "1": body_values
+    if not button_values:
+        return {
+            "countryCode": "+91",
+            "phoneNumber": phone_number,
+            "callbackData": "some text here",
+            "type": "Template",
+            "template": {
+                "name": template_name,
+                "languageCode": "en",
+                "bodyValues": body_values
             }
         }
-    }
+    else:
+        return {
+            "countryCode": "+91",
+            "phoneNumber": phone_number,
+            "callbackData": "some text here",
+            "type": "Template",
+            "template": {
+                "name": template_name,
+                "languageCode": "en",
+                "bodyValues": body_values,
+                "buttonValues": {
+                    "0": button_values
+                }
+            }
+        }
+
+
+def send_sync_whatsapp_message(phone_number: str, template_name: str, body_values: List[str], command: str,
+                               button_values: Optional[List[str]]) -> bool:
+    payload = build_payload(phone_number, template_name, body_values, button_values)
 
     try:
         response = requests.post(API_URL, json=payload, headers=HEADERS)
@@ -70,9 +75,9 @@ def send_sync_whatsapp_message(phone_number: str, template_name: str, body_value
 
 
 async def send_async_whatsapp_message(phone_number: str, template_name: str, body_values: List[str],
-                                      command: str) -> bool:
+                                      command: str, button_values: Optional[List[str]] = None) -> bool:
     """Sends a WhatsApp message using the Interakt API."""
-    payload = build_payload(phone_number, template_name, body_values)
+    payload = build_payload(phone_number, template_name, body_values, button_values)
     async with httpx.AsyncClient() as client:
         try:
             response = await client.post(API_URL, json=payload, headers=HEADERS)
@@ -92,7 +97,7 @@ async def send_async_whatsapp_message(phone_number: str, template_name: str, bod
 
 def send_otp_via_whatsapp(phone_number: str, otp: str):
     """Synchronous OTP sending."""
-    return send_sync_whatsapp_message(phone_number, "verification", [str(otp)], "User OTP")
+    return send_sync_whatsapp_message(phone_number, "verification", [str(otp)], "User OTP", [str(otp)])
 
 
 async def notify_admins(template_name: str, body_values: List[str], command: str):
@@ -162,20 +167,15 @@ async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id:
     )
 
 
-async def campaign_update_notification_via_whatsapp(client_phone_number: Optional[str], client_name: Optional[str],
+async def campaign_update_notification_via_whatsapp(campaign_id: int, client_phone_number: str,
                                                     influencer_name: str,
                                                     campaign_status: CampaignStage):
-    user_name = ""
-    if client_name:
-        user_name = client_name
-    elif client_phone_number:
-        user_name = client_phone_number
-
     await send_async_whatsapp_message(
         client_phone_number,
-        "campaign_update_client",
-        [user_name, influencer_name, campaign_stage_to_user_friendly_str(campaign_status)],
-        "Campaign Update User"
+        "campaign_stage_update_client",
+        [influencer_name, campaign_stage_to_user_friendly_str(campaign_status)],
+        "Campaign Update User",
+        [str(campaign_id)]
     )
 
 
