@@ -29,7 +29,7 @@ def int_to_str_k(count) -> Optional[str]:
             return f"{value} M"  # Converts to "m" for millions
 
     elif count >= 1000:  # For thousands
-        value = count / 1000
+        value = round(count / 1000, 1)
         if value % 1 == 0:  # If the number is an integer
             return f"{int(value)}K"
         else:
