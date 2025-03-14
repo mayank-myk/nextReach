@@ -25,7 +25,6 @@ from app.enums.niche import Niche
 from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
-from app.enums.response_action import ResponseAction
 from app.enums.sort_applied import SortApplied
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.client_login_repository import ClientLoginRepository
@@ -361,7 +360,8 @@ class ClientService:
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                profile_visited=True if influencer.id in visited_profiles else False,
+                profile_visited=False,
+                # profile_visited=True if influencer.id in visited_profiles else False,
                 views_charge=format_to_views_charge(influencer.views_charge),
                 content_charge=format_to_rupees(influencer.content_charge),
                 insta_followers=int_to_str_k(
@@ -487,10 +487,10 @@ class ClientService:
 
     def get_influencer_insight(self, request: InfluencerInsights) -> InfluencerDetail | GenericResponse:
 
-        if request.client_id is None or request.client_id == 1:
-            return GenericResponse(success=False, button_text="One Step Signup", action=ResponseAction.LOGIN_REDIRECT,
-                                   header="Signup & get 20 free profile unlocks",
-                                   message="Use these unlocks to explore influencer profiles for free and find the best match for your brand — Zero commission, Zero upfront fees !!")
+        # if request.client_id is None or request.client_id == 1:
+        #     return GenericResponse(success=False, button_text="One Step Signup", action=ResponseAction.LOGIN_REDIRECT,
+        #                            header="Signup & get 20 free profile unlocks",
+        #                            message="Use these unlocks to explore influencer profiles for free and find the best match for your brand — Zero commission, Zero upfront fees !!")
 
         try:
 
@@ -514,13 +514,13 @@ class ClientService:
                 return GenericResponse(success=False, button_text="Understood", header="Failed",
                                        message="Something went wrong, unable to fetch complete details for the influencer")
 
-            profile_visit_success = self.track_profile_visit(client_id=request.client_id,
-                                                             influencer_id=request.influencer_id)
-
-            if not profile_visit_success:
-                return GenericResponse(success=False, button_text="Request Coins", header="Oops",
-                                       action=ResponseAction.API_CALL_RECHARGE,
-                                       message="Your coin balance is currently zero. Please recharge to view more profiles")
+            # profile_visit_success = self.track_profile_visit(client_id=request.client_id,
+            #                                                  influencer_id=request.influencer_id)
+            #
+            # if not profile_visit_success:
+            #     return GenericResponse(success=False, button_text="Request Coins", header="Oops",
+            #                            action=ResponseAction.API_CALL_RECHARGE,
+            #                            message="Your coin balance is currently zero. Please recharge to view more profiles")
 
             instagram_detail = None
             if influencer_insta_metric:
@@ -655,15 +655,15 @@ class ClientService:
                                                       fb_detail=facebook_detail)
 
             collaboration_request_raised = False
-            all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
-                client_id=request.client_id, influencer_id=request.influencer_id)
-            for request in all_collaboration_request_raised:
-                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED,
-                                     CampaignStage.SHOOT_COMPLETED,
-                                     CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING,
-                                     CampaignStage.DAY8_BILLING]:
-                    collaboration_request_raised = True
-                    continue
+            # all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
+            #     client_id=request.client_id, influencer_id=request.influencer_id)
+            # for request in all_collaboration_request_raised:
+            #     if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED,
+            #                          CampaignStage.SHOOT_COMPLETED,
+            #                          CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING,
+            #                          CampaignStage.DAY8_BILLING]:
+            #         collaboration_request_raised = True
+            #         continue
 
             all_campaign_for_an_influencer = self.campaign_repository.get_all_completed_campaign_for_an_influencer(
                 influencer_id=request.influencer_id)
