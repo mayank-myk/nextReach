@@ -7,7 +7,7 @@ from app.enums.status import Status
 
 
 class WaitListRequest(BaseModel):
-    entity_type: EntityType
+    entity_type: EntityType = EntityType.CLIENT
     name: str = Field(..., max_length=255)
     phone_number: str = Field(..., min_length=10, max_length=10)
     email: Optional[str] = Field(None, max_length=255)
