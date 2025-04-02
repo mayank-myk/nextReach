@@ -27,5 +27,6 @@ class InfluencerRequest(BaseModel):
     city: City
     collab_type: CollabType
     deliverables: Optional[List[str]] = None
-    content_charge: int = Field(..., ge=0)
-    views_charge: int = Field(..., ge=0)
+    # content_charge: int = Field(..., ge=0)
+    # views_charge: int = Field(..., ge=0)
+    fixed_charge: int = Field(..., ge=0)

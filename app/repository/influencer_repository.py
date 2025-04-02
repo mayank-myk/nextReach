@@ -67,7 +67,8 @@ class InfluencerRepository:
             collab_type=influencer_request.collab_type,
             deliverables=influencer_request.deliverables,
             content_charge=influencer_request.content_charge,
-            views_charge=influencer_request.views_charge
+            views_charge=influencer_request.views_charge,
+            fixed_charge=influencer_request.fixed_charge
         )
 
         self.db.add(db_influencer)
@@ -132,6 +133,9 @@ class InfluencerRepository:
 
             if hasattr(influencer_request, 'views_charge') and influencer_request.views_charge is not None:
                 setattr(existing_influencer, 'views_charge', influencer_request.views_charge)
+
+            if hasattr(influencer_request, 'fixed_charge') and influencer_request.fixed_charge is not None:
+                setattr(existing_influencer, 'fixed_charge', influencer_request.fixed_charge)
 
             self.db.commit()
             self.db.refresh(existing_influencer)

@@ -245,6 +245,7 @@ class InfluencerService:
                     email=influencer.email,
                     content_charge=influencer.content_charge,
                     views_charge=influencer.views_charge,
+                    fixed_charge=influencer.fixed_charge,
                     niche=[niche.value for niche in influencer.niche] if influencer.niche else None,
                     gender=influencer.gender.value if influencer.gender else None,
                     languages=[lang.value for lang in influencer.languages] if influencer.languages else None,

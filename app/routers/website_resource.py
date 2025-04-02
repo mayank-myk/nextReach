@@ -34,7 +34,8 @@ def get_web_metadata(client_id: int = Query(None, description="Client Id", ge=1)
 
 
 @router.post("/create/lead")
-def create_lead(background_tasks: BackgroundTasks, request: WaitListRequest, db=Depends(db_manager.get_db)) -> GenericResponse:
+def create_lead(background_tasks: BackgroundTasks, request: WaitListRequest,
+                db=Depends(db_manager.get_db)) -> GenericResponse:
     web_service = WebService(db)
     return web_service.create_lead(background_tasks=background_tasks, request=request)
 

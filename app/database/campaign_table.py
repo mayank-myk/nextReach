@@ -30,6 +30,7 @@ class Campaign(Base):
     stage = Column(Enum(CampaignStage), nullable=False)
     content_charge = Column(Integer, CheckConstraint('content_charge >= 0'), nullable=True)
     views_charge = Column(Integer, CheckConstraint('views_charge >= 0'), nullable=True)
+    fixed_charge = Column(Integer, CheckConstraint('fixed_charge >= 0'), nullable=True)
     type_of_content = Column(Enum(ContentType), nullable=True)
     campaign_notes = Column(String(1000), nullable=True)
 

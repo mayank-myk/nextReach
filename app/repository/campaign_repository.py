@@ -38,6 +38,7 @@ class CampaignRepository:
             stage=CampaignStage.CREATED,
             content_charge=campaign_request.content_charge,
             views_charge=campaign_request.views_charge,
+            fixed_charge=campaign_request.fixed_charge,
             type_of_content=campaign_request.type_of_content,
             campaign_notes=campaign_request.campaign_notes,
             rating=campaign_request.rating,
@@ -86,6 +87,7 @@ class CampaignRepository:
             influencer_id=influencer.id,
             content_charge=influencer.content_charge,
             views_charge=influencer.views_charge,
+            fixed_charge=influencer.fixed_charge,
             client_id=client_id,
             stage=CampaignStage.CREATED,
             campaign_notes=COLLAB_DATE_DICT[collab_date] if collab_date else None

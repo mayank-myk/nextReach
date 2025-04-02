@@ -44,6 +44,7 @@ class Influencer(Base):
     deliverables = Column(ARRAY(String), nullable=True)
     content_charge = Column(Integer, CheckConstraint('content_charge >= 0'), default=0)
     views_charge = Column(Integer, CheckConstraint('views_charge >= 0'), default=0)
+    fixed_charge = Column(Integer, CheckConstraint('fixed_charge >= 0'), default=0)
 
     # The relationship to SocialMediaDetail (One-to-Many)
     influencer_insta_metric = relationship(

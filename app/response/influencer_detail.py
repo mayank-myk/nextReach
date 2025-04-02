@@ -29,6 +29,7 @@ class InfluencerDetail(BaseModel):
     deliverables: Optional[List[str]] = None
     content_charge: str
     views_charge: str
+    fixed_charge: str
     collab_charge: Optional[InfluencerCollabCharge] = None
     platform_details: InfluencerMetricDetail
     influencer_review: Optional[InfluencerReview] = None

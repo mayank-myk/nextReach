@@ -28,5 +28,6 @@ class UpdateInfluencerRequest(BaseModel):
     city: Optional[City] = None
     collab_type: Optional[CollabType] = None
     deliverables: Optional[List[str]] = None
-    content_charge: Optional[int] = Field(None, ge=0)
-    views_charge: Optional[int] = Field(None, ge=0)
+    # content_charge: Optional[int] = Field(None, ge=0)
+    # views_charge: Optional[int] = Field(None, ge=0)
+    fixed_charge: Optional[int] = Field(None, ge=0)

@@ -16,6 +16,7 @@ class CampaignRequest(BaseModel):
     stage: CampaignStage  # Required field (assuming it's an enum)
     content_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     views_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
+    fixed_charge: Optional[int] = Field(None, ge=0)  # Optional, but must be int if provided
     type_of_content: Optional[ContentType] = None  # Optional enum
     campaign_notes: Optional[str] = None  # Optional string
     rating: Optional[int] = Field(None, ge=0, le=5)  # Optional, but must be int between 0 and 5
