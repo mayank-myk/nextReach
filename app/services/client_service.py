@@ -655,15 +655,15 @@ class ClientService:
                                                       fb_detail=facebook_detail)
 
             collaboration_request_raised = False
-            # all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
-            #     client_id=request.client_id, influencer_id=request.influencer_id)
-            # for request in all_collaboration_request_raised:
-            #     if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED,
-            #                          CampaignStage.SHOOT_COMPLETED,
-            #                          CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING,
-            #                          CampaignStage.DAY8_BILLING]:
-            #         collaboration_request_raised = True
-            #         continue
+            all_collaboration_request_raised = self.campaign_repository.get_all_running_campaign_with_an_influencer(
+                client_id=request.client_id, influencer_id=request.influencer_id)
+            for request in all_collaboration_request_raised:
+                if request.stage in [CampaignStage.CREATED, CampaignStage.INFLUENCER_FINALIZED,
+                                     CampaignStage.SHOOT_COMPLETED,
+                                     CampaignStage.CONTENT_POSTED, CampaignStage.DAY2_BILLING,
+                                     CampaignStage.DAY8_BILLING]:
+                    collaboration_request_raised = True
+                    continue
 
             all_campaign_for_an_influencer = self.campaign_repository.get_all_completed_campaign_for_an_influencer(
                 influencer_id=request.influencer_id)
@@ -703,6 +703,7 @@ class ClientService:
                 deliverables=influencer.deliverables,
                 content_charge=format_to_rupees(influencer.content_charge),
                 views_charge=format_to_views_charge(influencer.views_charge),
+                fixed_charge=format_to_rupees(influencer.fixed_charge),
                 collab_charge=get_collab_charge(influencer, influencer_primary_metric),
                 platform_details=platform_details,
                 influencer_review=influencer_review)
