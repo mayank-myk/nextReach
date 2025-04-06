@@ -8,7 +8,7 @@ from app.enums.campaign_stage import CampaignStage
 from app.enums.entity_type import EntityType
 from app.enums.platform import Platform
 from app.utils.converters import format_to_currency, format_to_views_charge, int_to_str_k, \
-    campaign_stage_to_user_friendly_str
+    campaign_stage_to_user_friendly_str, influencer_charge_string
 from app.utils.logger import configure_logger
 
 logger = configure_logger()
@@ -55,11 +55,11 @@ def build_payload(phone_number: str, template_name: str, body_values: List[str],
 
 
 def send_sync_whatsapp_message(phone_number: str, template_name: str, body_values: List[str], command: str,
-                               button_values: Optional[List[str]]) -> bool:
+                               button_values: Optional[List[str]] = None) -> bool:
     payload = build_payload(phone_number, template_name, body_values, button_values)
 
     try:
-        response = requests.post(API_URL, json=payload, headers=HEADERS)
+        response = requests.post(API_URL, json=payload, headers=HEADERS, verify=False)
         response.raise_for_status()
 
         if response.status_code // 100 == 2:
@@ -122,33 +122,32 @@ async def contact_us_notification_via_whatsapp(entity_type: EntityType, name: st
 
 
 async def collab_request_user_notification_via_whatsapp(client_phone_number: str, date: str, influencer_name: str,
-                                                        primary_platform: Platform, profile_link: str,
-                                                        content_price: int, reach_price: int, followers: int,
-                                                        avg_views: int):
+                                                        primary_platform: Platform, deliverables: list,
+                                                        profile_link: str, fixed_price: int, followers: int,
+                                                        avg_views: int, campaign_id: int):
     await send_async_whatsapp_message(
         client_phone_number,
-        "collab_request_user",
+        "collab_request_raised_user",
         [
             date,
             influencer_name,
             primary_platform.value,
             profile_link,
-            format_to_currency(content_price),
-            format_to_views_charge(reach_price),
+            influencer_charge_string(fixed_price, deliverables),
             int_to_str_k(followers),
             int_to_str_k(avg_views)
         ],
-        "Collab Request User"
+        "Collab Request User",
+        [str(campaign_id)]
     )
 
 
 async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id: str, client_id: str,
                                                          influencer_id: str, client_name: Optional[str],
                                                          client_phone_number: str, influencer_name: str,
-                                                         influencer_phone_number: str, content_price: int,
-                                                         reach_price: int, followers: int, avg_views: int):
+                                                         influencer_phone_number: str, fixed_price: int):
     await notify_admins(
-        "incoming_collab_request",
+        "collab_request_admin",
         [
             date,
             campaign_id,
@@ -158,13 +157,22 @@ async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id:
             influencer_id,
             influencer_name,
             influencer_phone_number,
-            format_to_currency(content_price),
-            format_to_views_charge(reach_price),
-            int_to_str_k(followers),
-            int_to_str_k(avg_views)
+            format_to_currency(fixed_price)
         ],
         "Collab Request Admin"
     )
+
+
+def influencer_contact_detail_via_whatsapp(phone_number: str, influencer_name: str, profile_link: str,
+                                           influencer_phone_number: str, influencer_email: str,
+                                           fixed_price: int, deliverables: list):
+    return send_sync_whatsapp_message(phone_number, "influencer_contact_detail", [
+        influencer_name,
+        profile_link,
+        influencer_phone_number,
+        influencer_email,
+        influencer_charge_string(fixed_price, deliverables)
+    ], "Influencer Contact Detail")
 
 
 async def campaign_update_notification_via_whatsapp(campaign_id: int, client_phone_number: str,

@@ -8,7 +8,7 @@ from fastapi import BackgroundTasks
 from app.api_requests.influencer_insights import InfluencerInsights
 from app.api_requests.profile_update import ProfileUpdate
 from app.clients.interakt_client import send_otp_via_whatsapp, collab_request_user_notification_via_whatsapp, \
-    collab_request_admin_notification_via_whatsapp
+    collab_request_admin_notification_via_whatsapp, influencer_contact_detail_via_whatsapp
 from app.clients.meta_client import MetaAPIClient
 from app.enums.average_view import AverageView
 from app.enums.budget import Budget
@@ -25,6 +25,7 @@ from app.enums.niche import Niche
 from app.enums.platform import Platform
 from app.enums.rating import Rating
 from app.enums.reach_price import ReachPrice
+from app.enums.response_action import ResponseAction
 from app.enums.sort_applied import SortApplied
 from app.repository.campaign_repository import CampaignRepository
 from app.repository.client_login_repository import ClientLoginRepository
@@ -221,9 +222,50 @@ class ClientService:
 
         pass
 
+    def get_influencer_contact(self, client_id: Optional[int], influencer_id: int) -> GenericResponse:
+
+        if not client_id or client_id == 1:
+            return GenericResponse(success=False, button_text="One Step Signup", header="Login to get contact details",
+                                   message="Log in to explore complete influencers profiles and get contact details - Free of cost !!",
+                                   action=ResponseAction.LOGIN_REDIRECT)
+
+        else:
+            client = self.client_repository.get_client_by_id(client_id)
+            influencer = self.influencer_repository.get_influencer_by_id(influencer_id=influencer_id)
+
+            if influencer.primary_platform == Platform.FACEBOOK:
+                influencer_metric = self.influencer_metric_repository.get_latest_influencer_fb_metric(
+                    influencer_id=influencer_id)
+            elif influencer.primary_platform == Platform.YOUTUBE:
+                influencer_metric = self.influencer_metric_repository.get_latest_influencer_yt_metric(
+                    influencer_id=influencer_id)
+            else:
+                influencer_metric = self.influencer_metric_repository.get_latest_influencer_insta_metric(
+                    influencer_id=influencer_id)
+
+            try:
+                message_sent_successfully = influencer_contact_detail_via_whatsapp(phone_number=client.phone_number,
+                                                                                   influencer_name=influencer.name,
+                                                                                   profile_link=influencer_metric.profile_link,
+                                                                                   influencer_phone_number=influencer.phone_number,
+                                                                                   influencer_email=influencer.email,
+                                                                                   fixed_price=influencer.fixed_charge,
+                                                                                   deliverables=influencer.deliverables)
+
+                if not message_sent_successfully:
+                    return GenericResponse(success=False, button_text="Retry",
+                                           message="Something went wrong while sending contact details")
+
+                return GenericResponse(success=True, button_text="Okay", header="Success!",
+                                       message="Influencer contact details has been successfully sent to your WhatsApp")
+            except Exception as ex:
+                _log.error(
+                    f"Unable to send contact details to client_id: {client_id} for influencer_id: {influencer_id}. Error: {str(ex)}")
+                return GenericResponse(success=False, button_text="Try Again Later",
+                                       message="Something went wrong while sending contact details")
+
     def request_collab(self, background_tasks: BackgroundTasks, created_by: str, client_id: Optional[int],
-                       influencer_id: int,
-                       collab_date: Optional[CollabDate]) -> GenericResponse:
+                       influencer_id: int, collab_date: Optional[CollabDate]) -> GenericResponse:
 
         if not client_id or client_id == 1:
             return GenericResponse(success=False, button_text="One Step Signup", header="Login to start collaboration",
@@ -258,17 +300,16 @@ class ClientService:
 
             background_tasks.add_task(collab_request_user_notification_via_whatsapp, new_campaign.client.phone_number,
                                       datetime.today().strftime("%b %d, %Y"),
-                                      influencer_metric.username, influencer.primary_platform,
-                                      influencer_metric.profile_link,
-                                      new_campaign.content_charge, new_campaign.views_charge,
-                                      influencer_metric.followers, influencer_metric.avg_views)
+                                      influencer_metric.username, influencer.primary_platform, influencer.deliverables,
+                                      influencer_metric.profile_link, new_campaign.fixed_charge,
+                                      influencer_metric.followers,
+                                      influencer_metric.followers, influencer_metric.avg_views, new_campaign.id)
 
             background_tasks.add_task(collab_request_admin_notification_via_whatsapp,
                                       datetime.today().strftime("%b %d, %Y"), str(new_campaign.id),
                                       str(new_campaign.client.id), str(influencer.id), new_campaign.client.name,
                                       new_campaign.client.phone_number, influencer_metric.username,
-                                      influencer.phone_number, new_campaign.content_charge, new_campaign.views_charge,
-                                      influencer_metric.followers, influencer_metric.avg_views)
+                                      influencer.phone_number, new_campaign.fixed_charge)
 
             return GenericResponse(success=True, header="Success!", button_text="Thank You",
                                    message="Collaboration request created successfully! Our team will reach out to you shortly")
@@ -360,10 +401,10 @@ class ClientService:
                 profile_picture=influencer.profile_picture,
                 niche=influencer.niche,
                 city=influencer.city,
-                profile_visited=False,
-                # profile_visited=True if influencer.id in visited_profiles else False,
+                profile_visited=True if influencer.id in visited_profiles else False,
                 views_charge=format_to_views_charge(influencer.views_charge),
                 content_charge=format_to_rupees(influencer.content_charge),
+                fixed_charge=format_to_rupees(influencer.fixed_charge),
                 insta_followers=int_to_str_k(
                     influencer_metric.insta_followers) if influencer_metric.insta_followers else None,
                 yt_followers=int_to_str_k(influencer_metric.yt_followers) if influencer_metric.yt_followers else None,
@@ -514,13 +555,13 @@ class ClientService:
                 return GenericResponse(success=False, button_text="Understood", header="Failed",
                                        message="Something went wrong, unable to fetch complete details for the influencer")
 
-            # profile_visit_success = self.track_profile_visit(client_id=request.client_id,
-            #                                                  influencer_id=request.influencer_id)
-            #
-            # if not profile_visit_success:
-            #     return GenericResponse(success=False, button_text="Request Coins", header="Oops",
-            #                            action=ResponseAction.API_CALL_RECHARGE,
-            #                            message="Your coin balance is currently zero. Please recharge to view more profiles")
+            profile_visit_success = self.track_profile_visit(client_id=request.client_id,
+                                                             influencer_id=request.influencer_id)
+
+            if not profile_visit_success:
+                return GenericResponse(success=False, button_text="Request Coins", header="Oops",
+                                       action=ResponseAction.API_CALL_RECHARGE,
+                                       message="Your coin balance is currently zero. Please recharge to view more profiles")
 
             instagram_detail = None
             if influencer_insta_metric:
@@ -699,6 +740,9 @@ class ClientService:
                 next_reach_score=influencer.next_reach_score,
                 niche=influencer.niche,
                 city=influencer.city,
+                blue_tick=influencer.blue_tick,
+                content_type=influencer.content_type,
+                content_subject=influencer.content_subject,
                 collab_type=influencer.collab_type,
                 deliverables=influencer.deliverables,
                 content_charge=format_to_rupees(influencer.content_charge),

@@ -1,11 +1,13 @@
 import datetime
 
-from sqlalchemy import Column, String, DateTime, Integer, Enum, ARRAY, CheckConstraint, Date
+from sqlalchemy import Column, String, DateTime, Integer, Enum, ARRAY, CheckConstraint, Date, Boolean
 from sqlalchemy.orm import relationship
 
 from app.database.session import Base
 from app.enums.city import City
 from app.enums.collab_type import CollabType
+from app.enums.content_subject import ContentSubject
+from app.enums.content_type import ContentType
 from app.enums.gender import Gender
 from app.enums.language import Language
 from app.enums.niche import Niche
@@ -36,9 +38,12 @@ class Influencer(Base):
     languages = Column(ARRAY(Enum(Language, name="language_enum")), nullable=True)  # List of languages
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)
     dob = Column(Date, nullable=True)
+    blue_tick = Column(Boolean, nullable=True, default=True)
 
     # Niche and business location
     niche = Column(ARRAY(Enum(Niche, name="niche_enum")), nullable=True)
+    content_type = Column(Enum(ContentType), nullable=True)
+    content_subject = Column(Enum(ContentSubject), nullable=True)
     city = Column(Enum(City), nullable=False)
     collab_type = Column(Enum(CollabType), nullable=False)
     deliverables = Column(ARRAY(String), nullable=True)

@@ -2,7 +2,6 @@ from typing import Optional, List
 
 from sqlalchemy import or_, func, desc
 from sqlalchemy.orm import Session, aliased
-from sqlalchemy.sql.functions import coalesce
 
 from app.api_requests.influencer_request import InfluencerRequest
 from app.api_requests.update_influencer_request import UpdateInfluencerRequest
@@ -276,11 +275,8 @@ class InfluencerRepository:
             if platform:
                 query = query.filter(Influencer.primary_platform == platform)
             if budget:
-                avg_views_safe = coalesce(metric_table.avg_views, 0)
-                budget_calculation = Influencer.content_charge + (Influencer.views_charge * avg_views_safe) // 1000
-                query = query.filter(
-                    budget_calculation.between(BUDGET_DICT[budget][0], BUDGET_DICT[budget][1])
-                )
+                query = query.filter(Influencer.fixed_charge.between(BUDGET_DICT[budget][0],
+                                                                     BUDGET_DICT[budget][1]))
             if content_price:
                 query = query.filter(Influencer.content_charge.between(CONTENT_PRICE_DICT[content_price][0],
                                                                        CONTENT_PRICE_DICT[content_price][1]))
@@ -304,7 +300,11 @@ class InfluencerRepository:
             final_query = queries[0]
 
             # Apply sorting based on the 'sort_applied' parameter
-        if sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
+        if sort_applied == SortApplied.FIXED_PRICE_LOW_TO_HIGH:
+            query = final_query.order_by(Influencer.fixed_charge.asc())  # Sort by content charge in ascending order
+        elif sort_applied == SortApplied.FIXED_PRICE_HIGH_TO_LOW:
+            query = final_query.order_by(Influencer.fixed_charge.desc())  # Sort by content charge in descending order
+        elif sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
             query = final_query.order_by(Influencer.content_charge.asc())  # Sort by content charge in ascending order
         elif sort_applied == SortApplied.CONTENT_PRICE_HIGH_TO_LOW:
             query = final_query.order_by(Influencer.content_charge.desc())  # Sort by content charge in descending order
@@ -394,7 +394,11 @@ class InfluencerRepository:
         # final_query = self.db.query(Influencer).filter(Influencer.id.in_(unique_influencer_ids_subquery))
 
         # Apply sorting AFTER merging queries
-        if sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
+        if sort_applied == SortApplied.FIXED_PRICE_LOW_TO_HIGH:
+            final_query = final_query.order_by(Influencer.fixed_charge.asc())
+        elif sort_applied == SortApplied.FIXED_PRICE_HIGH_TO_LOW:
+            final_query = final_query.order_by(Influencer.fixed_charge.desc())
+        elif sort_applied == SortApplied.CONTENT_PRICE_LOW_TO_HIGH:
             final_query = final_query.order_by(Influencer.content_charge.asc())
         elif sort_applied == SortApplied.CONTENT_PRICE_HIGH_TO_LOW:
             final_query = final_query.order_by(Influencer.content_charge.desc())

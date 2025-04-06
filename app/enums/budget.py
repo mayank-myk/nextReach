@@ -12,8 +12,8 @@ class Budget(Enum):
 
 BUDGET_DICT = {
     Budget.LE_10: [0, 13000],
-    Budget.BTN_10_25: [8000, 32000],
-    Budget.BTN_25_50: [20000, 65000],
+    Budget.BTN_10_25: [8000, 30000],
+    Budget.BTN_25_50: [20000, 60000],
     Budget.BTN_50_75: [40000, 90000],
     Budget.BTN_75_100: [60000, 130000],
     Budget.GE_100: [80000, 10000000]

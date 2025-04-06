@@ -108,6 +108,7 @@ class CampaignService:
                 city=influencer.city,
                 views_charge=format_to_views_charge(existing_campaign.views_charge),
                 content_charge=format_to_rupees(existing_campaign.content_charge),
+                fixed_charge=format_to_rupees(existing_campaign.fixed_charge),
                 profile_visited=True
             )
 
@@ -312,6 +313,7 @@ class CampaignService:
                     client_phone_number=client.phone_number,
                     content_charge=campaign.content_charge,
                     views_charge=campaign.views_charge,
+                    fixed_charge=campaign.fixed_charge,
                     influencer_id=influencer.id,
                     influencer_name=influencer.name,
                     insta_username=influencer.influencer_insta_metric[

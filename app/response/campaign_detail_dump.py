@@ -17,6 +17,7 @@ class CampaignDetailDump(BaseModel):
     insta_username: Optional[str] = None
     content_charge: int
     views_charge: int
+    fixed_charge: int
 
     influencer_finalization_date: Optional[str] = None
     content_shoot_date: Optional[str] = None

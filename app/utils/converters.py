@@ -102,6 +102,22 @@ def format_to_currency(value: int):
         return "NOT_FOUND"
 
 
+def influencer_charge_string(charge: int, deliverables: list):
+    if not charge or charge <= 0:
+        charge_str = "Price not available"
+    else:
+        charge_str = f"₹{format_to_currency(charge)} (Negotiable)"
+
+    if deliverables:
+        deliverables_str = ", ".join([str(deliverable) for deliverable in deliverables if deliverable])
+        if deliverables_str:
+            return f"{charge_str} for {deliverables_str}"
+        else:
+            return charge_str
+    else:
+        return charge_str
+
+
 def format_to_views_charge(value: int):
     if value and value > 0:
         return "₹" + str(value) + " per 1000 views"

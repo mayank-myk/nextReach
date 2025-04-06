@@ -87,6 +87,12 @@ def remove_from_watchlist(request: CollabRequest, db=Depends(db_manager.get_db))
     return client_service.remove_from_watchlist(client_id=request.client_id, influencer_id=request.influencer_id)
 
 
+@router.post("/influencer/contact")
+def get_influencer_contact(request: InfluencerInsights, db=Depends(db_manager.get_db)) -> GenericResponse:
+    client_service = ClientService(db)
+    return client_service.get_influencer_contact(client_id=request.client_id, influencer_id=request.influencer_id)
+
+
 @router.post("/request/collab")
 def request_collab(background_tasks: BackgroundTasks, request: CollabRequest,
                    db=Depends(db_manager.get_db)) -> GenericResponse:

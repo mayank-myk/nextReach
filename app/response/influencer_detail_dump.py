@@ -16,7 +16,10 @@ class InfluencerDetailDump(BaseModel):
     gender: Optional[str] = None
     languages: List[str] = None
     next_reach_score: int
+    blue_tick: bool = None
     city: str
+    content_type: str = None
+    content_subject: str = None
     profile_picture: str
     collab_type: str
     deliverables: Optional[List[str]] = None
