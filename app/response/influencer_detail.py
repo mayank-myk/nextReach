@@ -27,9 +27,9 @@ class InfluencerDetail(BaseModel):
     niche: List[Niche]
     blue_tick: bool = False
     city: City
-    content_type: ContentType = None
-    content_subject: ContentSubject = None
-    collab_type: CollabType
+    content_type: Optional[ContentType] = None
+    content_subject: Optional[ContentSubject] = None
+    collab_type: Optional[CollabType] = None
     deliverables: Optional[List[str]] = None
     content_charge: str
     views_charge: str
@@ -37,3 +37,4 @@ class InfluencerDetail(BaseModel):
     collab_charge: Optional[InfluencerCollabCharge] = None
     platform_details: InfluencerMetricDetail
     influencer_review: Optional[InfluencerReview] = None
+    insights: Optional[List[str]] = None

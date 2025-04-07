@@ -50,7 +50,9 @@ from app.response.new_singup_dump import NewSignupDump
 from app.response.search_filter import SearchFilter
 from app.utils import id_utils
 from app.utils.converters import int_to_str_k, combine_names, format_to_rupees, format_to_views_charge, \
-    city_distribution_to_dict, age_distribution_to_dict, sex_distribution_to_dict, float_to_str
+    city_distribution_to_dict, age_distribution_to_dict, sex_distribution_to_dict, float_to_str, \
+    content_subject_to_user_friendly_str, content_type_to_user_friendly_str, collab_type_to_user_friendly_str, \
+    blue_tick_to_user_friendly_str, er_to_user_friendly_str
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -555,13 +557,14 @@ class ClientService:
                 return GenericResponse(success=False, button_text="Understood", header="Failed",
                                        message="Something went wrong, unable to fetch complete details for the influencer")
 
-            profile_visit_success = self.track_profile_visit(client_id=request.client_id,
-                                                             influencer_id=request.influencer_id)
+            if request.client_id and request.client_id > 1:
+                profile_visit_success = self.track_profile_visit(client_id=request.client_id,
+                                                                 influencer_id=request.influencer_id)
 
-            if not profile_visit_success:
-                return GenericResponse(success=False, button_text="Request Coins", header="Oops",
-                                       action=ResponseAction.API_CALL_RECHARGE,
-                                       message="Your coin balance is currently zero. Please recharge to view more profiles")
+                if not profile_visit_success:
+                    return GenericResponse(success=False, button_text="Request Coins", header="Oops",
+                                           action=ResponseAction.API_CALL_RECHARGE,
+                                           message="Your coin balance is currently zero. Please recharge to view more profiles")
 
             instagram_detail = None
             if influencer_insta_metric:
@@ -728,6 +731,19 @@ class ClientService:
             else:
                 influencer_review = None
 
+            insights = []
+            if influencer.content_subject:
+                insights.append(content_subject_to_user_friendly_str(influencer.content_subject))
+            if influencer.content_type:
+                insights.append(content_type_to_user_friendly_str(influencer.content_type))
+            if influencer.collab_type:
+                insights.append(collab_type_to_user_friendly_str(influencer.collab_type))
+            if influencer.blue_tick:
+                insights.append(blue_tick_to_user_friendly_str())
+            if influencer_insta_metric.engagement_rate:
+                insights.append(
+                    er_to_user_friendly_str(influencer_insta_metric.engagement_rate, influencer_insta_metric.followers))
+
             return InfluencerDetail(
                 id=influencer.id,
                 last_updated_at=influencer.last_updated_at.strftime("%d %b %Y"),
@@ -750,7 +766,8 @@ class ClientService:
                 fixed_charge=format_to_rupees(influencer.fixed_charge),
                 collab_charge=get_collab_charge(influencer, influencer_primary_metric),
                 platform_details=platform_details,
-                influencer_review=influencer_review)
+                influencer_review=influencer_review,
+                insights=insights)
 
         except Exception as e:
             _log.error(

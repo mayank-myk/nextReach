@@ -1,6 +1,9 @@
 from typing import Optional, List, Dict
 
 from app.enums.campaign_stage import CampaignStage
+from app.enums.collab_type import CollabType
+from app.enums.content_subject import ContentSubject
+from app.enums.content_type import ContentType
 from app.enums.status import Status
 
 
@@ -174,3 +177,74 @@ def campaign_stage_to_user_friendly_str(campaign_stage: CampaignStage):
         return "CANCELLED"
     else:
         return ""
+
+
+def content_subject_to_user_friendly_str(content_subject: ContentSubject):
+    if content_subject == ContentSubject.SOLO:
+        return "Creator mostly posts solo-focused content"
+    elif content_subject == ContentSubject.COUPLE:
+        return "Creator mostly features couple-based content"
+    elif content_subject == ContentSubject.FAMILY:
+        return "Creator mostly shares family-oriented content"
+    elif content_subject == ContentSubject.FRIENDS:
+        return "Creator mostly creates content featuring friends"
+    else:
+        return "Creator posts diverse content across various themes"
+
+
+def content_type_to_user_friendly_str(content_type: ContentType):
+    if content_type == ContentType.PROMOTIONAL:
+        return "The creator typically makes promotional content"
+    elif content_type == ContentType.NON_PROMOTIONAL:
+        return "The creator typically makes non-promotional and UGC content"
+    else:
+        return "The creator typically makes both promotional and non-promotional content"
+
+
+def collab_type_to_user_friendly_str(collab_type: CollabType):
+    if collab_type == CollabType.CONTENT:
+        return "Collaboration primarily for quality content creation"
+    elif collab_type == CollabType.REACH:
+        return "Collaboration primarily aimed at maximizing reach"
+    else:
+        return "Collaboration combines quality content with high reach"
+
+
+def blue_tick_to_user_friendly_str():
+    return "Verified Influencer with Instagram blue tick"
+
+
+def categorize_influencer(follower_count: int) -> str:
+    if follower_count < 10000:
+        return "Nano"
+    elif 10000 <= follower_count < 100000:
+        return "Micro"
+    elif 100000 <= follower_count < 1000000:
+        return "Macro"
+    else:
+        return "Mega"
+
+
+def er_to_user_friendly_str(engagement_rate: float, follower_count: int):
+    category = categorize_influencer(follower_count)
+
+    thresholds = {
+        "Nano": [3, 5, 8],
+        "Micro": [2, 4, 7],
+        "Macro": [1, 2, 5],
+        "Mega": [0.5, 1.5, 3]
+    }
+
+    low, good, excellent = thresholds[category]
+    er_quality = ""
+
+    if engagement_rate < low:
+        er_quality = "Low"
+    elif low <= engagement_rate < good:
+        er_quality = "Good"
+    elif good <= engagement_rate < excellent:
+        er_quality = "Excellent"
+    else:
+        er_quality = "Outstanding"
+
+    return f"This influencer is a {category} creator with {er_quality} engagement."

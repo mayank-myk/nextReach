@@ -166,11 +166,11 @@ async def collab_request_admin_notification_via_whatsapp(date: str, campaign_id:
 def influencer_contact_detail_via_whatsapp(phone_number: str, influencer_name: str, profile_link: str,
                                            influencer_phone_number: str, influencer_email: str,
                                            fixed_price: int, deliverables: list):
-    return send_sync_whatsapp_message(phone_number, "influencer_contact_detail", [
+    return send_sync_whatsapp_message(phone_number, "influencer_contact_detail1", [
         influencer_name,
         profile_link,
         influencer_phone_number,
-        influencer_email,
+        influencer_email or "Not available",
         influencer_charge_string(fixed_price, deliverables)
     ], "Influencer Contact Detail")
 

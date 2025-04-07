@@ -38,7 +38,7 @@ class Influencer(Base):
     languages = Column(ARRAY(Enum(Language, name="language_enum")), nullable=True)  # List of languages
     next_reach_score = Column(Integer, CheckConstraint('next_reach_score >= 0'), default=0)
     dob = Column(Date, nullable=True)
-    blue_tick = Column(Boolean, nullable=True, default=True)
+    blue_tick = Column(Boolean, nullable=True, default=False)
 
     # Niche and business location
     niche = Column(ARRAY(Enum(Niche, name="niche_enum")), nullable=True)
