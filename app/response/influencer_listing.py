@@ -9,7 +9,7 @@ from app.response.search_filter import SearchFilter
 
 class InfluencerListing(BaseModel):
     client_id: Optional[int] = None
-    coin_balance: Optional[int] = None
+    coin_balance: Optional[str] = None
     matched_influencer_list: List[InfluencerBasicDetail]
     unmatched_influencer_list: List[InfluencerBasicDetail]
     filters_applied: SearchFilter

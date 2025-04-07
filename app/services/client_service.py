@@ -479,10 +479,10 @@ class ClientService:
             matched_influencers, unmatched_influencers, client_id)
 
         if not client_id or client_id == 1:
-            balance_profile_visit_count = 0
+            balance_profile_visit_count = "Login Required"
         else:
             client = self.client_repository.get_client_by_id(client_id)
-            balance_profile_visit_count = client.balance_profile_visits
+            balance_profile_visit_count = str(client.balance_profile_visits)
             background_tasks.add_task(influencer_discovery_event, client.phone_number)
 
         if (len(all_matched_influencers) + len(all_unmatched_influencers) - page_number * page_size) > 0:
