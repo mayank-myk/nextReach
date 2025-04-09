@@ -87,7 +87,7 @@ def format_to_rupees(value: int):
         # Combine the reversed groups with commas, then reverse the final string
         return "₹" + ','.join(formatted)[::-1]
     else:
-        return None
+        return "₹0"
 
 
 def format_to_currency(value: int):

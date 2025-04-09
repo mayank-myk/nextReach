@@ -764,7 +764,7 @@ class ClientService:
                 content_charge=format_to_rupees(influencer.content_charge),
                 views_charge=format_to_views_charge(influencer.views_charge),
                 fixed_charge=format_to_rupees(influencer.fixed_charge),
-                collab_charge=get_collab_charge(influencer, influencer_primary_metric),
+                # collab_charge=get_collab_charge(influencer, influencer_primary_metric),
                 platform_details=platform_details,
                 influencer_review=influencer_review,
                 insights=insights)
