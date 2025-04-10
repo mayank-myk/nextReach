@@ -65,8 +65,8 @@ class InfluencerRepository:
             city=influencer_request.city,
             collab_type=influencer_request.collab_type,
             deliverables=influencer_request.deliverables,
-            content_charge=influencer_request.content_charge,
-            views_charge=influencer_request.views_charge,
+            # content_charge=influencer_request.content_charge,
+            # views_charge=influencer_request.views_charge,
             fixed_charge=influencer_request.fixed_charge
         )
 

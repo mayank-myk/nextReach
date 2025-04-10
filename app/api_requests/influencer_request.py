@@ -25,8 +25,6 @@ class InfluencerRequest(BaseModel):
     dob: Optional[date] = None
     niche: List[Niche]
     city: City
-    collab_type: CollabType
+    collab_type: CollabType = CollabType.CONTENT_AND_REACH
     deliverables: Optional[List[str]] = None
-    # content_charge: int = Field(..., ge=0)
-    # views_charge: int = Field(..., ge=0)
     fixed_charge: int = Field(..., ge=0)
