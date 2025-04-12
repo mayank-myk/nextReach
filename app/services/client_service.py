@@ -52,7 +52,7 @@ from app.utils import id_utils
 from app.utils.converters import int_to_str_k, combine_names, format_to_rupees, format_to_views_charge, \
     city_distribution_to_dict, age_distribution_to_dict, sex_distribution_to_dict, float_to_str, \
     content_subject_to_user_friendly_str, content_type_to_user_friendly_str, collab_type_to_user_friendly_str, \
-    blue_tick_to_user_friendly_str, er_to_user_friendly_str
+    blue_tick_to_user_friendly_str, er_to_user_friendly_str, calculate_nr_percentile
 from app.utils.logger import configure_logger
 
 _log = configure_logger()
@@ -731,7 +731,7 @@ class ClientService:
             else:
                 influencer_review = None
 
-            insights = []
+            insights = [calculate_nr_percentile(influencer.next_reach_score)]
             if influencer.content_subject:
                 insights.append(content_subject_to_user_friendly_str(influencer.content_subject))
             if influencer.content_type:

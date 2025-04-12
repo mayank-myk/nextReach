@@ -248,3 +248,16 @@ def er_to_user_friendly_str(engagement_rate: float, follower_count: int):
         er_quality = "Outstanding"
 
     return f"This influencer is a {category} creator with {er_quality} engagement."
+
+
+def calculate_nr_percentile(next_reach_score: int):
+    if next_reach_score >= 70:
+        score = "90"
+    elif next_reach_score >= 60:
+        score = "80"
+    elif next_reach_score >= 50:
+        score = "70"
+    else:
+        score = "50"
+
+    return f"Ranked among the top {score} percentile by our AI."
