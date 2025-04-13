@@ -31,8 +31,8 @@ class InfluencerDetail(BaseModel):
     content_subject: Optional[ContentSubject] = None
     collab_type: Optional[CollabType] = None
     deliverables: Optional[List[str]] = None
-    content_charge: str
-    views_charge: str
+    # content_charge: str
+    # views_charge: str
     fixed_charge: Optional[str] = None
     collab_charge: Optional[InfluencerCollabCharge] = None
     platform_details: InfluencerMetricDetail
