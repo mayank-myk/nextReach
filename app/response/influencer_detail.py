@@ -21,6 +21,7 @@ class InfluencerDetail(BaseModel):
     primary_platform: Platform
     name: str
     gender: Optional[Gender] = None
+    phone_number: str
     profile_picture: str
     languages: List[str] = None
     next_reach_score: int

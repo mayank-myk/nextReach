@@ -749,6 +749,7 @@ class ClientService:
                 last_updated_at=influencer.last_updated_at.strftime("%d %b %Y"),
                 collaboration_ongoing=collaboration_request_raised,
                 primary_platform=influencer.primary_platform,
+                phone_number=influencer.phone_number,
                 name=influencer.name,
                 gender=influencer.gender,
                 profile_picture=influencer.profile_picture,
